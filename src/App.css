@@ -1,5 +1,11 @@
 .App {
   text-align: center;
+  background-color: #009c99;
+}
+body {
+  font-family:Georgia, 'Times New Roman', Times, serif;
+  background-color: rgb(46, 69, 68);
+ 
 }
 
 .App-logo {
@@ -25,8 +31,10 @@
 }
 
 .App-link {
-  color: #61dafb;
+  color: #2136ac;
 }
+
+
 
 @keyframes App-logo-spin {
   from {
@@ -35,4 +43,52 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.div1{
+  /* position: relative; */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.div1a{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: absolute;
+  top: 100px;   /* y-position */
+  left: 420px; 
+  background: white;
+  width:300px;
+  height:200px;
+  padding:20px;
+  /* margin: 100px;  --> this can chaneg the coordinate*/ 
+  border-radius: 10px;
+  box-shadow: 10px 10px 10px rgb(66, 63, 63);
+}
+.div1b{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: absolute;
+  top: 100px;   /* y-position */
+  left: 780px; 
+  background: white;
+  width:300px;
+  height:200px;
+  padding:20px;
+  /* margin: 100px;  --> this can chaneg the coordinate*/ 
+  border-radius: 10px;
+  box-shadow: 10px 10px 10px rgb(66, 63, 63);
+}
+
+.button1{
+  background-color: #009c99;
+  border-radius: 10px;
+  padding: 10px 20px;
+}
+.button2{
+  background-color: #009c99;
+  border-radius: 10px;
+  padding: 10px 20px;
 }
