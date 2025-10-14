@@ -1,12 +1,17 @@
 import logo from './logo.svg';
 import './App.css';
+import NavBar from "./NavBar.js";
 
 
 
 function App() {
   return (
-    <div className="div1" >
-      <h1>choose your workout</h1>
+    <div >
+      <div className='div1c'> 
+        <NavBar/>
+      </div>
+      <div className="div1"> 
+      <h1 style={{ color:'white'}}>choose your workout</h1>
       <div className='div1a'> 
         <h3>Home workout</h3>
         <p>train in the confort  of your home with <br/> minimal equipment</p> 
@@ -17,7 +22,7 @@ function App() {
         <p>Access a wide range of equipment and .<br/>maximize your training</p> 
         <button className="button2" >start</button>
       </div>
-
+      </div>
     </div>
   );
 }
