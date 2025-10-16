@@ -4,7 +4,7 @@
 }
 body {
   font-family:Georgia, 'Times New Roman', Times, serif;
-  background-color: rgb(46, 69, 68);
+  background-color:#343541;
  
 }
 
@@ -44,32 +44,67 @@ body {
     transform: rotate(360deg);
   }
 }
-
-.div1{
-  /* position: relative; */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+#heading3{
+  text-align: center;
+  font-size: 30px;
+  color: #0f1113;
+  background-color:rgb(117, 148, 222);
+  border-radius: 25px ;
+  padding: 12px 25px ;
+  
 }
-.div1a{
+#para{
+  text-align: center;
+  
+}
+
+.mainPart{
+  /* position: relative; */
+  padding-top: 60px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  position: absolute;
+
+   /* margin-left: 220px; same as sidebar width */
+  
+
+  /* transition: margin-left 0.6s;
+  margin-left: 220px; */
+}
+/* .sidebar.collapsed ~ .mainPart,
+.sidebar.collapsed + .mainPart {
+  margin-left: 70px; same as collapsed width
+} */
+/* .mainPart.collapsed {
+  margin-left: 70px; jab sidebar close ho
+}
+
+.section1, .section2 {
+  transition: left 0.6s;
+} */
+.section1{
+  
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  
+  position:absolute;
   top: 150px;   /* y-position */
   left: 250px; 
   background: white;
   width:300px;
   height:200px;
   padding:20px;
-  /* margin: 100px;  --> this can chaneg the coordinate*/ 
+  /* margin-top: 60px;--> this can chaneg the coordinate*/ 
   border-radius: 10px;
   box-shadow: 10px 10px 10px rgb(66, 63, 63);
 }
-.div1b{
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.section2{
+  display: flex;            /* these three used for that is in section*/
+  flex-direction: column;         /*center the element */
+  align-items: center;             /*that is in section*/
+
   position: absolute;
   top: 150px;   /* y-position */
   left: 610px; 
@@ -81,50 +116,167 @@ body {
   border-radius: 10px;
   box-shadow: 10px 10px 10px rgb(66, 63, 63);
 }
-.div1c{
 
-  background-color:rgb(1, 197, 227);
-  height:50px;
-  width: 1230px;
-}
 
 .button1{
-  background-color: #009c99;
+  width: 160px;
+  margin: 10px 0px;
+  color:white;
+  background-color: #1c1f22;
   border-radius: 10px;
+  border: none;
   padding: 10px 20px;
+  cursor: pointer;
+  font-size: 14px;
+
+  /* transition-duration: 1s; */
+  transition: background 0.3s, padding-left 0.9s;
+}
+.button1:hover {
+  background-color: rgb(117, 148, 222);
+  padding-left:30px ;
 }
 .button2{
-  background-color: #009c99;
+  width: 160px;
+  margin: 10px 0px;
+  color:white;
+  background-color: #1c1f22;
   border-radius: 10px;
+  border: none;
   padding: 10px 20px;
+  cursor: pointer;
+  /* transition-duration: 1s; */
+  transition: background 0.3s, padding-left 0.9s;
+}
+
+.button2:hover {
+  background-color: rgb(117, 148, 222);
+   padding-left: 30px;
 }
 .navbar{
-
+  background-color: #0f1113;
+  width: 1200px;
+  
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
+  
   height: 60px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 20px;
+  padding: 0px 20px;
   /* background: linear-gradient(90deg, #08a79b, #00b3b3); */
-  color: white;
+  color: rgb(255, 255, 255);
   z-index: 50;
+  border:2px solid #343541;
 }
 .logo{
   margin: 0;
   letter-spacing: 3px;
+  cursor: pointer;
+  
 }
 .navDiv1{
-   display: flex;
+  display: flex;
   align-items:center; 
   gap: 20px;
+}
+.navbtn1{
+  border-radius: 20px ;
+  border: none;
+  padding: 6px 6px ;
+  transition: background 0.3s, padding-right 0.3s;
+}
+.navbtn1:hover{
+  background-color: rgb(117, 148, 222);
+  padding-right: 10px;
 }
 .profile-pic{
 width: 35px;
 height: 35px;
 border-radius: 50px;
-border: 3px solid rgba(0, 4, 248, 0.3);
+border: none;
+
+}
+.sidebar{
+  position: fixed;
+  top: 60px;
+  left: 0;
+  width: 220px;
+  height: 100%;
+  background-color: #0f1113;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 60px;
+
+  transition:1s;
+
+}
+#sidebarButton{
+  width: 160px;
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+  /* justify-content: flex-start; */
+
+  padding: 10px;
+  margin: 0.2px 0;
+  background-color: transparent;
+  color: white;
+
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+
+  transition:background 0.9s, padding-left 0.9s;
+  
+}
+.sidebar.collapsed {
+  /* width: 70px; */
+  width: 48px;           /* keep small so icon is visible only */
+  padding-left: 0;
+  
+}
+.sidebar.collapsed .label {
+  display: none;
+}
+#sidebarButton:hover {
+  background-color: rgb(117, 148, 222);
+  padding-left: 15px;
+}
+.sidebar button:hover {
+  transform: translateX(6px);
+  background-color: rgba(255,255,255,0.03);
+}
+
+.sidebar .label {
+  display: inline-block;
+}
+.toggle-btn {
+  
+  right: -120px;
+  width: 40px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  margin: 0.2px 0;
+  background-color: transparent;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+
+  transition:background 0.3s, padding-left 0.3s;
+}
+.toggle-btn:hover{
+  background-color: #2a2f34;
+  padding-left: 15px;
 }
