@@ -217,6 +217,7 @@ border: none;
 
 }
 #sidebarButton{
+  right: -120px;
   width: 160px;
   display: flex;
   align-items: center;
@@ -262,6 +263,7 @@ border: none;
   
   right: -120px;
   width: 40px;
+  
   display: flex;
   align-items: center;
   gap: 10px;
@@ -279,4 +281,8 @@ border: none;
 .toggle-btn:hover{
   background-color: #2a2f34;
   padding-left: 15px;
+}
+.noLink{
+   text-decoration: none;
+  color: inherit;
 }
