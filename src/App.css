@@ -58,18 +58,31 @@ body {
   
 }
 
-.mainPart{
-  /* position: relative; */
+/* .mainPart{
+  /* position: relative; 
   padding-top: 60px;
   display: flex;
   flex-direction: column;
+  align-items: center; */
+
+  .mainPart {
+    position: relative;
+  display: flex;
+  flex-direction:column;
   align-items: center;
+
+  /* gap: 20px; space between sections */
+  /* margin-left: 220px; dynamic via App.js inline style */
+  padding-top: 50px; 
+  
+  /* transition: margin-left 0.5s; */
+}
 
    /* margin-left: 220px; same as sidebar width */
   
 
   /* transition: margin-left 0.6s;
-  margin-left: 220px; */
+  margin-left: 220px; 
 }
 /* .sidebar.collapsed ~ .mainPart,
 .sidebar.collapsed + .mainPart {
@@ -90,33 +103,57 @@ body {
 
   
   position:absolute;
-  top: 150px;   /* y-position */
-  left: 250px; 
+   top: 150px;  /* y-position  */
+  left: 140px; 
   background: white;
   width:300px;
   height:200px;
   padding:20px;
-  /* margin-top: 60px;--> this can chaneg the coordinate*/ 
+  /* margin-top: 60px;--> this can chaneg the coordinate */
   border-radius: 10px;
   box-shadow: 10px 10px 10px rgb(66, 63, 63);
+
+  
+  top: 150px;
+  transition: left 0.5s ease;
 }
 .section2{
-  display: flex;            /* these three used for that is in section*/
+   display: flex;          /*  these three used for that is in section */
   flex-direction: column;         /*center the element */
   align-items: center;             /*that is in section*/
 
   position: absolute;
   top: 150px;   /* y-position */
-  left: 610px; 
+  left: 500px; 
   background: white;
   width:300px;
   height:200px;
   padding:20px;
-  /* margin: 100px;  --> this can chaneg the coordinate*/ 
+  /* margin: 100px;  --> this can chaneg the coordinate*/
   border-radius: 10px;
   box-shadow: 10px 10px 10px rgb(66, 63, 63);
-}
 
+  
+  top: 150px;
+  transition: left 0.5s ease;
+}
+.headingDiv{
+  position: relative; 
+  top:0px;  
+  color:white;
+  margin-left: 20px ;
+}
+/* .section1, .section2 {
+
+  position: relative; 
+  top: 150px; 
+  left:20px;/* ya default remove absolute 
+  width: 300px;
+  height: 200px;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 10px 10px 10px rgb(66,63,63);
+} */
 
 .button1{
   width: 160px;

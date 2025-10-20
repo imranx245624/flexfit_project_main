@@ -1,6 +1,12 @@
 // src/pages/GymWorkout.jsx
+import PageWrapper from "./pageWrapper.jsx";
 import React from "react";
 
 export default function GWorkout() {
-  return <h2 >Welcome to the workout section </h2>;
-}
+  return(
+    <PageWrapper>
+   <h2 style={{color:'white'}} >Welcome to the GYM workout section </h2>
+   </PageWrapper>
+  
+  );
+  }
