@@ -18,6 +18,7 @@ import Plans from "./sidebar_pages/My_Plans.jsx";
 import Progress from "./sidebar_pages/Progress_tracker.jsx";
 import Settings from "./sidebar_pages/Setting.jsx";
 
+import AIWorkout from "./workout_pages/AIWorkout.jsx";
 
 
 function App() {
@@ -32,7 +33,7 @@ function HomeContent(){
       {/* Home workout section  */}
 
       <div>
-      <section className='section1' style={{ Left: open ? "250px" : "150px" }}> 
+      <section className='section1' style={{ Left: open ? "250px" : "200px" }}> 
         <div id="heading3"><FaHome/></div><br/>
 
         <p id='para'>
@@ -45,7 +46,7 @@ function HomeContent(){
       </section>
       
       {/* Gym workout section  */}
-      <section  className='section2' style={{ Left: open ? "250px" : "150px" }}> 
+      <section  className='section2' style={{ Left: open ? "250px" : "200px" }}> 
         <div  id="heading3" > <GiWeightLiftingUp/> </div> <br/>
 
         <p id='para' >
@@ -72,15 +73,17 @@ function HomeContent(){
 
       <main className="mainPart"  style={{ marginLeft: open ? "180px" : "50px", transition: "margin-left 1s" }} >
       
-
         <Routes>
-          <Route  path="/" element={<HomeContent />} />
+           <Route  path="/" element={<HomeContent />} />
           <Route path="/HWorkout" element={<HWorkout />} />
           <Route path="/GWorkout" element={<GWorkout />} />
+          
           <Route path="/workouts" element={<Workouts />} />
           <Route path="/plans" element={<Plans />} />
           <Route path="/progress" element={<Progress />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/AIWorkout" elemennt={<AIWorkout/>}/>
+          
         </Routes>
 
       </main>

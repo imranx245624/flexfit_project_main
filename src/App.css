@@ -1,3 +1,7 @@
+
+
+
+
 .App {
   text-align: center;
   background-color: #009c99;
@@ -47,7 +51,8 @@ body {
 #heading3{
   text-align: center;
   font-size: 30px;
-  color: #0f1113;
+  width: auto;
+  color: #000000;
   background-color:rgb(117, 148, 222);
   border-radius: 25px ;
   padding: 12px 25px ;
@@ -66,7 +71,7 @@ body {
   align-items: center; */
 
   .mainPart {
-    position: relative;
+  position: relative;
   display: flex;
   flex-direction:column;
   align-items: center;
@@ -323,3 +328,5 @@ border: none;
    text-decoration: none;
   color: inherit;
 }
+
+
