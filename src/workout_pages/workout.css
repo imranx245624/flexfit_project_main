@@ -1,10 +1,20 @@
 .page-title {
-  text-align: center;
-  color: white;
-  margin-bottom: 20px;
+position: absolute;
+left: 38%;
+ text-align: center;
+ font-size: 18px;
+  width: 300px;
+  color: #000000;
+  background-color:rgb(117, 148, 222);
+  border-radius: 25px ;
+  padding: 2px 5px ;
+  justify-items: center;
+  z-index:1;
+
 }
 
 .video-grid {
+  top: 200px; 
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   margin-left: 50px;
@@ -35,7 +45,9 @@
 
 .video-card:hover {
   transform: scale(1.08) translateY(-5px) translateX(-5px);
-  box-shadow: 0 6px 6px  rgb(0, 83, 86);
+  /* box-shadow: 0 6px 6px  rgb(0, 83, 86); */
+  border: 20px;
+  border-color:  rgb(0, 83, 86);
   background:  rgba(255, 255, 255, 0.2);
 }
 
@@ -60,7 +72,7 @@
   padding: 10px 20px;
   cursor: pointer;
   font-size: 14px;
-   box-shadow: 0 4px 5px rgba(0, 0, 0, 0.9);
+  box-shadow: 0 4px 5px rgba(0, 0, 0, 0.9);
   transition: transform 0.3s ease-in-out;
 
   /* transition-duration: 1s; */
@@ -99,16 +111,6 @@
 }
 
 
-#heading{
-  text-align: center;
-  font-size: 30px;
-  width: 400px;
-  color: #000000;
-  background-color:rgb(117, 148, 222);
-  border-radius: 25px ;
-  padding: 12px 25px ;
-  
-}
 
 
 /* .section-label {

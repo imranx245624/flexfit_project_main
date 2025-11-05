@@ -1,16 +1,18 @@
 // src/App.js
 import React, { useState } from "react";
-import {FaHome, FaChartLine, FaDumbbell, FaCog, FaClipboardList,  FaBars} from  "react-icons/fa";// icons for different button
+import {FaHome, FaChartLine, FaDumbbell, FaCog, FaClipboardList,  FaBars,FaVideo} from  "react-icons/fa";// icons for different button
 import { GiWeightLiftingUp } from "react-icons/gi";
+
 
 //import logo from './logo.svg';
 import './App.css';
+import './HomeContent.css';
 import NavBar from "./NavBar.jsx";
 import Sidebar from "./SideBar.jsx";
 import {BrowserRouter as Router ,Routes ,Route, Link} from 'react-router-dom';
 // for this we have install 'react-router-dom' using command "npm install react-router-dom"
-
 //importing different pages 
+
 import HWorkout from "./workout_pages/HomeWorkout.jsx";
 import GWorkout from "./workout_pages/GymWorkout.jsx";
 import Workouts from "./sidebar_pages/Workout_library.jsx";
@@ -21,50 +23,59 @@ import Settings from "./sidebar_pages/Setting.jsx";
 import AIWorkout from "./workout_pages/AIWorkout.jsx";
 
 
+
+
+
+
 function App() {
   const [open, setOpen] = useState(true);
 
 function HomeContent(){
+
   return (
     <>
-    <div className="headingDiv" >
-      <h1 >Choose Your Workout</h1>
-      </div>
-      {/* Home workout section  */}
+    <div className="home-container">
+<header className="home-header">
+<h1>Welcome to FlexFit</h1>
+<p>Your AI-powered fitness companion</p>
+</header>
 
-      <div>
-      <section className='section1' style={{ Left: open ? "250px" : "200px" }}> 
-        <div id="heading3"><FaHome/></div><br/>
 
-        <p id='para'>
-          Train in the confort  of your home with <br/> minimal equipment
-        </p>
+<section className="home-intro">
+<p>
+Track your workouts, follow personalized plans, and monitor your progress —
+all in one place.
+</p>
 
-        <Link to="/HWorkout" className="noLink">
-          <button className="button1">  HomeWorkout  </button>
-        </Link>
-      </section>
-      
-      {/* Gym workout section  */}
-      <section  className='section2' style={{ Left: open ? "250px" : "200px" }}> 
-        <div  id="heading3" > <GiWeightLiftingUp/> </div> <br/>
+<Link to= "/plans">
+<button className="get-started">< FaVideo size={18}/>  Train with AI</button>
+</Link>
 
-        <p id='para' >
-          Access a wide range of equipment and <br/>maximize your training
-        </p> 
+</section>
 
-        <Link to="/GWorkout" className="noLink">
-          <button  className="button2" >
-            GymWorkout
-          </button>
-        </Link>
-      </section>
-      </div>
-    </>
+
+<section className="home-features">
+<div className="feature-card">
+<h3>AI Workouts</h3>
+<p>Generate smart workout plans based on your fitness level and goals.</p>
+</div>
+
+
+<div className="feature-card">
+<h3>Progress Tracking</h3>
+<p>Visualize your fitness journey and stay motivated.</p>
+</div>
+
+
+<div className="feature-card">
+<h3>Workout Library</h3>
+<p>Explore a collection of home and gym workouts designed by experts.</p>
+</div>
+</section>
+</div>
+     </>
   );
 }
-
-
   return (
     <Router>
       
@@ -74,7 +85,11 @@ function HomeContent(){
       <main className="mainPart"  style={{ marginLeft: open ? "180px" : "50px", transition: "margin-left 1s" }} >
       
         <Routes>
-           <Route  path="/" element={<HomeContent />} />
+          {/* <Route path="/signin" element={<SignIn />} />
+          <Route path="/signup" element={<SignUp />} /> */}
+
+          <Route  path="/" element={<HomeContent />} />
+
           <Route path="/HWorkout" element={<HWorkout />} />
           <Route path="/GWorkout" element={<GWorkout />} />
           
@@ -82,7 +97,7 @@ function HomeContent(){
           <Route path="/plans" element={<Plans />} />
           <Route path="/progress" element={<Progress />} />
           <Route path="/settings" element={<Settings />} />
-          <Route path="/AIWorkout" elemennt={<AIWorkout/>}/>
+          <Route path="/AIWorkout" element={<AIWorkout/>}/>
           
         </Routes>
 
@@ -92,4 +107,4 @@ function HomeContent(){
   );
 }
 
-export default App;
+ export default App;

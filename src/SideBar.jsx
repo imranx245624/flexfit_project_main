@@ -1,5 +1,5 @@
 import React,{ useState} from "react";
-import {FaHome, FaChartLine, FaDumbbell, FaCog, FaClipboardList,  FaBars} from  "react-icons/fa";
+import {FaHome, FaChartLine, FaDumbbell, FaCog, FaClipboardList,  FaBars, FaRobot} from  "react-icons/fa";
  // we have to install react icons for this "npm install react-icons" 
 import './App.css';
 import { Link } from "react-router-dom";
@@ -21,7 +21,7 @@ function Sidebar({ open, setOpen }){
               <button id="sidebarButton" ><FaDumbbell/><span className="label">Workouts Library</span></button><br/>
             </Link>
             <Link to="/plans" className="noLink">
-              <button id="sidebarButton" ><FaClipboardList/><span className="label">My Plans</span> </button><br/>
+              <button id="sidebarButton" ><FaRobot/><span className="label">AI Workout</span> </button><br/>
             </Link>
             <Link to="/progress" className="noLink">
              <button id="sidebarButton" >< FaChartLine/><span className="label">Progress Tracker</span> </button><br/>

@@ -4,7 +4,7 @@ import React from "react";
 
 import VideoCard from "../components/VideoCard.jsx";
 import "./workout.css";
-
+import AIWorkout from "./AIWorkout.jsx";
 
 import chest1  from "../assets/Gym_videos/chest1.mp4";
 import chest2  from "../assets/Gym_videos/chest2.mp4";

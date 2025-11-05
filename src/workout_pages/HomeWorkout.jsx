@@ -3,6 +3,7 @@ import React from "react";
 import PageWrapper from "./pageWrapper.jsx";
 import VideoCard from "../components/VideoCard.jsx";
 import "./workout.css";
+import AIWorkout from "./AIWorkout.jsx";
 
 import video1 from "../assets/videos/video1.mp4";
 import video2 from "../assets/videos/video2.mp4";
@@ -26,8 +27,12 @@ import video12 from "../assets/videos/video12.mp4";
 function HomeWorkout() {
   return (
     <PageWrapper>
-      <h2 id="heading" className="page-title">Home Workout</h2>
+      <div className="page-title"> 
+      <h2 >Home Workout</h2>
+      </div>
+      <br/><br/><br/><br/>
       <div className="video-grid">
+       
         <VideoCard videoSrc={video1}  buttonLabel="plank" navigateTo="/AIWorkout" />
         <VideoCard videoSrc={video2}  buttonLabel="push-Up" navigateTo="/AIWorkout" />
         <VideoCard videoSrc={video3}  buttonLabel="Calf Raises" navigateTo="/AIWorkout" />

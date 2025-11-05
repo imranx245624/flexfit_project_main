@@ -1,0 +1,62 @@
+.home-container {
+  text-align: center;
+  padding-top: 5px;
+  color: #fff;
+  background-color: #1e1f25;
+  min-height: 150vh;
+  font-family:Georgia, 'Times New Roman', Times, serif;
+  /* font-size: 20px; */
+}
+
+.home-header h1 {
+  font-size: 50px;
+  color: rgb(117, 148, 222);
+}
+
+.home-header p {
+  font-size: 20px;
+}
+
+.home-intro {
+  margin-top: 40px;
+}
+
+.get-started {
+  justify-content: center;
+  background: linear-gradient(90deg, rgb(0, 83, 86), rgb(117, 148, 222));
+
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  margin-top: 20px;
+  border-radius: 15px;
+  cursor: pointer;
+  font-size: 18px;
+  transition: transform 0.2s ease-in-out;
+}
+.get-started:hover {
+  transform: scale(1.05) translateX(-5px) translateY(-5px);
+  background: linear-gradient(90deg, rgb(117, 148, 222), rgb(0, 83, 86));
+  transition: transform 0.2s ease-in-out;
+}
+
+.home-features {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 60px;
+  flex-wrap: wrap;
+}
+
+.feature-card {
+  background-color: #2a2b32;
+  padding: 20px;
+  border-radius: 15px;
+  width: 250px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+}
+
+.feature-card h3 {
+  color: rgb(117, 148, 222);
+  margin-bottom: 10px;
+}

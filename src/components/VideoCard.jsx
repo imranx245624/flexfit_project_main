@@ -2,6 +2,7 @@
 import React, { useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "../workout_pages/workout.css";
+//import AIWorkout from "./AIWorkout.jsx";
 
 const VideoCard = ({ videoSrc, buttonLabel, navigateTo }) => {
   const videoRef = useRef(null);

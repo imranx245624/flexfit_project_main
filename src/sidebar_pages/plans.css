@@ -1,0 +1,66 @@
+.Mode_container{
+    text-align: center;
+        justify-content: center;
+
+    /* font-size: 20px; */
+}
+.Mode_header{
+ margin-top: 10px;
+ font-size: 20px;
+ color: rgb(117, 148, 222);
+}
+.Both_section{
+  padding-top: 50px;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  gap: 80px;
+  margin-top: 60px;
+  flex-wrap: wrap;
+}
+.page_card{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+
+    justify-content: center;
+    text-align: center;
+    min-height: 180px;
+    min-width: 200px;
+    padding: 30px 30px;
+    background-color: rgba(255, 255, 255, 0.08);
+    border-radius: 15px;
+    transition: all 0.3s ease-in-out;
+}
+.page_card:hover{
+     transform: scale(1.08) translateX(-5px) translateY(-5px);
+      background-color: (255, 255, 255, 0.2);
+}
+.mode_logo{
+    justify-content: center;
+    text-align: center;
+    width: 50px;
+    padding: 15px 15px;
+    background-color:rgb(117, 148, 222) ;
+    border-radius: 50px;
+}
+.para{
+color: white;
+font-size: 18px;
+}
+.mode_button{
+    color: white;
+    margin-top: 5px;
+    padding: 15px 24px;
+    border-radius: 15px;
+    border: none;
+    font-size: 17px;
+    background:linear-gradient(90deg, rgb(0, 83, 86), rgb(117, 148, 222));
+    transition: all 0.3s ease-in-out;
+}
+.mode_button:hover{
+    transform: scale(1.08) translateX(-5px) translateY(-5px);
+    background:linear-gradient(90deg, rgb(117, 148, 222),rgb(0, 83, 86))
+
+}
