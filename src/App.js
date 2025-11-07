@@ -1,34 +1,42 @@
 // src/App.js
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import {FaHome, FaChartLine, FaDumbbell, FaCog, FaClipboardList,  FaBars,FaVideo} from  "react-icons/fa";// icons for different button
 import { GiWeightLiftingUp } from "react-icons/gi";
 
-
-//import logo from './logo.svg';
-import './App.css';
-import './HomeContent.css';
-import NavBar from "./NavBar.jsx";
-import Sidebar from "./SideBar.jsx";
 import {BrowserRouter as Router ,Routes ,Route, Link} from 'react-router-dom';
 // for this we have install 'react-router-dom' using command "npm install react-router-dom"
 //importing different pages 
 
+//pages src->
+import './App.css';
+import './SignIN_Popup.css';
+import './HomeContent.css';
+import NavBar from "./NavBar.jsx";
+import Sidebar from "./SideBar.jsx";
+
+//pages src->workout_pages 
 import HWorkout from "./workout_pages/HomeWorkout.jsx";
 import GWorkout from "./workout_pages/GymWorkout.jsx";
 import Workouts from "./sidebar_pages/Workout_library.jsx";
 import Plans from "./sidebar_pages/My_Plans.jsx";
 import Progress from "./sidebar_pages/Progress_tracker.jsx";
 import Settings from "./sidebar_pages/Setting.jsx";
+import SignIn from "./workout_pages/SignIn.jsx";
 
 import AIWorkout from "./workout_pages/AIWorkout.jsx";
 
-
-
-
-
-
 function App() {
   const [open, setOpen] = useState(true);
+  const [showSignIn, setShowSignIn] = useState(false);
+
+useEffect(() => {
+  const timer = setTimeout(() => {
+    setShowSignIn(true);
+  }, 2000); // 2 seconds delay
+
+  return () => clearTimeout(timer);
+}, []);
+
 
 function HomeContent(){
 
@@ -83,7 +91,7 @@ all in one place.
       <Sidebar open={open} setOpen={setOpen} />
 
       <main className="mainPart"  style={{ marginLeft: open ? "180px" : "50px", transition: "margin-left 1s" }} >
-      
+
         <Routes>
           {/* <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} /> */}
@@ -102,6 +110,15 @@ all in one place.
         </Routes>
 
       </main>
+      {showSignIn && (
+        //popup css use here 
+        <div className="popup-overlay">
+          <div className="popup-box">
+            <button className="close-btn" onClick={() => setShowSignIn(false)}>×</button>
+            <SignIn />
+          </div>
+        </div>
+      )} 
     </Router>
 
   );

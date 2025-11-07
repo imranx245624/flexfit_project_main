@@ -23,7 +23,7 @@ const VideoCard = ({ videoSrc, buttonLabel, navigateTo }) => {
         <video
           ref={videoRef}
           src={videoSrc}
-          
+          controls
           muted
           loop
           className="video-element"
