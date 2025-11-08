@@ -32,19 +32,24 @@ font-size: 15px;
     height: 40px;
     border-radius: 10px;
 }
+
 .signIN_button{
+    
+    color:white;
     font-size: 15px;
     font-weight: bold;
     border: none;
     margin-top: 30px;
-    width: 100px;
+    width: 150px;
     height: 50px;
     border-radius: 10px;
-    /* background:linear-gradient(90deg, rgb(117, 148, 222),rgb(0, 83, 86)); */
-    background: rgb(117, 148, 222);
+    background:linear-gradient(90deg, rgb(117, 148, 222),rgb(0, 83, 86));
+    /* background: rgb(117, 148, 222); */
     transition: transform 0.2s ease-in-out;
 }
 .signIN_button:hover{
     transform: scale(1.08) translateY(-5px);
-    background: rgb(0, 83, 86);
+    /* background: rgb(0, 83, 86); */
+        background:linear-gradient(90deg,rgb(0, 83, 86), rgb(117, 148, 222));
+
 }

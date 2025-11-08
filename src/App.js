@@ -22,20 +22,31 @@ import Plans from "./sidebar_pages/My_Plans.jsx";
 import Progress from "./sidebar_pages/Progress_tracker.jsx";
 import Settings from "./sidebar_pages/Setting.jsx";
 import SignIn from "./workout_pages/SignIn.jsx";
+import SignUp from "./workout_pages/SignUp.jsx";
 
 import AIWorkout from "./workout_pages/AIWorkout.jsx";
 
 function App() {
   const [open, setOpen] = useState(true);
-  const [showSignIn, setShowSignIn] = useState(false);
 
+  const [showSignIn, setShowSignIn] = useState(false);
+  const [showSignUp, setShowSignUp] = useState(false);
+
+
+/*
 useEffect(() => {
   const timer = setTimeout(() => {
     setShowSignIn(true);
   }, 2000); // 2 seconds delay
 
   return () => clearTimeout(timer);
+}, []);*/
+
+useEffect(() => {
+  const timer = setTimeout(() => setShowSignIn(true), 2000);
+  return () => clearTimeout(timer);
 }, []);
+
 
 
 function HomeContent(){
@@ -93,8 +104,8 @@ all in one place.
       <main className="mainPart"  style={{ marginLeft: open ? "180px" : "50px", transition: "margin-left 1s" }} >
 
         <Routes>
-          {/* <Route path="/signin" element={<SignIn />} />
-          <Route path="/signup" element={<SignUp />} /> */}
+          {/* <Route path="/signin" element={<SignIn />} /> */}
+          <Route path="/signup" element={<SignUp />} />
 
           <Route  path="/" element={<HomeContent />} />
 
@@ -115,10 +126,19 @@ all in one place.
         <div className="popup-overlay">
           <div className="popup-box">
             <button className="close-btn" onClick={() => setShowSignIn(false)}>×</button>
-            <SignIn />
+            <SignIn setShowSignIn={setShowSignIn} setShowSignUp={setShowSignUp} />
           </div>
         </div>
       )} 
+
+      {showSignUp && (
+  <div className="popup-overlay">
+    <div className="popup-box">
+      <button className="close-btn" onClick={() => setShowSignUp(false)}>×</button>
+      <SignUp />
+    </div>
+  </div>
+)}
     </Router>
 
   );

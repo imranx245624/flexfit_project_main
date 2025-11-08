@@ -1,7 +1,9 @@
 import React from "react";
+import {Link, link} from 'react-router-dom';
 import "./SignIn.css";
+import SignUp from "./SignUp";
 
-function SignIn() {
+function SignIn({ setShowSignIn, setShowSignUp }) {
   return (
     <div className="sign-in-wrapper">
       <header>
@@ -16,8 +18,21 @@ function SignIn() {
       <input className="Pass_textbox" type="password" placeholder="Enter your password"/>
       </div>
       <div>
-        <button className="signIN_button"> Sign IN</button>
+        <button className="signIN_button">Sign IN</button>
       </div>
+      <p>
+  Don't have an account?{" "}
+  <button
+    className="link-btn"
+    onClick={() => {
+      setShowSignIn(false);
+      setShowSignUp(true);
+    }}
+  >
+    Sign up
+  </button>
+</p>
+
 
       {/* Add your form fields later */}
     </div>
