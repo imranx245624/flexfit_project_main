@@ -1,11 +1,11 @@
 import React from "react";
 import {Link, link} from 'react-router-dom';
-import "./SignIn.css";
+import "./Authentication.css";
 import SignUp from "./SignUp";
 
 function SignIn({ setShowSignIn, setShowSignUp }) {
   return (
-    <div className="sign-in-wrapper">
+    <div className="authentication_page">
       <header>
       <h2>Sign In</h2>
       <p className="para1"> Sign in to continue your fitness  journey </p>

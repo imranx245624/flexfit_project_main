@@ -1,0 +1,148 @@
+/* src/workout_pages/SignIn.css */
+.authentication_page{
+    margin-top: 1px;
+  padding: 12px 6px;
+  text-align: center;
+  color: #111;
+}
+
+/* smaller demo layout so popup content fits nicely */
+.authentication_page h2{
+
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  margin-bottom: 8px;
+  font-size: 30px;
+}
+.para1{
+
+font-size: 12px;
+}
+
+.credential_div{
+    display: flex;
+  align-items:center;
+  justify-content: space-between;
+    z-index: 50;
+    gap: 20px;
+}
+.credential{
+    text-align:left;
+    font-weight: bold;
+}
+.Email_textbox{
+    font-size: 13px;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    width: 250px;
+    height: 30px;
+    border-radius: 10px;
+}
+.Pass_textbox{
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    font-size: 13px;
+    width: 250px;
+    height: 30px;
+    border-radius: 10px;
+}
+
+.username_textbox{
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    font-size: 13px;
+    width: 250px;
+    height: 30px;
+    border-radius: 10px;
+}
+.signIN_button{
+    
+    color:white;
+    font-size: 10px;
+    font-weight: bold;
+    border: none;
+    margin-top: 30px;
+    width: 150px;
+    height: 50px;
+    border-radius: 10px;
+    background:linear-gradient(90deg, rgb(117, 148, 222),rgb(0, 83, 86));
+    /* background: rgb(117, 148, 222); */
+    transition: transform 0.2s ease-in-out;
+}
+.signIN_button:hover,.upload-btn:hover,.capture-btn:hover{
+    transform: scale(1.08) translateY(-5px);
+    /* background: rgb(0, 83, 86); */
+        background:linear-gradient(90deg,rgb(0, 83, 86), rgb(117, 148, 222));
+
+}
+.SighUp_page{
+    color:white;
+    font-size: 15px;
+    font-weight: bold;
+    border: none;
+    margin-top: 30px;
+    width: 150px;
+    height: 50px;
+    border-radius: 10px;
+    background:linear-gradient(90deg, rgb(117, 148, 222),rgb(0, 83, 86));
+    /* background: rgb(117, 148, 222); */
+    transition: transform 0.2s ease-in-out;
+}
+.SighUp_page:hover{
+    transform: scale(1.08) translateY(-5px);
+    /* background: rgb(0, 83, 86); */
+        background:linear-gradient(90deg,rgb(0, 83, 86), rgb(117, 148, 222));
+
+}
+
+
+.profile-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.profile-placeholder, .profile-img {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: #eee;
+  object-fit: cover;
+  border: 2px solid #ccc;
+}
+
+
+.pic_buttons_div{
+display: flex;
+  align-items: center;
+  justify-content: space-between;
+ z-index: 50;
+    gap: 50px;
+}
+
+.upload-btn,.capture-btn {
+  margin-top: 10px;
+  background-color: #8a6dfb;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  cursor: pointer;
+   background:linear-gradient(90deg, rgb(117, 148, 222),rgb(0, 83, 86));
+    /* background: rgb(117, 148, 222); */
+    transition: transform 0.2s ease-in-out;
+}
+
+
+/* .upload-btn:hover, .capture-btn:hover {
+  background-color: #6d4df0;
+} */
+
+.camera-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.video-preview {
+  width: 200px;
+  border-radius: 10px;
+  margin-top: 10px;
+}
