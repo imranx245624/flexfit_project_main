@@ -21,8 +21,8 @@ function SignIn({ setShowSignIn, setShowSignUp }) {
         <button className="signIN_button">Sign IN</button>
       </div>
       <p>
-  Don't have an account?{" "}
-  <button
+   Don't have an account?{" "}
+  {/* <button
     className="link-btn"
     onClick={() => {
       setShowSignIn(false);
@@ -30,7 +30,11 @@ function SignIn({ setShowSignIn, setShowSignUp }) {
     }}
   >
     Sign up
-  </button>
+  </button> */}
+  <Link to="/signup"  onClick={() => {
+      setShowSignIn(false);
+      setShowSignUp(true);
+    }}>Sign Up</Link>
 </p>
 
 

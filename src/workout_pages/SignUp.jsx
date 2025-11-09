@@ -1,8 +1,11 @@
 import React, { useRef, useState } from "react";
 import "./Authentication.css";
 import { Input } from "postcss";
+import SignIn from "./SignIn";
+import {Link, link} from 'react-router-dom';
 
-function SignUp() {
+
+function SignUp({setShowSighIn,setShowSignUp}) {
   const [image, setImage] = useState(null);
   const fileInputRef = useRef();
   const videoRef = useRef();
@@ -100,11 +103,32 @@ function SignUp() {
 
                     <p className="credential">Password</p>
                     <input className="Pass_textbox"  type="password" placeholder="Miniumum 8 characters" />
-            </div><br/>
+            </div>
         </div>
         <div>
             <button className="SighUp_page">Sign Up</button>
         </div>
+        <p>
+          Already have an Account?
+          {/* <button  className="link-btn"
+          onClick={()=>
+          {
+            setShowSighIn(true);
+            setShowSignUp(false);
+          }
+          }
+          >
+            SignIN
+          </button> */}
+          <Link  to="/signin"
+          onClick={()=>
+          {
+            setShowSighIn(true);
+            setShowSignUp(false);
+          }
+          } >Sign In</Link>
+
+        </p>
     </div>
   );
 }

@@ -25,12 +25,14 @@ import SignIn from "./workout_pages/SignIn.jsx";
 import SignUp from "./workout_pages/SignUp.jsx";
 
 import AIWorkout from "./workout_pages/AIWorkout.jsx";
+import Profile from "./navbar_pages/ProfilePage.jsx";
 
 function App() {
   const [open, setOpen] = useState(true);
 
   const [showSignIn, setShowSignIn] = useState(false);
   const [showSignUp, setShowSignUp] = useState(false);
+  const [showProfile,setShowProfile] =useState(false);
 
 
 /*
@@ -105,7 +107,7 @@ all in one place.
 
         <Routes>
           {/* <Route path="/signin" element={<SignIn />} /> */}
-          <Route path="/signup" element={<SignUp />} />
+          {/* <Route path="/signup" element={<SignUp />} /> */}
 
           <Route  path="/" element={<HomeContent />} />
 
@@ -117,7 +119,9 @@ all in one place.
           <Route path="/progress" element={<Progress />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/AIWorkout" element={<AIWorkout/>}/>
-          
+
+          {/* <Route path="/signin" element={<SignIn />} />
+          <Route path="/signup" element={<SignUp />} /> */}
         </Routes>
 
       </main>
@@ -125,7 +129,7 @@ all in one place.
         //popup css use here 
         <div className="popup-overlay">
           <div className="popup-box">
-            <button className="close-btn" onClick={() => setShowSignIn(false)}>×</button>
+            <button className="close-btn" onClick={() => setShowSignIn(false)}>X</button>
             <SignIn setShowSignIn={setShowSignIn} setShowSignUp={setShowSignUp} />
           </div>
         </div>
@@ -134,11 +138,22 @@ all in one place.
       {showSignUp && (
   <div className="popup-overlay">
     <div className="popup-box">
-      <button className="close-btn" onClick={() => setShowSignUp(false)}>×</button>
+      <button className="close-btn" onClick={() => setShowSignUp(false)}>X</button>
       <SignUp />
     </div>
   </div>
+  
 )}
+    {showSignUp && (
+  <div className="popup-overlay">
+    <div className="popup-box">
+      <button className="close-btn" onClick={() => setShowProfile(false)}>X</button>
+      <SignUp />
+    </div>
+  </div>
+  
+)}
+
     </Router>
 
   );

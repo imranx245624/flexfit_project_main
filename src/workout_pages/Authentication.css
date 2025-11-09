@@ -71,6 +71,16 @@ font-size: 12px;
         background:linear-gradient(90deg,rgb(0, 83, 86), rgb(117, 148, 222));
 
 }
+.link-btn{
+  background-color:white;
+  border: none;
+  color: blue;
+}
+.link-btn:hover{
+  text-decoration: underline;
+}
+
+
 .SighUp_page{
     color:white;
     font-size: 15px;
@@ -91,6 +101,7 @@ font-size: 12px;
 
 }
 
+/* pop */
 
 .profile-section {
   display: flex;
@@ -119,7 +130,7 @@ display: flex;
 
 .upload-btn,.capture-btn {
   margin-top: 10px;
-  background-color: #8a6dfb;
+  
   color: white;
   border: none;
   border-radius: 8px;
