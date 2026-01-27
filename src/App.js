@@ -100,7 +100,7 @@ all in one place.
   return (
     <Router>
       
-      <NavBar/>
+      <NavBar setShowProfile={setShowProfile} />
       <Sidebar open={open} setOpen={setOpen} />
 
       <main className="mainPart"  style={{ marginLeft: open ? "180px" : "50px", transition: "margin-left 1s" }} >
@@ -136,24 +136,22 @@ all in one place.
       )} 
 
       {showSignUp && (
-  <div className="popup-overlay">
-    <div className="popup-box">
-      <button className="close-btn" onClick={() => setShowSignUp(false)}>X</button>
-      <SignUp />
-    </div>
-  </div>
-  
-)}
-    {showSignUp && (
-  <div className="popup-overlay">
-    <div className="popup-box">
-      <button className="close-btn" onClick={() => setShowProfile(false)}>X</button>
-      <SignUp />
-    </div>
-  </div>
-  
-)}
+        <div className="popup-overlay">
+          <div className="popup-box">
+            <button className="close-btn" onClick={() => setShowSignUp(false)}>X</button>
+            <SignUp />
+          </div>
+        </div>
+      )}
 
+      {showProfile && (
+        <div className="popup-overlay">
+          <div className="popup-box">
+            <button className="close-btn" onClick={() => setShowProfile(false)}>X</button>
+            <Profile />
+          </div>
+        </div>
+      )}
     </Router>
 
   );

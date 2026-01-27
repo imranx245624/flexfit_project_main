@@ -1,145 +1,187 @@
-.page-title {
-position: absolute;
-left: 38%;
- text-align: center;
- font-size: 18px;
-  width: 300px;
-  color: #000000;
-  background-color:rgb(117, 148, 222);
-  border-radius: 25px ;
-  padding: 2px 5px ;
-  justify-items: center;
-  z-index:1;
-
+/* ---------------------------------------------
+   TITLE ANIMATIONS
+---------------------------------------------- */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-15px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.video-grid {
-  top: 200px; 
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  margin-left: 50px;
-  margin-right: 50px;
-  gap: 100px;
-  padding: 40px;
-  /* justify-items: center; */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
 }
-.video-wrapper {
+
+/* ---------------------------------------------
+   MAIN PAGE TITLES (Home + Gym)
+---------------------------------------------- */
+.homeworkout-title,
+.main-workout-title {
+  margin-top: 30px;
   text-align: center;
-}
-
-.video-card {
-  background: rgba(255, 255, 255, 0.08);
-  margin-top: 10px;
+  font-size: 42px;
+  font-weight: 700;
+  background: #6f8dfd;
+  color: white;
+  padding: 10px 40px;
   border-radius: 20px;
-  padding: 5px;
-  /* width:200px; */
-  height: 280px;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+  box-shadow: 0px 4px 15px rgba(0,0,0,0.4);
+  opacity: 0;
+  animation: fadeIn 1.2s ease forwards;
+}
+
+/* ---------------------------------------------
+   SECTION TITLES (Chest, Back, Shoulder...)
+---------------------------------------------- */
+.section-title {
+  margin-top: 50px;
+  margin-bottom: 25px;
   text-align: center;
-  transition: transform 0.5s ease-in-out;
-  position: relative;
-  /* overflow: hidden; */
-  box-shadow: 0 4px 5px rgba(0, 0, 0, 0.9);
-  /* backdrop-filter: blur(200px); */
-  
+  font-size: 32px;
+  font-weight: 600;
+  background: #6f8dfd;
+  color: white;
+  padding: 8px 35px;
+  border-radius: 15px;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+  box-shadow: 0px 4px 12px rgba(0,0,0,0.4);
+  opacity: 0;
+  animation: fadeIn 1s ease forwards;
 }
 
-.video-card:hover {
-  transform: scale(1.08) translateY(-5px) translateX(-5px);
-  /* box-shadow: 0 6px 6px  rgb(0, 83, 86); */
-  border: 20px;
-  border-color:  rgb(0, 83, 86);
-  background:  rgba(255, 255, 255, 0.2);
+/* ---------------------------------------------
+   SECTION CONTAINER ANIMATION
+---------------------------------------------- */
+.section-container {
+  opacity: 0;
+  transform: translateY(30px);
+  animation: slideUp 0.8s ease forwards;
 }
 
-.video-element {
+/* ---------------------------------------------
+   2-COLUMN GRID FOR HOME WORKOUT
+---------------------------------------------- */
+.homeworkout-grid {
+  margin-top: 50px;
+  display: grid;
+  grid-template-columns: repeat(2, 350px);
+  justify-content: center;
+  column-gap: 80px;
+  row-gap: 60px;
   width: 100%;
-  height: 230px;
-  border-radius: 14px;
-  /* padding: 20px; */
-  outline: none;
-  transition: filter 0.3s ease-in-out;
 }
 
-.video-card:hover .video-element {
-  filter: brightness(1.2) saturate(1.3);
-}
-.video-button{
-  
-  color:white;
-  background-color:rgb(117, 148, 222);
-  border-radius: 10px;
-  border: none;
-  padding: 10px 20px;
-  cursor: pointer;
-  font-size: 14px;
-  box-shadow: 0 4px 5px rgba(0, 0, 0, 0.9);
-  transition: transform 0.3s ease-in-out;
-
-  /* transition-duration: 1s; */
-  /* transition: background 0.3s, padding-left 0.9s; */
-}
-.video-button:hover{
-  transform: scale(1.08) translateY(-2px) translateX(-2px) translateZ(-2px);
-  background-color: rgb(0, 83, 86);
-  /* padding-left:30px ;  */
+/* ---------------------------------------------
+   2-COLUMN GRID FOR GYM WORKOUT
+---------------------------------------------- */
+.gymworkout-grid {
+  margin-top: 30px;
+  display: grid;
+  grid-template-columns: repeat(2, 350px);
+  justify-content: center;
+  column-gap: 80px;
+  row-gap: 60px;
+  width: 100%;
 }
 
-/* .video-label {
-   display: block; 
-  margin-top: 10px;
-  font-size: 18px;
-  color: #e0e0e0;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  transition: color 0.3s ease;
-  width: auto;
-  text-align: center; 
-  background-color:rgb(0, 83, 86);
-  border-radius: 10px ;
-  padding: 12px 25px ;
-} */
-.video-label{
-  font-weight: 600;
- text-align: center;
-  font-size: 20px;
-  width: auto;
-  color: #000000;
-   background-color: rgb(0, 83, 86);
-  border-radius: 25px ;
-  padding: 12px 25px ;
+/* ---------------------------------------------
+   VIDEO WRAPPER
+---------------------------------------------- */
+.video-wrapper {
+  width: 350px !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-
-
-
-/* .section-label {
-  display: block;
+/* ---------------------------------------------
+   VIDEO CARD DESIGN
+---------------------------------------------- */
+.video-card {
+  width: 320px;
+  background: #1d1f27;
+  padding: 20px;
+  border-radius: 20px;
+  box-shadow: 0px 4px 15px rgba(0,0,0,0.35);
+  transition: 0.35s ease;
   text-align: center;
-  font-size: 38px;
-  font-weight: 800;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: #f0f0f0;
-  margin-top: 20px;
-  margin-bottom: 30px;
-  position: relative;
-  text-shadow: 0 0 10px rgba(255, 255, 255, 0.3),
-               0 0 20px rgba(0, 191, 255, 0.4),
-               0 0 40px rgba(0, 191, 255, 0.6);
-  animation: glow 2.5s infinite alternate ease-in-out;
+  opacity: 0;
+  transform: translateY(30px);
+  animation: slideUp 0.8s ease forwards;
 }
 
-@keyframes glow {
-  from {
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3),
-                 0 0 20px rgba(0, 191, 255, 0.4),
-                 0 0 40px rgba(0, 191, 255, 0.6);
-  }
-  to {
-    text-shadow: 0 0 20px rgba(255, 255, 255, 0.5),
-                 0 0 40px rgba(0, 191, 255, 0.6),
-                 0 0 60px rgba(0, 191, 255, 0.8);
-  }
-} */
+/* Card stagger animation */
+.video-card:nth-child(1) { animation-delay: 0.2s; }
+.video-card:nth-child(2) { animation-delay: 0.35s; }
+.video-card:nth-child(3) { animation-delay: 0.5s; }
+.video-card:nth-child(4) { animation-delay: 0.65s; }
+.video-card:nth-child(5) { animation-delay: 0.8s; }
+.video-card:nth-child(6) { animation-delay: 0.95s; }
 
+/* Hover animation */
+.video-card:hover {
+  transform: translateY(-10px) scale(1.03);
+  box-shadow: 0px 10px 25px rgba(120,140,255,0.45);
+}
+
+/* Video */
+.video-card video {
+  width: 100%;
+  height: 380px;
+  border-radius: 15px;
+  object-fit: cover;
+  transition: 0.35s ease;
+}
+
+.video-card:hover video {
+  transform: scale(1.05);
+}
+
+/* ---------------------------------------------
+   BUTTON DESIGN
+---------------------------------------------- */
+.video-button {
+  margin-top: 15px;
+  background: #6f8dfd;
+  padding: 10px 20px;
+  border-radius: 10px;
+  color: white;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.2s ease;
+}
+
+.video-button:active {
+  transform: scale(0.92);
+  background: #5b75e6;
+}
+
+/* ---------------------------------------------
+   RESPONSIVE FOR MOBILE
+---------------------------------------------- */
+@media (max-width: 800px) {
+  .homeworkout-grid,
+  .gymworkout-grid {
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+
+  .video-wrapper {
+    width: 100%;
+    max-width: 420px;
+  }
+
+  .video-card {
+    width: 100%;
+  }
+
+  .main-workout-title, .section-title {
+    font-size: 28px;
+    padding: 8px 25px;
+  }
+}

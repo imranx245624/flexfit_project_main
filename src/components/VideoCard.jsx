@@ -2,7 +2,6 @@
 import React, { useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "../workout_pages/workout.css";
-//import AIWorkout from "./AIWorkout.jsx";
 
 const VideoCard = ({ videoSrc, buttonLabel, navigateTo }) => {
   const videoRef = useRef(null);
@@ -10,7 +9,11 @@ const VideoCard = ({ videoSrc, buttonLabel, navigateTo }) => {
 
   const handleMouseEnter = () => videoRef.current.play();
   const handleMouseLeave = () => videoRef.current.pause();
-  const handleClick = () => navigate(navigateTo);
+
+  // THE IMPORTANT FIX ↓↓↓
+  const handleClick = () => {
+    navigate(navigateTo, { state: { workoutName: buttonLabel } });
+  };
 
   return (
     <div className="video-wrapper">
@@ -19,19 +22,19 @@ const VideoCard = ({ videoSrc, buttonLabel, navigateTo }) => {
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-        <br/>
+        <br />
         <video
           ref={videoRef}
           src={videoSrc}
-          // controls
           muted
           loop
           className="video-element"
         />
-        
-        </div>
-        <br/> 
-        <button className="video-button" onClick={handleClick}>{buttonLabel}</button>
+      </div>
+      <br />
+      <button className="video-button" onClick={handleClick}>
+        {buttonLabel}
+      </button>
     </div>
   );
 };

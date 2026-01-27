@@ -3,7 +3,6 @@ import React from "react";
 import PageWrapper from "./pageWrapper.jsx";
 import VideoCard from "../components/VideoCard.jsx";
 import "./workout.css";
-import AIWorkout from "./AIWorkout.jsx";
 
 import video1 from "../assets/videos/video1.mp4";
 import video2 from "../assets/videos/video2.mp4";
@@ -11,48 +10,64 @@ import video3 from "../assets/videos/video3.mp4";
 import video4 from "../assets/videos/video4.mp4";
 import video5 from "../assets/videos/video5.mp4";
 import video6 from "../assets/videos/video6.mp4";
-import video7 from "../assets/videos/video7.mp4";
-import video8 from "../assets/videos/video8.mp4";
-import video9 from "../assets/videos/video9.mp4";
-import video10 from "../assets/videos/video10.mp4";
-import video11 from "../assets/videos/video11.mp4";
-import video12 from "../assets/videos/video12.mp4";
-
-
-
-
-
-
 
 function HomeWorkout() {
   return (
     <PageWrapper>
-      <div className="page-title"> 
-      <h2 >Home Workout</h2>
-      </div>
-      <br/><br/><br/><br/>
-      <div className="video-grid">
-       
-        <VideoCard videoSrc={video1}  buttonLabel="plank" navigateTo="/AIWorkout" />
-        <VideoCard videoSrc={video2}  buttonLabel="push-Up" navigateTo="/AIWorkout" />
-        <VideoCard videoSrc={video3}  buttonLabel="Calf Raises" navigateTo="/AIWorkout" />
-        <VideoCard videoSrc={video4}  buttonLabel="Abs-Workout" navigateTo="/AIWorkout" />
-        <VideoCard videoSrc={video5}  buttonLabel="Chin-up" navigateTo="/AIWorkout" />
-        <VideoCard videoSrc={video6}  buttonLabel="Pull-up" navigateTo="/AIWorkout" />
-        <VideoCard videoSrc={video7}  buttonLabel="Lunges" navigateTo="/AIWorkout" />
-        <VideoCard videoSrc={video8}  buttonLabel="Mountain climber" navigateTo="/AIWorkout" />
-        <VideoCard videoSrc={video9}  buttonLabel="video9" navigateTo="/AIWorkout" />
-        <VideoCard videoSrc={video10} buttonLabel="video10" navigateTo="/AIWorkout" />
-        <VideoCard videoSrc={video11} buttonLabel="video11" navigateTo="/AIWorkout" />
-        <VideoCard videoSrc={video12} buttonLabel="video12" navigateTo="/AIWorkout" />
-        
-       
+      <div className="homeworkout-title">Home Workout</div>
 
+      <div className="homeworkout-grid">
+{/* 1️⃣ PLANKS */}
+<VideoCard
+  videoSrc={video1}
+  buttonLabel="🧘 PLANKS"
+  navigateTo="/AIWorkout"
+  state={{ workoutName: "Planks" }}
+/>
 
-       
+       {/* 2️⃣ PUSH UPS */}
+<VideoCard
+  videoSrc={video2}
+  buttonLabel="💪 PUSH UPS"
+  navigateTo="/AIWorkout"
+  state={{ workoutName: "Push Ups" }}
+/>
+
+{/* 3️⃣ SQUATS */}
+<VideoCard
+  videoSrc={video3}
+  buttonLabel="🏋️ SQUATS"
+  navigateTo="/AIWorkout"
+  state={{ workoutName: "Squats" }}
+/>
+
+{/* 4️⃣ BURPEES */}
+<VideoCard
+  videoSrc={video4}
+  buttonLabel="🔥 BURPEES"
+  navigateTo="/AIWorkout"
+  state={{ workoutName: "Burpees" }}
+/>
+
+{/* 5️⃣ LUNGES */}
+<VideoCard
+  videoSrc={video5}
+  buttonLabel="🦵 LUNGES"
+  navigateTo="/AIWorkout"
+  state={{ workoutName: "Lunges" }}
+/>
+
+{/* 6️⃣ PULL UPS */}
+<VideoCard
+  videoSrc={video6}
+  buttonLabel="🧗 PULL UPS"
+  navigateTo="/AIWorkout"
+  state={{ workoutName: "Pull Ups" }}
+/>
+
       </div>
     </PageWrapper>
   );
 }
 
-export default HomeWorkout;
+export default HomeWorkout; 
