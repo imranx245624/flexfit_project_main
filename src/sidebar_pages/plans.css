@@ -1,66 +1,42 @@
-.Mode_container{
-    text-align: center;
-        justify-content: center;
+.plans-page { padding-top: 8px; }
 
-    /* font-size: 20px; */
+.plans-header { margin-bottom: 20px; }
+.plans-title { margin: 0; color: var(--accent-2); font-size: 28px; }
+.plans-sub { margin: 6px 0 0 0; color: var(--muted); }
+
+.plans-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
 }
-.Mode_header{
- margin-top: 10px;
- font-size: 20px;
- color: rgb(117, 148, 222);
-}
-.Both_section{
-  padding-top: 50px;
-  text-align: center;
-  display: flex;
-  justify-content: center;
-  gap: 80px;
-  margin-top: 60px;
-  flex-wrap: wrap;
-}
-.page_card{
+
+.plans-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 16px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
+  gap: 10px;
+}
+
+.plans-icon {
+  width: 70px;
+  height: 70px;
+  border-radius: 14px;
+  display: flex;
   align-items: center;
-  text-align: center;
+  justify-content: center;
+  background: linear-gradient(180deg, var(--accent-1), var(--accent-2));
+  font-family: var(--mono);
+  color: #06110a;
+}
 
-    justify-content: center;
-    text-align: center;
-    min-height: 180px;
-    min-width: 200px;
-    padding: 30px 30px;
-    background-color: rgba(255, 255, 255, 0.08);
-    border-radius: 15px;
-    transition: all 0.3s ease-in-out;
-}
-.page_card:hover{
-     transform: scale(1.08) translateX(-5px) translateY(-5px);
-      background-color: (255, 255, 255, 0.2);
-}
-.mode_logo{
-    justify-content: center;
-    text-align: center;
-    width: 50px;
-    padding: 15px 15px;
-    background-color:rgb(117, 148, 222) ;
-    border-radius: 50px;
-}
-.para{
-color: white;
-font-size: 18px;
-}
-.mode_button{
-    color: white;
-    margin-top: 5px;
-    padding: 15px 24px;
-    border-radius: 15px;
-    border: none;
-    font-size: 17px;
-    background:linear-gradient(90deg, rgb(0, 83, 86), rgb(117, 148, 222));
-    transition: all 0.3s ease-in-out;
-}
-.mode_button:hover{
-    transform: scale(1.08) translateX(-5px) translateY(-5px);
-    background:linear-gradient(90deg, rgb(117, 148, 222),rgb(0, 83, 86))
+.plans-icon.alt { background: linear-gradient(180deg, var(--accent-3), var(--accent-2)); color: #fff; }
 
+.plans-name { font-family: var(--mono); font-size: 18px; }
+.plans-desc { color: var(--muted); font-size: 14px; }
+
+@media (max-width: 640px) {
+  .plans-grid { grid-template-columns: 1fr; }
 }

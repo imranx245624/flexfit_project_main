@@ -2,12 +2,63 @@
 @tailwind components;
 @tailwind utilities;
 
+:root{
+  --bg-900: #0b0f11;   /* almost-black */
+  --bg-800: #0e1113;
+  --panel: #ffffff;    /* white panel color for hero content */
+  --muted: #9aa0a3;
+  --accent-1: #00ff99; /* neon green */
+  --accent-2: #6ee7ff; /* cyan */
+  --accent-3: #7c5cff; /* purple */
+  --glass: rgba(255,255,255,0.04);
+  --glass-2: rgba(255,255,255,0.02);
+  --text: #e6eef6;
+  --mono: 'Share Tech Mono', monospace;
+  --ui-font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  --nav-height: 72px;
+}
+
+* { box-sizing: border-box; }
+
+/* Base page */
+html,body,#root { height: 100%; background: linear-gradient(180deg, var(--bg-900), #0c0f11); color: var(--text); font-family: var(--ui-font); margin:0; padding:0; }
+
+/* Apply hacker-ish monospace for headings */
+h1, h2, h3, .mono { font-family: var(--mono); letter-spacing: 0.6px; }
+
+/* Links & accents */
+a, button { color: var(--text); }
+a.primary { color: var(--accent-2); }
+
+/* Make containers stand out */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+/* Utility */
+.flex { display:flex; }
+.center { display:flex; align-items:center; justify-content:center; }
+.btn {
+  background: linear-gradient(90deg, var(--accent-1), var(--accent-2));
+  color: #06110a;
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: none;
+  font-weight:600;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.45);
+  cursor:pointer;
+}
+.card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+}
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

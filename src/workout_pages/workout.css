@@ -1,187 +1,127 @@
-/* ---------------------------------------------
-   TITLE ANIMATIONS
----------------------------------------------- */
+/* workout page styling - hacker dark theme */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-15px); }
+  from { opacity: 0; transform: translateY(-12px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(40px); }
+  from { opacity: 0; transform: translateY(30px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ---------------------------------------------
-   MAIN PAGE TITLES (Home + Gym)
----------------------------------------------- */
 .homeworkout-title,
 .main-workout-title {
-  margin-top: 30px;
+  margin-top: 24px;
   text-align: center;
-  font-size: 42px;
+  font-size: 36px;
   font-weight: 700;
-  background: #6f8dfd;
-  color: white;
-  padding: 10px 40px;
-  border-radius: 20px;
+  font-family: var(--mono);
+  color: var(--accent-2);
+  padding: 10px 30px;
+  border-radius: 16px;
   width: fit-content;
   margin-left: auto;
   margin-right: auto;
-  box-shadow: 0px 4px 15px rgba(0,0,0,0.4);
-  opacity: 0;
-  animation: fadeIn 1.2s ease forwards;
-}
-
-/* ---------------------------------------------
-   SECTION TITLES (Chest, Back, Shoulder...)
----------------------------------------------- */
-.section-title {
-  margin-top: 50px;
-  margin-bottom: 25px;
-  text-align: center;
-  font-size: 32px;
-  font-weight: 600;
-  background: #6f8dfd;
-  color: white;
-  padding: 8px 35px;
-  border-radius: 15px;
-  width: fit-content;
-  margin-left: auto;
-  margin-right: auto;
-  box-shadow: 0px 4px 12px rgba(0,0,0,0.4);
-  opacity: 0;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 12px 36px rgba(0,0,0,0.45);
   animation: fadeIn 1s ease forwards;
 }
 
-/* ---------------------------------------------
-   SECTION CONTAINER ANIMATION
----------------------------------------------- */
+.section-title {
+  margin-top: 40px;
+  margin-bottom: 18px;
+  text-align: center;
+  font-size: 26px;
+  font-weight: 600;
+  color: var(--accent-1);
+  padding: 8px 26px;
+  border-radius: 14px;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 10px 28px rgba(0,0,0,0.4);
+  animation: fadeIn 1s ease forwards;
+}
+
 .section-container {
   opacity: 0;
-  transform: translateY(30px);
+  transform: translateY(20px);
   animation: slideUp 0.8s ease forwards;
 }
 
-/* ---------------------------------------------
-   2-COLUMN GRID FOR HOME WORKOUT
----------------------------------------------- */
-.homeworkout-grid {
-  margin-top: 50px;
-  display: grid;
-  grid-template-columns: repeat(2, 350px);
-  justify-content: center;
-  column-gap: 80px;
-  row-gap: 60px;
-  width: 100%;
-}
-
-/* ---------------------------------------------
-   2-COLUMN GRID FOR GYM WORKOUT
----------------------------------------------- */
+.homeworkout-grid,
 .gymworkout-grid {
-  margin-top: 30px;
+  margin-top: 40px;
   display: grid;
-  grid-template-columns: repeat(2, 350px);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   justify-content: center;
-  column-gap: 80px;
-  row-gap: 60px;
+  gap: 28px;
   width: 100%;
 }
 
-/* ---------------------------------------------
-   VIDEO WRAPPER
----------------------------------------------- */
 .video-wrapper {
-  width: 350px !important;
+  width: 100% !important;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-/* ---------------------------------------------
-   VIDEO CARD DESIGN
----------------------------------------------- */
 .video-card {
-  width: 320px;
-  background: #1d1f27;
-  padding: 20px;
-  border-radius: 20px;
-  box-shadow: 0px 4px 15px rgba(0,0,0,0.35);
-  transition: 0.35s ease;
+  width: 100%;
+  max-width: 360px;
+  background: rgba(255,255,255,0.04);
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.06);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.45);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
   text-align: center;
   opacity: 0;
-  transform: translateY(30px);
+  transform: translateY(20px);
   animation: slideUp 0.8s ease forwards;
 }
 
-/* Card stagger animation */
-.video-card:nth-child(1) { animation-delay: 0.2s; }
-.video-card:nth-child(2) { animation-delay: 0.35s; }
-.video-card:nth-child(3) { animation-delay: 0.5s; }
-.video-card:nth-child(4) { animation-delay: 0.65s; }
-.video-card:nth-child(5) { animation-delay: 0.8s; }
-.video-card:nth-child(6) { animation-delay: 0.95s; }
-
-/* Hover animation */
 .video-card:hover {
-  transform: translateY(-10px) scale(1.03);
-  box-shadow: 0px 10px 25px rgba(120,140,255,0.45);
+  transform: translateY(-6px);
+  box-shadow: 0 24px 50px rgba(124,92,255,0.2);
 }
 
-/* Video */
 .video-card video {
   width: 100%;
-  height: 380px;
-  border-radius: 15px;
+  height: 320px;
+  border-radius: 12px;
   object-fit: cover;
-  transition: 0.35s ease;
+  transition: transform 0.25s ease;
 }
 
-.video-card:hover video {
-  transform: scale(1.05);
-}
+.video-card:hover video { transform: scale(1.03); }
 
-/* ---------------------------------------------
-   BUTTON DESIGN
----------------------------------------------- */
 .video-button {
-  margin-top: 15px;
-  background: #6f8dfd;
-  padding: 10px 20px;
+  margin-top: 12px;
+  background: linear-gradient(90deg, var(--accent-1), var(--accent-2));
+  padding: 10px 18px;
   border-radius: 10px;
-  color: white;
-  font-weight: 600;
+  color: #06110a;
+  font-weight: 700;
   border: none;
   cursor: pointer;
-  transition: transform 0.15s ease, background 0.2s ease;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.video-button:active {
-  transform: scale(0.92);
-  background: #5b75e6;
-}
+.video-button:active { transform: scale(0.96); }
 
-/* ---------------------------------------------
-   RESPONSIVE FOR MOBILE
----------------------------------------------- */
-@media (max-width: 800px) {
+@media (max-width: 900px) {
   .homeworkout-grid,
   .gymworkout-grid {
     grid-template-columns: 1fr;
-    width: 100%;
   }
 
-  .video-wrapper {
-    width: 100%;
-    max-width: 420px;
-  }
+  .video-card { max-width: 100%; }
+}
 
-  .video-card {
-    width: 100%;
-  }
-
-  .main-workout-title, .section-title {
-    font-size: 28px;
-    padding: 8px 25px;
-  }
+@media (max-width: 640px) {
+  .main-workout-title, .section-title { font-size: 24px; }
 }

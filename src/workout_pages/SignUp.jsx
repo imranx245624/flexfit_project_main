@@ -1,134 +1,190 @@
-import React, { useRef, useState } from "react";
+// src/workout_pages/SignUp.jsx
+import React, { useState } from "react";
 import "./Authentication.css";
-import { Input } from "postcss";
-import SignIn from "./SignIn";
-import {Link, link} from 'react-router-dom';
+/* TODO: DO NOT CHANGE API CALLS (supabase) */
+import { supabase } from "../utils/supabaseClient";
+import { Link } from "react-router-dom";
 
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email).toLowerCase());
+}
 
-function SignUp({setShowSighIn,setShowSignUp}) {
-  const [image, setImage] = useState(null);
-  const fileInputRef = useRef();
-  const videoRef = useRef();
-  const [cameraOpen, setCameraOpen] = useState(false);
+function SignUp({ setShowSignIn, setShowSignUp }) {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [email, setEmail] = useState("");
+  const [msg, setMsg] = useState("");
+  const [type, setType] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  // open camera
-  const openCamera = async () => {
-    setCameraOpen(true);
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    videoRef.current.srcObject = stream;
+  const savePendingProfile = () => {
+    const pending = { username: username || "" };
+    localStorage.setItem("pending_profile", JSON.stringify(pending));
   };
 
-  // capture photo
-  const capturePhoto = () => {
-    const canvas = document.createElement("canvas");
-    canvas.width = videoRef.current.videoWidth;
-    canvas.height = videoRef.current.videoHeight;
-    const context = canvas.getContext("2d");
-    context.drawImage(videoRef.current, 0, 0);
-    const dataUrl = canvas.toDataURL("image/png");
-    setImage(dataUrl);
-    stopCamera();
+  const handleSignUp = async () => {
+    setMsg("");
+    setType("");
+    if (!username.trim()) {
+      setType("error");
+      setMsg("Please enter a username.");
+      return;
+    }
+    if (password.length < 8) {
+      setType("error");
+      setMsg("Password must be at least 8 characters.");
+      return;
+    }
+    if (password !== confirm) {
+      setType("error");
+      setMsg("Passwords do not match.");
+      return;
+    }
+    if (!isValidEmail(email)) {
+      setType("error");
+      setMsg("Please enter a valid email.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { full_name: username },
+        },
+      });
+
+      if (error) {
+        setType("error");
+        setMsg(error.message);
+      } else {
+        // attempt to insert username->email mapping; may fail due to RLS
+        try {
+          await supabase.from("users").insert([{ username: username, email }]);
+        } catch (insErr) {
+          console.warn("profile insert failed (client-side):", insErr);
+        }
+
+        savePendingProfile();
+        setType("success");
+        setMsg("Signed up. Check your email to confirm. After confirmation, sign in to complete your profile.");
+      }
+    } catch (err) {
+      setType("error");
+      setMsg(String(err.message || err));
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // stop camera
-  const stopCamera = () => {
-    let stream = videoRef.current.srcObject;
-    let tracks = stream.getTracks();
-    tracks.forEach((track) => track.stop());
-    videoRef.current.srcObject = null;
-    setCameraOpen(false);
-  };
-
-  // upload from device
-  const handleUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setImage(URL.createObjectURL(file));
+  const handleGoogleSignUp = async () => {
+    setMsg("");
+    setType("");
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({ provider: "google" });
+      if (error) {
+        setType("error");
+        setMsg(error.message);
+      } else {
+        setType("info");
+        setMsg("Redirecting to Google...");
+      }
+    } catch (err) {
+      setType("error");
+      setMsg(String(err.message || err));
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="authentication_page">
-      <header>
-        <h2>Create Your Account</h2>
-        <p className="para1">Start your fitness journey Today</p>
+    <div className="auth-wrapper">
+      <header className="auth-header">
+        <div className="brand-head">
+          <h1 className="brand-title">FlexFit</h1>
+          <p className="brand-sub">AI powered workouts &amp; progress tracking</p>
+        </div>
       </header>
 
-      <div className="profile-section">
-        {image ? (
-          <img src={image} alt="Profile" className="profile-img" />
-        ) : (
-          <div className="profile-placeholder"></div>
-        )}
+      <div className="auth-card">
+        <div className="auth-left">
+          <h2 className="auth-title">Create your account</h2>
+          <p className="auth-sub">Sign up quickly and start your fitness journey</p>
 
-        {!cameraOpen && (
-          <div className="pic_buttons_div">
-            <button className="upload-btn" onClick={() => fileInputRef.current.click()}>
-              Upload Picture
-            </button>
-            <button className="upload-btn" onClick={openCamera}>
-              Open Camera
-            </button>
-          </div>
-        )}
+          <div className="auth-form form-grid" aria-label="Sign up form">
+            <div className="form-col">
+              <label className="auth-label" htmlFor="su-username">Username</label>
+              <input
+                id="su-username"
+                className="auth-input"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="e.g. _imranx_"
+                autoComplete="username"
+              />
 
-        {cameraOpen && (
-          <div className="camera-container">
-            <video ref={videoRef} autoPlay className="video-preview" />
-            <button className="capture-btn" onClick={capturePhoto}>
-              Capture Photo
-            </button>
-          </div>
-        )}
-
-        <input
-          type="file"
-          accept="image/*"
-          ref={fileInputRef}
-          style={{ display: "none" }}
-          onChange={handleUpload}
-        />
-         <br/><br/>
-        </div>
-        <div>
-            <div className="credential_div">
-                    <p className="credential">Username: </p>
-                    <input className="username_textbox" type="username" placeholder="Username: like  _imranx_"/>
-                </div><br/>
-             <div className="credential_div">   
-                    <p className="credential">Email: </p>
-                    <input className="Email_textbox" type="email" placeholder="imran@gmail.com" />
-            </div><br/>
-            <div className="credential_div"> 
-
-                    <p className="credential">Password</p>
-                    <input className="Pass_textbox"  type="password" placeholder="Miniumum 8 characters" />
+              <label className="auth-label" htmlFor="su-password">Password</label>
+              <input
+                id="su-password"
+                className="auth-input"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Minimum 8 characters"
+                autoComplete="new-password"
+              />
             </div>
-        </div>
-        <div>
-            <button className="SighUp_page">Sign Up</button>
-        </div>
-        <p>
-          Already have an Account?
-          {/* <button  className="link-btn"
-          onClick={()=>
-          {
-            setShowSighIn(true);
-            setShowSignUp(false);
-          }
-          }
-          >
-            SignIN
-          </button> */}
-          <Link  to="/signin"
-          onClick={()=>
-          {
-            setShowSighIn(true);
-            setShowSignUp(false);
-          }
-          } >Sign In</Link>
 
-        </p>
+            <div className="form-col">
+              <label className="auth-label" htmlFor="su-confirm">Confirm Password</label>
+              <input
+                id="su-confirm"
+                className="auth-input"
+                type="password"
+                value={confirm}
+                onChange={(e) => setConfirm(e.target.value)}
+                placeholder="Retype password"
+                autoComplete="new-password"
+              />
+
+              <label className="auth-label" htmlFor="su-email">Email</label>
+              <input
+                id="su-email"
+                className="auth-input"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                autoComplete="email"
+              />
+            </div>
+
+            <div className="full-col">
+              <button className="auth-btn primary full" onClick={handleSignUp} disabled={loading}>
+                {loading ? "Signing up..." : "Create account"}
+              </button>
+            </div>
+          </div>
+
+          <div className="or-divider"><span>OR</span></div>
+
+          <button className="auth-btn oauth" onClick={handleGoogleSignUp} disabled={loading}>
+            <img src="/google-icon.svg" alt="google" className="oauth-icon" />
+            Continue with Google
+          </button>
+
+          {msg && <div className={`auth-msg ${type === "error" ? "error" : type === "success" ? "success" : "info"}`}>{msg}</div>}
+
+          <div className="auth-footer">
+            <span>Already have an account?</span>&nbsp;
+            <Link to="/signin" onClick={() => { setShowSignIn(true); setShowSignUp(false); }} className="link">Sign in</Link>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
