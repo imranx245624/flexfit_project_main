@@ -8,13 +8,15 @@ const PAGE_TITLES = {
   "/workouts": "Workout Library",
   "/HWorkout": "Home Workouts",
   "/GWorkout": "Gym Workouts",
+  "/AIWorkoutLibrary": "AI Workout Library",
   "/AIWorkout": "AI Workout",
-  "/progress": "Progress Tracker",
+  "/profile": "Dashboard",
+  "/progress": "Dashboard",
+  "/settings": "Dashboard",
   "/leaderboard": "Flex Rankings",
-  "/settings": "Settings",
 };
 
-export default function TopNav({ currentUser, setShowProfile, setShowSignIn }) {
+export default function TopNav({ currentUser }) {
   const [open, setOpen] = useState(false);
   const [hidden, setHidden] = useState(false);
   const loc = useLocation();
@@ -34,7 +36,7 @@ export default function TopNav({ currentUser, setShowProfile, setShowSignIn }) {
   }, [loc.pathname]);
 
   const pageTitle = PAGE_TITLES[loc.pathname] || "FlexFit";
-  const userInitial = (currentUser?.user_metadata?.full_name || currentUser?.email || "U")[0].toUpperCase();
+  const isProfileRoute = loc.pathname.startsWith("/profile") || loc.pathname === "/progress" || loc.pathname === "/settings";
 
   return (
     <header className={`topnav ${hidden ? "is-hidden" : ""}`}>
@@ -54,10 +56,9 @@ export default function TopNav({ currentUser, setShowProfile, setShowSignIn }) {
           <Link to="/" className="brand">FLEXFIT</Link>
           <nav className="topnav-links">
             <Link to="/workouts" className={loc.pathname === "/workouts" ? "active" : ""}>Workouts</Link>
-            <Link to="/HWorkout" className={loc.pathname === "/HWorkout" ? "active" : ""}>AI Workout</Link>
-            <Link to="/progress" className={loc.pathname === "/progress" ? "active" : ""}>Progress</Link>
+            <Link to="/AIWorkoutLibrary" className={loc.pathname === "/AIWorkoutLibrary" ? "active" : ""}>AI Workout</Link>
+            <Link to="/profile" className={isProfileRoute ? "active" : ""}>Dashboard</Link>
             <Link to="/leaderboard" className={loc.pathname === "/leaderboard" ? "active" : ""}>Rankings</Link>
-            <Link to="/settings" className={loc.pathname === "/settings" ? "active" : ""}>Settings</Link>
           </nav>
         </div>
 
@@ -66,7 +67,7 @@ export default function TopNav({ currentUser, setShowProfile, setShowSignIn }) {
         </div>
 
         <div className="topnav-right">
-          <Link to="/HWorkout" className="btn topnav-cta">Train with AI</Link>
+          <Link to="/HWorkout" className="btn topnav-cta">Home Workout</Link>
 
           <button className="nav-icon ghost" aria-label="Notifications">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
@@ -76,15 +77,9 @@ export default function TopNav({ currentUser, setShowProfile, setShowSignIn }) {
           </button>
 
           {currentUser ? (
-            <button
-              className="avatar-btn"
-              aria-label="Profile"
-              onClick={() => setShowProfile(true)}
-            >
-              {userInitial}
-            </button>
+            <Link className="btn ghost small" to="/profile">Dashboard</Link>
           ) : (
-            <button className="btn ghost small" onClick={() => setShowSignIn(true)}>Sign in</button>
+            <Link className="btn ghost small" to="/profile">Sign in</Link>
           )}
         </div>
       </div>
@@ -92,11 +87,10 @@ export default function TopNav({ currentUser, setShowProfile, setShowSignIn }) {
       <div id="topnav-menu" className={`topnav-mobile ${open ? "open" : ""}`}>
         <Link to="/" onClick={() => setOpen(false)}>Home</Link>
         <Link to="/workouts" onClick={() => setOpen(false)}>Workout Library</Link>
-        <Link to="/HWorkout" onClick={() => setOpen(false)}>AI Workout</Link>
-        <Link to="/progress" onClick={() => setOpen(false)}>Progress Tracker</Link>
+        <Link to="/AIWorkoutLibrary" onClick={() => setOpen(false)}>AI Workout</Link>
+        <Link to="/profile" onClick={() => setOpen(false)}>Dashboard</Link>
         <Link to="/leaderboard" onClick={() => setOpen(false)}>Flex Rankings</Link>
-        <Link to="/settings" onClick={() => setOpen(false)}>Settings</Link>
-        <Link to="/HWorkout" onClick={() => setOpen(false)} className="mobile-cta">Train with AI</Link>
+        <Link to="/HWorkout" onClick={() => setOpen(false)} className="mobile-cta">Home Workout</Link>
       </div>
     </header>
   );

@@ -16,22 +16,6 @@ export default function CompleteProfile({ profile, onClose, onComplete }) {
   const [msg, setMsg] = useState("");
   const [type, setType] = useState(""); // error | success | info
 
-  // helper: check username exists in mapping table (correctly handle response)
-  const usernameTaken = async (name) => {
-    if (!name) return false;
-    try {
-      const { data, error } = await supabase.from("users").select("username, email").eq("username", name).maybeSingle();
-      if (error) {
-        // treat error as not taken (or you can return true to be conservative)
-        return false;
-      }
-      // if data exists and username matches -> taken
-      return !!data;
-    } catch (err) {
-      return false;
-    }
-  };
-
   const handleSubmit = async (e) => {
     e?.preventDefault?.();
     setMsg("");
@@ -79,7 +63,7 @@ export default function CompleteProfile({ profile, onClose, onComplete }) {
 
       // 2) update password for current signed-in user (if provided)
       if (password) {
-        const { data: updUser, error: updErr } = await supabase.auth.updateUser({
+        const { error: updErr } = await supabase.auth.updateUser({
           password: password,
         });
         if (updErr) {

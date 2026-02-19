@@ -8,8 +8,17 @@
   margin-bottom: 20px;
 }
 
-.leaderboard-title { margin: 0; color: var(--accent-2); font-size: 28px; }
-.leaderboard-sub { margin: 6px 0 0 0; color: var(--muted); }
+.leaderboard-title { margin: 0; color: var(--ff-text); font-size: 28px; }
+.leaderboard-sub { margin: 6px 0 0 0; color: var(--ff-muted); }
+
+.leaderboard-loading {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--ff-surface-2);
+  border: 1px solid var(--ff-card-border);
+  color: var(--ff-muted);
+  margin-bottom: 14px;
+}
 
 .leaderboard-list {
   display: grid;
@@ -20,25 +29,41 @@
   display: grid;
   grid-template-columns: 70px 1fr auto;
   align-items: center;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 12px;
+  gap: 12px;
   padding: 14px;
 }
 
-.leaderboard-rank { color: var(--accent-1); font-family: var(--mono); }
+.leaderboard-rank { color: var(--ff-accent); font-weight: 700; }
+
+.leaderboard-user { display: flex; align-items: center; gap: 10px; }
+.leaderboard-user .avatar.small { width: 28px; height: 28px; font-size: 12px; }
 .leaderboard-name { font-weight: 600; }
-.leaderboard-score { color: var(--muted); }
+.leaderboard-score { color: var(--ff-muted); }
+
+.leaderboard-sparkline {
+  width: 120px;
+  height: 16px;
+  margin-top: 6px;
+  border-radius: 999px;
+  background: repeating-linear-gradient(90deg, rgba(31,184,166,0.5), rgba(31,184,166,0.5) 12px, rgba(31,184,166,0.1) 12px, rgba(31,184,166,0.1) 24px);
+  opacity: 0.6;
+}
+
+.cached-card { margin-bottom: 12px; }
+.cached-title { font-weight: 700; color: var(--ff-text); }
+.cached-sub { color: var(--ff-muted); font-size: 13px; margin-top: 6px; }
 
 .leaderboard-note {
   margin-top: 16px;
   padding: 12px;
   border-radius: 12px;
-  background: rgba(255,255,255,0.03);
-  color: var(--muted);
+  background: var(--ff-surface-2);
+  color: var(--ff-muted);
+  border: 1px solid var(--ff-card-border);
 }
 
 @media (max-width: 640px) {
   .leaderboard-header { flex-direction: column; align-items: flex-start; }
-  .leaderboard-row { grid-template-columns: 1fr; gap: 6px; }
+  .leaderboard-row { grid-template-columns: 1fr; }
+  .leaderboard-sparkline { width: 100%; }
 }

@@ -1,70 +1,64 @@
-// src/workout_pages/HomeWorkout.jsx
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import PageWrapper from "./pageWrapper.jsx";
-import VideoCard from "../components/VideoCard.jsx";
 import "./workout.css";
-
-import video1 from "../assets/videos/video1.mp4";
-import video2 from "../assets/videos/video2.mp4";
-import video3 from "../assets/videos/video3.mp4";
-import video4 from "../assets/videos/video4.mp4";
-import video5 from "../assets/videos/video5.mp4";
-import video6 from "../assets/videos/video6.mp4";
+import { HOME_GROUPS, toSlug } from "../data/exerciseCatalog";
 
 function HomeWorkout() {
+  const navigate = useNavigate();
+  const goDetail = (name) => navigate(`/exercise/${toSlug(name)}`);
+
+  const ExerciseGrid = ({ items }) => (
+    <div className="workout-exercise-grid">
+      {items.map((item) => (
+        <button
+          key={item}
+          type="button"
+          className="workout-exercise-card"
+          onClick={() => goDetail(item)}
+        >
+          <span className="workout-exercise-name">{item}</span>
+          <span className="workout-exercise-cta">View Details</span>
+        </button>
+      ))}
+    </div>
+  );
+
+  const GroupSection = ({ title, items }) => (
+    <div className="workout-group-section">
+      <div className="workout-group-subtitle">{title}</div>
+      <ExerciseGrid items={items} />
+    </div>
+  );
+
   return (
     <PageWrapper>
       <div className="homeworkout-title">Home Workout</div>
 
-      <div className="homeworkout-grid">
-{/* 1️⃣ PLANKS */}
-<VideoCard
-  videoSrc={video1}
-  buttonLabel="🧘 PLANKS"
-  navigateTo="/AIWorkout"
-  state={{ workoutName: "Planks" }}
-/>
-
-       {/* 2️⃣ PUSH UPS */}
-<VideoCard
-  videoSrc={video2}
-  buttonLabel="💪 PUSH UPS"
-  navigateTo="/AIWorkout"
-  state={{ workoutName: "Push Ups" }}
-/>
-
-{/* 3️⃣ SQUATS */}
-<VideoCard
-  videoSrc={video3}
-  buttonLabel="🏋️ SQUATS"
-  navigateTo="/AIWorkout"
-  state={{ workoutName: "Squats" }}
-/>
-
-{/* 4️⃣ BURPEES */}
-<VideoCard
-  videoSrc={video4}
-  buttonLabel="🔥 BURPEES"
-  navigateTo="/AIWorkout"
-  state={{ workoutName: "Burpees" }}
-/>
-
-{/* 5️⃣ LUNGES */}
-<VideoCard
-  videoSrc={video5}
-  buttonLabel="🦵 LUNGES"
-  navigateTo="/AIWorkout"
-  state={{ workoutName: "Lunges" }}
-/>
-
-{/* 6️⃣ PULL UPS */}
-<VideoCard
-  videoSrc={video6}
-  buttonLabel="🧗 PULL UPS"
-  navigateTo="/AIWorkout"
-  state={{ workoutName: "Pull Ups" }}
-/>
-
+      <div className="workout-groups">
+        {HOME_GROUPS.map((group) => (
+          <section key={group.title} className="workout-group-card">
+            <div className="workout-group-header">
+              <h2>{group.title}</h2>
+            </div>
+            <div className="workout-group-body">
+              {group.sections.map((section) => (
+                section.subsections ? (
+                  <div key={section.title} className="workout-group-section">
+                    <div className="workout-group-subtitle">{section.title}</div>
+                    <div className="workout-group-subgrid">
+                      {section.subsections.map((sub) => (
+                        <GroupSection key={sub.title} title={sub.title} items={sub.items} />
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <GroupSection key={section.title} title={section.title} items={section.items} />
+                )
+              ))}
+            </div>
+          </section>
+        ))}
       </div>
     </PageWrapper>
   );

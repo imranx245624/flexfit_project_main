@@ -1,127 +1,258 @@
-/* workout page styling - hacker dark theme */
+/* workout page styling - dark teal dashboard */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-12px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(30px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
 .homeworkout-title,
 .main-workout-title {
-  margin-top: 24px;
+  margin-top: 16px;
   text-align: center;
-  font-size: 36px;
+  font-size: 28px;
   font-weight: 700;
-  font-family: var(--mono);
-  color: var(--accent-2);
-  padding: 10px 30px;
-  border-radius: 16px;
+  color: var(--ff-text);
+  padding: 10px 18px;
+  border-radius: 12px;
   width: fit-content;
   margin-left: auto;
   margin-right: auto;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
-  box-shadow: 0 12px 36px rgba(0,0,0,0.45);
-  animation: fadeIn 1s ease forwards;
+  background: var(--ff-surface);
+  border: 1px solid var(--ff-card-border);
+  box-shadow: var(--ff-shadow);
+  animation: fadeIn 0.6s ease forwards;
 }
 
 .section-title {
-  margin-top: 40px;
-  margin-bottom: 18px;
-  text-align: center;
-  font-size: 26px;
+  margin-top: 28px;
+  margin-bottom: 12px;
+  text-align: left;
+  font-size: 18px;
   font-weight: 600;
-  color: var(--accent-1);
-  padding: 8px 26px;
-  border-radius: 14px;
-  width: fit-content;
-  margin-left: auto;
-  margin-right: auto;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.08);
-  box-shadow: 0 10px 28px rgba(0,0,0,0.4);
-  animation: fadeIn 1s ease forwards;
+  color: var(--ff-text);
+  padding: 6px 2px;
 }
 
-.section-container {
-  opacity: 0;
-  transform: translateY(20px);
-  animation: slideUp 0.8s ease forwards;
-}
+.section-container { animation: fadeIn 0.6s ease forwards; }
 
 .homeworkout-grid,
+
+
+
 .gymworkout-grid {
-  margin-top: 40px;
+  margin-top: 18px;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  justify-content: center;
-  gap: 28px;
+  /* responsive columns: fit as many 260px cards as possible */
+  grid-template-columns: repeat(2, minmax(260px, 1fr));
+  gap: 100px;
   width: 100%;
+
+  /* center the whole grid and give horizontal breathing room */
+  max-width: 1200px;   /* change if you want wider/narrower content */
+  margin-left: auto;
+  margin-right: auto;
+  padding: 50px 50px;     /* side spacing so grid doesn't touch edges */
+  box-sizing: border-box;
+
+  /* make grid rows taller so cards have more vertical space */
+  grid-auto-rows: minmax(340px, auto);
+
+  /* ensure items align to top */
+  align-items: start;
 }
 
-.video-wrapper {
+/* smaller screens — reduce card height & gaps for better fit */
+@media (max-width: 1000px) {
+  .gymworkout-grid {
+    max-width: 960px;
+    grid-auto-rows: minmax(300px, auto);
+    gap: 24px;
+    padding: 0 18px;
+  }
+}
+
+@media (max-width: 760px) {
+  .gymworkout-grid {
+    grid-template-columns: 1fr;
+    grid-auto-rows: minmax(260px, auto);
+    gap: 18px;
+    padding: 0 12px;
+  }
+}
+
+
+
+
+
+.ff-workout-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ff-workout-media .video-wrapper {
   width: 100% !important;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  gap: 10px;
+  align-items: stretch;
 }
+
+.ff-workout-media .video-wrapper br { display: none; }
 
 .video-card {
   width: 100%;
-  max-width: 360px;
-  background: rgba(255,255,255,0.04);
-  padding: 16px;
-  border-radius: 18px;
-  border: 1px solid rgba(255,255,255,0.06);
-  box-shadow: 0 18px 40px rgba(0,0,0,0.45);
+  background: var(--ff-surface-2);
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid var(--ff-card-border);
+  box-shadow: var(--ff-shadow);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  text-align: center;
-  opacity: 0;
-  transform: translateY(20px);
-  animation: slideUp 0.8s ease forwards;
 }
 
 .video-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 24px 50px rgba(124,92,255,0.2);
+  transform: translateY(-4px);
+  box-shadow: 0 18px 40px rgba(3,12,18,0.6);
 }
 
 .video-card video {
   width: 100%;
-  height: 320px;
-  border-radius: 12px;
+  height: 180px;
+  border-radius: 10px;
   object-fit: cover;
-  transition: transform 0.25s ease;
 }
 
-.video-card:hover video { transform: scale(1.03); }
-
 .video-button {
-  margin-top: 12px;
-  background: linear-gradient(90deg, var(--accent-1), var(--accent-2));
-  padding: 10px 18px;
+  background: linear-gradient(180deg, var(--ff-accent), var(--ff-accent-600));
+  padding: 10px 14px;
   border-radius: 10px;
-  color: #06110a;
+  color: #071014;
   font-weight: 700;
   border: none;
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.video-button:active { transform: scale(0.96); }
+.ff-workout-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
 
-@media (max-width: 900px) {
+.ff-workout-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ff-text);
+}
+
+.ff-workout-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* grouped exercise lists */
+.workout-groups {
+  margin: 24px auto 40px;
+  max-width: 1200px;
+  padding: 0 24px;
+  display: grid;
+  gap: 20px;
+}
+
+.workout-group-card {
+  background: var(--ff-surface);
+  border: 1px solid var(--ff-card-border);
+  box-shadow: var(--ff-shadow);
+  border-radius: 18px;
+  padding: 18px 18px 20px;
+}
+
+.workout-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.workout-group-header h2 {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--ff-text);
+}
+
+.workout-group-body {
+  display: grid;
+  gap: 14px;
+}
+
+.workout-group-section {
+  display: grid;
+  gap: 8px;
+}
+
+.workout-group-subtitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ff-text);
+}
+
+.workout-group-subgrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.workout-exercise-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.workout-exercise-card {
+  background: var(--ff-surface-2);
+  border: 1px solid var(--ff-card-border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  cursor: pointer;
+  text-align: left;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.workout-exercise-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--ff-shadow);
+}
+
+.workout-exercise-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ff-text);
+}
+
+.workout-exercise-cta {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ff-accent);
+}
+
+@media (max-width: 1100px) {
+  .homeworkout-grid,
+  .gymworkout-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
   .homeworkout-grid,
   .gymworkout-grid {
     grid-template-columns: 1fr;
   }
-
-  .video-card { max-width: 100%; }
-}
-
-@media (max-width: 640px) {
-  .main-workout-title, .section-title { font-size: 24px; }
+  .main-workout-title, .section-title { font-size: 18px; }
+  .video-card video { height: 200px; }
+  .workout-groups { padding: 0 16px; }
 }

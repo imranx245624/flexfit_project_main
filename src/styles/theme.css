@@ -1,9 +1,12 @@
-/* src/styles/theme.css - hacker dark UI theme */
+/* src/styles/theme.css - light prism UI theme */
 
 body {
-  background: linear-gradient(180deg, var(--bg-900), #0c0f11);
-  color: var(--text);
-  font-family: var(--ui-font);
+  background: radial-gradient(1000px 520px at -8% -12%, rgba(124,58,237,0.1), transparent 60%),
+              radial-gradient(900px 520px at 110% 0%, rgba(110,231,255,0.16), transparent 55%),
+              radial-gradient(900px 520px at 60% 120%, rgba(255,107,157,0.1), transparent 55%),
+              var(--ff-bg);
+  color: var(--ff-text);
+  font-family: var(--ff-font-stack);
 }
 
 a { text-decoration: none; }
@@ -26,10 +29,10 @@ img { max-width: 100%; height: auto; display: block; }
 
 /* subtle panel utility */
 .glass-panel {
-  background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
-  border: 1px solid rgba(255,255,255,0.06);
+  background: linear-gradient(180deg, rgba(255,255,255,0.8), rgba(255,255,255,0.65));
+  border: 1px solid var(--ff-card-border);
   border-radius: 14px;
-  box-shadow: 0 18px 60px rgba(0,0,0,0.45);
+  box-shadow: var(--ff-shadow);
 }
 
 /* shared hover glow */
@@ -38,8 +41,8 @@ img { max-width: 100%; height: auto; display: block; }
 }
 .glow-hover:hover {
   transform: translateY(-6px);
-  box-shadow: 0 16px 44px rgba(124,92,255,0.18);
-  border-color: rgba(124,92,255,0.32);
+  box-shadow: 0 18px 44px rgba(124,58,237,0.22);
+  border-color: rgba(124,58,237,0.2);
 }
 
 @keyframes headerGlow {

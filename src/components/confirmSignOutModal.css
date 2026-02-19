@@ -1,0 +1,75 @@
+/* src/components/confirmSignOutModal.css */
+.confirm-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 36, 0.35);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 9500;
+}
+
+.confirm-panel {
+  width: 100%;
+  max-width: 380px;
+  background: var(--ff-surface);
+  border: 1px solid var(--ff-card-border);
+  border-radius: 18px;
+  box-shadow: var(--ff-shadow);
+  padding: 22px;
+  display: grid;
+  gap: 10px;
+  text-align: center;
+}
+
+.confirm-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  margin: 0 auto 4px;
+  background: linear-gradient(135deg, #ff8bb0, #7c3aed);
+  color: #fff;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.confirm-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ff-text);
+}
+
+.confirm-text {
+  font-size: 14px;
+  color: var(--ff-muted);
+}
+
+.confirm-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.confirm-btn {
+  border: none;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.confirm-btn.ghost {
+  background: var(--ff-surface-2);
+  color: var(--ff-text);
+  border: 1px solid var(--ff-card-border);
+}
+
+.confirm-btn.danger {
+  background: linear-gradient(135deg, #ff6b9d, #7c3aed);
+  color: #fff;
+}

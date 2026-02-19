@@ -8,38 +8,39 @@
   margin-bottom: 20px;
 }
 
-.settings-title { margin: 0; color: var(--accent-2); font-size: 28px; }
-.settings-sub { margin: 6px 0 0 0; color: var(--muted); }
+.settings-title { margin: 0; color: var(--ff-text); font-size: 28px; }
+.settings-sub { margin: 6px 0 0 0; color: var(--ff-muted); }
 
-.settings-grid {
+.settings-groups {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
 }
 
-.settings-card {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 12px;
-  padding: 16px;
+.settings-group {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
-.settings-label { font-family: var(--mono); font-size: 15px; }
-.settings-help { color: var(--muted); font-size: 13px; }
+.settings-group-title { font-weight: 700; font-size: 16px; }
 
-.settings-options { display: flex; gap: 10px; }
+.settings-item { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+
+.settings-label { font-size: 14px; }
+.settings-help { color: var(--ff-muted); font-size: 13px; }
+.settings-value { color: var(--ff-muted); font-size: 13px; }
+
+.settings-options { display: flex; gap: 8px; flex-wrap: wrap; }
 .option {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.12);
-  color: var(--text);
+  background: var(--ff-surface-2);
+  border: 1px solid var(--ff-card-border);
+  color: var(--ff-text);
   padding: 8px 12px;
   border-radius: 10px;
   cursor: pointer;
 }
-.option.active { border-color: var(--accent-2); color: var(--accent-2); }
+.option.active { border-color: var(--ff-accent); color: var(--ff-accent); }
 
 .toggle { position: relative; width: 52px; height: 28px; }
 .toggle input { opacity: 0; width: 0; height: 0; }
@@ -47,9 +48,10 @@
   position: absolute;
   cursor: pointer;
   inset: 0;
-  background: rgba(255,255,255,0.08);
+  background: var(--ff-surface-2);
   border-radius: 999px;
   transition: .2s;
+  border: 1px solid var(--ff-card-border);
 }
 .toggle span::before {
   content: "";
@@ -62,9 +64,10 @@
   border-radius: 50%;
   transition: .2s;
 }
-.toggle input:checked + span { background: rgba(0,255,153,0.4); }
+.toggle input:checked + span { background: rgba(31,184,166,0.4); }
 .toggle input:checked + span::before { transform: translateX(24px); }
 
 @media (max-width: 900px) {
-  .settings-grid { grid-template-columns: 1fr; }
+  .settings-groups { grid-template-columns: 1fr; }
+  .settings-header { flex-direction: column; align-items: flex-start; }
 }

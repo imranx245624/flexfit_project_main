@@ -21,10 +21,10 @@ onmessage = async (e) => {
       await tf.ready();
 
       const tryUrls = [
-        modelUrl,                                       // preferred (if provided)
-        "/models/movenet/model.json",                   // local hosting (BEST)
+        modelUrl,
+        "/models/movenet/model.json",
         "/models/movenet/singlepose_lightning_4/model.json",
-        "https://tfhub.dev/google/tfjs-model/movenet/singlepose/lightning/4?tfjs-format=file" // fallback
+        "https://tfhub.dev/google/tfjs-model/movenet/singlepose/lightning/4?tfjs-format=file"
       ].filter(Boolean);
 
       let lastErr = null;

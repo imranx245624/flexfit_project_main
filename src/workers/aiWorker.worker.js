@@ -12,7 +12,7 @@ self.onmessage = (event) => {
   const { type, pose, videoWidth = 640, videoHeight = 480 } = event.data;
 
   if (type === "init") {
-    // No heavy model load here â€“ only confirm worker is ready
+    // No heavy model load here – only confirm worker is ready
     self.postMessage({ type: "ready" });
     return;
   }

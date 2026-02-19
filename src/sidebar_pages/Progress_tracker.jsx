@@ -1,54 +1,578 @@
-import React from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { supabase } from "../utils/supabaseClient";
+import { useAuth } from "../utils/auth";
 import "./progressTracker.css";
 
-const DEFAULT_PROGRESS = {
-  totalSessions: 0,
-  avgAccuracy: 0,
-  totalEca: 0,
-  sessions: [],
+/* helpers and constants left unchanged (pad, isoDate, MET_MAP, mapDbRowToSession, aggregate, downloadCSV) */
+const YEAR_MIN = 2024;
+const YEAR_MAX = 2028;
+const monthNames = [
+  "January","February","March","April","May","June",
+  "July","August","September","October","November","December",
+];
+
+function pad(n){ return n<10?`0${n}`:`${n}`; }
+function isoDate(y,m,d){ return `${y}-${pad(m+1)}-${pad(d)}`; }
+function daysInMonth(y,m){ return new Date(y,m+1,0).getDate(); }
+function dayOfWeek(y,m,d){ return new Date(y,m,d).getDay(); }
+function toHHMM(dt){ const d=new Date(dt); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; }
+function dateOnlyISO(dt){ const d=new Date(dt); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
+
+const MET_MAP = {
+  "PUSH-UPS": 8.0, "PUSHUP": 8.0, "PUSH": 8.0, "SQUAT": 8.0, "SQUATS": 8.0,
+  "LUNGE": 8.0, "LUNGES": 8.0, "PLANK": 3.5, "BURPEE": 10.0, "BURPEES": 10.0,
+  "PULLUP": 8.0, "PULL-UP": 8.0, "PULL-UPS": 8.0, "JUMPING JACK": 8.0,
+  "HIGH KNEE": 9.0, "HIGH-KNEE": 9.0, "MOUNTAIN CLIMBER": 8.5, "SKIPPING": 12.0,
+  "SKIP": 12.0, "SHADOW BOX": 7.0, "SIT-UP": 6.0, "SITUPS": 6.0, "CRUNCH": 6.0,
+  "STRETCH": 2.5, "YOGA": 3.0, "BALANCE": 3.5, "DEFAULT": 6.0,
 };
 
-function Progress() {
-  // TODO: Hook into existing progress endpoints without changing API calls.
-  const progress = DEFAULT_PROGRESS;
+function getMET(workoutName = "") {
+  if(!workoutName) return MET_MAP.DEFAULT;
+  const n = String(workoutName).toUpperCase();
+  const keys = Object.keys(MET_MAP).sort((a,b)=>b.length - a.length);
+  for (const key of keys) {
+    if (key === "DEFAULT") continue;
+    if (n.includes(key)) return MET_MAP[key];
+  }
+  return MET_MAP.DEFAULT;
+}
+
+function mapDbRowToSession(row){
+  const created = row.created_at ? new Date(row.created_at) : new Date();
+  const dateIso = dateOnlyISO(created);
+  const timeStr = toHHMM(created);
+
+  const time_seconds = row.time_seconds ? Number(row.time_seconds) : 0;
+  const minutes = time_seconds ? Math.ceil(time_seconds / 60) : 0;
+
+  const weight = (row.weight_kg !== null && row.weight_kg !== undefined) ? Number(row.weight_kg) : 0;
+  const met = getMET(row.workout_name);
+
+  const calories = (met && weight && time_seconds)
+    ? Math.round((met * weight * (time_seconds / 3600)) * 100) / 100
+    : 0;
+
+  return {
+    id: row.id,
+    date: dateIso,
+    time: timeStr,
+    workoutName: row.workout_name || "Workout",
+    reps: row.reps ?? 0,
+    accuracy: row.accuracy ?? 0,
+    minutes,
+    calories,
+    eca: row.eca_points ?? 0,
+    raw: row,
+  };
+}
+
+function aggregate(sessions){
+  if(!sessions || sessions.length===0) return { totalSessions:0, avgAccuracy:0, totalEca:0, totalCalories:0, totalMinutes:0 };
+  const totalSessions = sessions.length;
+  const avgAccuracy = Math.round((sessions.reduce((s,x)=>s + (Number(x.accuracy)||0), 0) / totalSessions) * 10) / 10;
+  const totalEca = sessions.reduce((s,x)=>s + (Number(x.eca)||0), 0);
+  const totalCalories = Math.round(sessions.reduce((s,x)=>s + (Number(x.calories)||0), 0) * 100) / 100;
+  const totalMinutes = sessions.reduce((s,x)=>s + (Number(x.minutes)||0), 0);
+  return { totalSessions, avgAccuracy, totalEca, totalCalories, totalMinutes };
+}
+
+function downloadCSV(rows, filename="export.csv"){
+  if(!rows || rows.length===0) return;
+  const keys = Object.keys(rows[0]);
+  const csv = [keys.join(",")].concat(rows.map(r=>keys.map(k=>`"${String(r[k] ?? "")}"`).join(","))).join("\n");
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename; a.click(); URL.revokeObjectURL(url);
+}
+
+/* ---------------- React component ---------------- */
+export default function Progress(){
+  const today = new Date();
+  const [viewYear, setViewYear] = useState(today.getFullYear());
+  const [viewMonth, setViewMonth] = useState(today.getMonth());
+  const [selectedDate, setSelectedDate] = useState(isoDate(today.getFullYear(), today.getMonth(), today.getDate()));
+
+  const { user, loading: authLoading } = useAuth();
+  const [monthSessionsRaw, setMonthSessionsRaw] = useState([]);
+  const [sessionsForDate, setSessionsForDate] = useState([]);
+  const [yearSessionsRaw, setYearSessionsRaw] = useState([]);
+
+  const PAGE_SIZE = 4;
+  const [page, setPage] = useState(1);
+  const [items, setItems] = useState([]);
+  const sentinelRef = useRef(null);
+  const didInitRef = useRef(false);
+
+  const [loadingDate, setLoadingDate] = useState(false);
+
+  const monthCells = useMemo(()=> {
+    const blanks = dayOfWeek(viewYear, viewMonth, 1);
+    const days = daysInMonth(viewYear, viewMonth);
+    const arr = Array.from({length: blanks}).map(()=>null).concat(Array.from({length: days}, (_,i)=>i+1));
+    return arr;
+  }, [viewMonth, viewYear]);
+
+  const daysWithSessions = useMemo(() => {
+    const set = new Set();
+    monthSessionsRaw.forEach(r => {
+      if(r.created_at) set.add(dateOnlyISO(r.created_at));
+    });
+    return set;
+  }, [monthSessionsRaw]);
+
+  const summary = useMemo(()=> aggregate(sessionsForDate), [sessionsForDate]);
+
+  const [rangeMode, setRangeMode] = useState("month"); // week|month|year
+  const chartData = useMemo(()=> {
+    const anchor = new Date(selectedDate);
+    const points = [];
+
+    if(rangeMode === "week"){
+      const weekLabels = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+      const dayOfWeek = anchor.getDay(); // 0=Sun
+      const weekStart = new Date(anchor); weekStart.setDate(anchor.getDate() - dayOfWeek);
+      for(let i=0;i<7;i++){
+        const d = new Date(weekStart); d.setDate(weekStart.getDate() + i);
+        const iso = dateOnlyISO(d);
+        const mapped = sessionsFromRawForDate(monthSessionsRaw, iso).map(mapDbRowToSession);
+        const a = aggregate(mapped);
+        points.push({ label: weekLabels[i], ...a });
+      }
+    } else if(rangeMode === "month"){
+      const year = viewYear;
+      const month = viewMonth;
+      const days = daysInMonth(year, month);
+      for (let d = 1; d <= days; d++) {
+        const iso = isoDate(year, month, d);
+        const mapped = sessionsFromRawForDate(monthSessionsRaw, iso).map(mapDbRowToSession);
+        const a = aggregate(mapped);
+        points.push({ label: String(d), ...a });
+      }
+    } else {
+      const year = viewYear;
+      for(let mi=0; mi<12; mi++){
+        const days = daysInMonth(year, mi);
+        let agg = { totalMinutes:0, totalCalories:0, totalSessions:0, totalEca:0 };
+        for(let d=1; d<=days; d++){
+          const iso = isoDate(year, mi, d);
+          const mapped = sessionsFromRawForDate(yearSessionsRaw, iso).map(mapDbRowToSession);
+          const a = aggregate(mapped);
+          agg.totalMinutes += a.totalMinutes; agg.totalCalories += a.totalCalories; agg.totalSessions += a.totalSessions; agg.totalEca += a.totalEca;
+        }
+        points.push({ label: monthNames[mi].slice(0,3), ...agg });
+      }
+    }
+    return points;
+  }, [rangeMode, selectedDate, monthSessionsRaw, yearSessionsRaw, viewYear, viewMonth]);
+
+  function sessionsFromRawForDate(rawRows, isoDateStr){
+    if(!rawRows || rawRows.length===0) return [];
+    return rawRows.filter(r => dateOnlyISO(r.created_at) === isoDateStr);
+  }
+
+  const isAuthError = (err) => {
+    const msg = String(err?.message || err || "").toLowerCase();
+    return msg.includes("jwt") || msg.includes("token") || msg.includes("expired");
+  };
+
+  /* ---------------- init to latest session date ---------------- */
+  useEffect(() => {
+    if (authLoading || !user || didInitRef.current) return;
+    let mounted = true;
+
+    const fetchLatest = async () => {
+      return await supabase
+        .from("workout_sessions")
+        .select("created_at")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(1);
+    };
+
+    (async () => {
+      try {
+        let { data, error } = await fetchLatest();
+        if (error && isAuthError(error)) {
+          await supabase.auth.refreshSession();
+          ({ data, error } = await fetchLatest());
+        }
+
+        if (!error && data && data.length) {
+          const dt = new Date(data[0].created_at);
+          if (mounted) {
+            setViewYear(dt.getFullYear());
+            setViewMonth(dt.getMonth());
+            setSelectedDate(isoDate(dt.getFullYear(), dt.getMonth(), dt.getDate()));
+          }
+        }
+      } catch (err) {
+        console.warn("latest session fetch failed:", err);
+      } finally {
+        didInitRef.current = true;
+      }
+    })();
+
+    return () => { mounted = false; };
+  }, [user, authLoading]);
+
+  /* ---------------- fetch month sessions ---------------- */
+  useEffect(() => {
+    if (authLoading) return;
+    if(!user){
+      setMonthSessionsRaw([]);
+      return;
+    }
+    let mounted = true;
+    (async () => {
+      try {
+        const start = new Date(viewYear, viewMonth, 1, 0, 0, 0, 0);
+        const end = new Date(viewYear, viewMonth, daysInMonth(viewYear, viewMonth), 23, 59, 59, 999);
+        const runQuery = async () => await supabase
+          .from("workout_sessions")
+          .select("id, user_id, workout_name, reps, time_seconds, weight_kg, accuracy, eca_points, created_at")
+          .eq("user_id", user.id)
+          .gte("created_at", start.toISOString())
+          .lte("created_at", end.toISOString())
+          .order("created_at", { ascending: true });
+
+        let { data, error } = await runQuery();
+        if (error && isAuthError(error)) {
+          await supabase.auth.refreshSession();
+          ({ data, error } = await runQuery());
+        }
+
+        if(error){
+          console.error("month fetch error:", error);
+          if(mounted) setMonthSessionsRaw([]);
+        } else {
+          if(mounted) setMonthSessionsRaw(data || []);
+        }
+      } catch (err) {
+        console.error("month fetch threw:", err);
+        if(mounted) setMonthSessionsRaw([]);
+      } finally {
+        // no-op
+      }
+    })();
+    return () => { mounted = false; };
+  }, [user, authLoading, viewMonth, viewYear]);
+
+  /* ---------------- fetch year sessions (for year chart) ---------------- */
+  useEffect(() => {
+    if (authLoading) return;
+    if(!user){
+      setYearSessionsRaw([]);
+      return;
+    }
+    if (rangeMode !== "year") return;
+    let mounted = true;
+    (async () => {
+      try {
+        const start = new Date(viewYear, 0, 1, 0, 0, 0, 0);
+        const end = new Date(viewYear, 11, 31, 23, 59, 59, 999);
+        const runQuery = async () => await supabase
+          .from("workout_sessions")
+          .select("id, user_id, workout_name, reps, time_seconds, weight_kg, accuracy, eca_points, created_at")
+          .eq("user_id", user.id)
+          .gte("created_at", start.toISOString())
+          .lte("created_at", end.toISOString())
+          .order("created_at", { ascending: true });
+
+        let { data, error } = await runQuery();
+        if (error && isAuthError(error)) {
+          await supabase.auth.refreshSession();
+          ({ data, error } = await runQuery());
+        }
+
+        if(error){
+          console.error("year fetch error:", error);
+          if(mounted) setYearSessionsRaw([]);
+        } else {
+          if(mounted) setYearSessionsRaw(data || []);
+        }
+      } catch (err) {
+        console.error("year fetch threw:", err);
+        if(mounted) setYearSessionsRaw([]);
+      }
+    })();
+    return () => { mounted = false; };
+  }, [user, authLoading, rangeMode, viewYear]);
+
+  /* ---------------- fetch selected date sessions ---------------- */
+  useEffect(() => {
+    if (authLoading) {
+      setSessionsForDate([]);
+      setItems([]);
+      return;
+    }
+    if(!user){
+      setSessionsForDate([]);
+      setItems([]);
+      return;
+    }
+    let mounted = true;
+    (async () => {
+      try {
+        setLoadingDate(true);
+        const foundInMonth = monthSessionsRaw && monthSessionsRaw.some(r => dateOnlyISO(r.created_at) === selectedDate);
+        if(foundInMonth){
+          const rows = monthSessionsRaw.filter(r => dateOnlyISO(r.created_at) === selectedDate);
+          const mapped = rows.map(mapDbRowToSession).sort((a,b)=>a.time.localeCompare(b.time));
+          if(mounted){
+            setSessionsForDate(mapped);
+            setPage(1);
+            setItems(mapped.slice(0, PAGE_SIZE));
+          }
+          return;
+        }
+
+        const start = new Date(selectedDate + "T00:00:00");
+        const end = new Date(selectedDate + "T23:59:59.999");
+        const runQuery = async () => await supabase
+          .from("workout_sessions")
+          .select("id, user_id, workout_name, reps, time_seconds, weight_kg, accuracy, eca_points, created_at")
+          .eq("user_id", user.id)
+          .gte("created_at", start.toISOString())
+          .lte("created_at", end.toISOString())
+          .order("created_at", { ascending: true });
+
+        let { data, error } = await runQuery();
+        if (error && isAuthError(error)) {
+          await supabase.auth.refreshSession();
+          ({ data, error } = await runQuery());
+        }
+
+        if(error){
+          console.error("date fetch error:", error);
+          if(mounted) {
+            setSessionsForDate([]);
+            setItems([]);
+          }
+        } else {
+          const mapped = (data || []).map(mapDbRowToSession).sort((a,b)=>a.time.localeCompare(b.time));
+          if(mounted){
+            setSessionsForDate(mapped);
+            setPage(1);
+            setItems(mapped.slice(0, PAGE_SIZE));
+          }
+        }
+      } catch (err) {
+        console.error("date fetch threw:", err);
+        if(mounted){
+          setSessionsForDate([]);
+          setItems([]);
+        }
+      } finally {
+        if(mounted) setLoadingDate(false);
+      }
+    })();
+    return () => { mounted = false; };
+  }, [user, authLoading, selectedDate, monthSessionsRaw]);
+
+  /* ---------------- pagination observer ---------------- */
+  useEffect(()=>{
+    const obs = new IntersectionObserver(entries=>{
+      entries.forEach(e => { if(e.isIntersecting) setPage(p=>p+1); });
+    }, { threshold: 0.1 });
+    if(sentinelRef.current) obs.observe(sentinelRef.current);
+    return ()=>obs.disconnect();
+  }, []);
+
+  useEffect(()=>{
+    if(page<=1) return;
+    setItems(sessionsForDate.slice(0, Math.min(sessionsForDate.length, page*PAGE_SIZE)));
+  }, [page, sessionsForDate]);
+
+  /* ---------------- handlers ---------------- */
+  function prevMonth(){ let m=viewMonth-1, y=viewYear; if(m<0){ m=11; y--; } if(y < YEAR_MIN) return; setViewYear(y); setViewMonth(m); }
+  function nextMonth(){ let m=viewMonth+1, y=viewYear; if(m>11){ m=0; y++; } if(y > YEAR_MAX) return; setViewYear(y); setViewMonth(m); }
+  function pickDate(day){ if(!day) return; setSelectedDate(isoDate(viewYear, viewMonth, day)); }
+
+  function exportDay(){
+    downloadCSV(sessionsForDate.map(s=>({
+      date: s.date, time: s.time, workoutName: s.workoutName, reps: s.reps, accuracy: s.accuracy, minutes: s.minutes, calories: s.calories, eca: s.eca
+    })), `progress_${selectedDate}.csv`);
+  }
+  function exportVisible(){
+    downloadCSV(items.map(s=>({
+      date: s.date, time: s.time, workoutName: s.workoutName, reps: s.reps, accuracy: s.accuracy, minutes: s.minutes, calories: s.calories, eca: s.eca
+    })), `progress_visible_${selectedDate}.csv`);
+  }
+
+  const sessionsCountText = `${sessionsForDate.length} session(s) on this date`;
 
   return (
-    <div className="progress-page container">
-      <div className="progress-header">
+    <div className="progress-wrap container small-calendar">
+      <div className="page-header">
         <div>
-          <h1 className="progress-title">Progress Tracker</h1>
-          <p className="progress-sub">Track accuracy, consistency, and ECA points over time.</p>
+          <h1 className="title">Progress Tracker</h1>
+          <p className="subtitle">Compact calendar, quick stats and chart. Click a date to see sessions.</p>
         </div>
-        <button className="btn ghost small">Export</button>
-      </div>
-
-      <div className="progress-chart">
-        <div className="chart-overlay">
-          <div className="chart-label">Weekly Form Trend (placeholder)</div>
-          <div className="chart-line" />
-        </div>
-      </div>
-
-      <div className="progress-summary">
-        <div className="summary-card">
-          <div className="summary-label">Total Sessions</div>
-          <div className="summary-value">{progress.totalSessions}</div>
-        </div>
-        <div className="summary-card">
-          <div className="summary-label">Avg Accuracy</div>
-          <div className="summary-value">{progress.avgAccuracy || "--"}</div>
-        </div>
-        <div className="summary-card">
-          <div className="summary-label">Total ECA</div>
-          <div className="summary-value">{progress.totalEca}</div>
+        <div className="top-actions">
+          <div className="range-toggle">
+            <button className={rangeMode==="week"?"chip active":"chip"} onClick={()=>setRangeMode("week")}>WEEK</button>
+            <button className={rangeMode==="month"?"chip active":"chip"} onClick={()=>setRangeMode("month")}>MONTH</button>
+            <button className={rangeMode==="year"?"chip active":"chip"} onClick={()=>setRangeMode("year")}>YEAR</button>
+          </div>
+          <div className="export-actions">
+            <button className="btn ghost" onClick={exportVisible}>Export Visible</button>
+            <button className="btn" onClick={exportDay}>Export Date</button>
+          </div>
         </div>
       </div>
 
-      <div className="progress-empty">
-        No sessions yet - start your first AI workout!
+      <div className="content-grid">
+        {/* LEFT: calendar + stats grid + report stacked */}
+        <aside className="left-col">
+          <div className="mini-calendar card">
+            <div className="cal-head">
+              <button className="icon-btn" onClick={prevMonth} aria-label="prev">‹</button>
+              <div className="month-select">
+                <select value={viewMonth} onChange={e=>setViewMonth(Number(e.target.value))}>
+                  {monthNames.map((m, i)=> <option key={i} value={i}>{m}</option>)}
+                </select>
+                <select value={viewYear} onChange={e=>setViewYear(Number(e.target.value))}>
+                  {Array.from({length: YEAR_MAX - YEAR_MIN + 1}).map((_,i)=> {
+                    const y = YEAR_MIN + i; return <option key={y} value={y}>{y}</option>;
+                  })}
+                </select>
+              </div>
+              <button className="icon-btn" onClick={nextMonth} aria-label="next">›</button>
+            </div>
+
+            <div className="weekdays">
+              <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
+            </div>
+
+            <div className="days-grid">
+              {monthCells.map((d, idx)=> {
+                if(d === null) return <div key={idx} className="day blank" />;
+                const iso = isoDate(viewYear, viewMonth, d);
+                const has = daysWithSessions.has(iso);
+                const isSel = iso === selectedDate;
+                return (
+                  <button key={iso}
+                    className={`day ${has? "has": "no"} ${isSel? "sel": ""}`}
+                    onClick={()=>{ pickDate(d); }}
+                    title={`${iso}${has ? " — sessions available" : ""}`}>
+                    <div className="num">{d}</div>
+                    {has && <div className="dot" />}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* ===== stats rows under calendar ===== */}
+          <div className="summary-row">
+            <div className="stat-card">
+              <div className="label">Total Sessions</div>
+              <div className="val">{summary.totalSessions}</div>
+            </div>
+            <div className="stat-card">
+              <div className="label">Avg Accuracy</div>
+              <div className="val">{summary.avgAccuracy ? `${summary.avgAccuracy}%` : "--"}</div>
+            </div>
+            <div className="stat-card">
+              <div className="label">Total ECA</div>
+              <div className="val">{summary.totalEca}</div>
+            </div>
+          </div>
+
+          <div className="summary-row-2">
+            <div className="stat-card">
+              <div className="label">Calories</div>
+              <div className="val">{summary.totalCalories}</div>
+            </div>
+            <div className="stat-card">
+              <div className="label">Time Spent</div>
+              <div className="val">{summary.totalMinutes}m</div>
+            </div>
+          </div>
+
+          {/* report stays under stats */}
+          <div className="report card">
+            <div className="report-head">
+              <div>
+                <h3>Sessions — {selectedDate}</h3>
+                <div className="muted">{loadingDate ? "Loading..." : sessionsCountText}</div>
+              </div>
+              <div className="report-actions">
+                <button className="btn ghost" onClick={()=>{ setSelectedDate(isoDate(today.getFullYear(), today.getMonth(), today.getDate())); setViewMonth(today.getMonth()); setViewYear(today.getFullYear()); }}>Today</button>
+              </div>
+            </div>
+
+            <div className="report-list" id="report-list">
+              {items.length === 0 ? (
+                <div className="empty">{loadingDate ? "Loading sessions..." : "No sessions on this date — start your first AI workout!"}</div>
+              ) : items.map(s => (
+                <div className="session" key={s.id}>
+                  <div className="s-left">
+                    <div className="s-title">{s.workoutName}</div>
+                    <div className="s-meta">
+                      <span>{s.time}</span>
+                      <span>{s.minutes}m</span>
+                      <span>{s.calories} kcal</span>
+                    </div>
+                  </div>
+                  <div className="s-right">
+                    <div className="s-row"><span className="k">Reps</span><span className="v">{s.reps}</span></div>
+                    <div className="s-row"><span className="k">Acc</span><span className="v">{s.accuracy}%</span></div>
+                    <div className="s-row"><span className="k">ECA</span><span className="v">{s.eca}</span></div>
+                  </div>
+                </div>
+              ))}
+              <div ref={sentinelRef} className="sentinel" />
+            </div>
+          </div>
+        </aside>
+
+        {/* RIGHT: big chart only (summary moved left) */}
+        <main className="right-col">
+          <div className="chart-card card">
+            <div className="chart-head">
+              <div>
+                <div className="chart-title">Activity (minutes)</div>
+                <div className="muted">Mode: {rangeMode}</div>
+              </div>
+              <div className="chart-controls">
+                <div className="legend"><span className="dot small" /> time</div>
+              </div>
+            </div>
+
+            <div className="chart-area">
+              <svg viewBox="0 0 100 40" preserveAspectRatio="none" className="bar-svg">
+                { (() => {
+                    const max = Math.max(...chartData.map(p=>p.totalMinutes||0), 1);
+                    const w = 100 / Math.max(1, chartData.length);
+                    return chartData.map((p,i) => {
+                      const h = (p.totalMinutes / max) * 34;
+                      const x = i * w + 1;
+                      const y = 38 - h;
+                      return (
+                        <g key={i}>
+                          <rect x={x} y={y} width={w-3} height={h} rx="1" className="bar" />
+                          <text x={x + (w-3)/2} y={39} className="bar-label">{p.label}</text>
+                        </g>
+                      );
+                    })
+                })() }
+              </svg>
+            </div>
+
+            <div className="table-nums">
+              <div className="num-row"><div className="nlabel">Total Time</div><div className="nval">{chartData.reduce((s,x)=>s+(x.totalMinutes||0),0)}m</div></div>
+              <div className="num-row"><div className="nlabel">Calories</div><div className="nval">{Math.round(chartData.reduce((s,x)=>s+(x.totalCalories||0),0) * 100) / 100}</div></div>
+              <div className="num-row"><div className="nlabel">Sessions</div><div className="nval">{chartData.reduce((s,x)=>s+(x.totalSessions||0),0)}</div></div>
+              <div className="num-row"><div className="nlabel">ECA</div><div className="nval">{chartData.reduce((s,x)=>s+(x.totalEca||0),0)}</div></div>
+            </div>
+          </div>
+        </main>
       </div>
+
+      <div className="note muted">Live mode — data pulled from Supabase `workout_sessions` table. Calories computed using MET mapping on client.</div>
     </div>
   );
 }
-
-export default Progress;
