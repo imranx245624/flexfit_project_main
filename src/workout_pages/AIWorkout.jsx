@@ -126,7 +126,6 @@ function AIWorkout() {
 
   // Session Control Refs
   const lastMovementRef = useRef(Date.now());
-  const lastActiveTimeRef = useRef(Date.now());
   const holdStartRef = useRef(null); 
 
   // Summary Tracking Refs
@@ -153,7 +152,7 @@ function AIWorkout() {
   const [formScore, setFormScore] = useState(100);
   const [poseConfidence, setPoseConfidence] = useState(0);
   const [reps, setReps] = useState(0);
-  const [startProgress, setStartProgress] = useState(0);
+  const [, setStartProgress] = useState(0);
   const [buttonLocked, setButtonLocked] = useState(false);
   const [sessionState, setSessionState] = useState("IDLE"); 
   const [showSavePopup, setShowSavePopup] = useState(false);
@@ -557,7 +556,7 @@ function AIWorkout() {
     return Math.round(list.reduce((sum, val) => sum + (Number(val) || 0), 0) / list.length);
   };
 
-  const getFinalElapsedMs = () => {
+  const getFinalElapsedMs = useCallback(() => {
     if (isPlankWorkout) {
       return Math.max(plankElapsedCarryRef.current || 0, elapsedMs || 0);
     }
@@ -565,7 +564,7 @@ function AIWorkout() {
       return Math.max(0, Date.now() - startTimeRef.current);
     }
     return Math.max(0, elapsedMs || 0);
-  };
+  }, [elapsedMs, isPlankWorkout]);
 
   const saveSessionToStorage = (payload) => {
     try {
@@ -589,7 +588,7 @@ function AIWorkout() {
     const finalMs = getFinalElapsedMs();
     setFinalElapsedMs(finalMs);
     setShowSavePopup(true);
-  }, [showSavePopup, elapsedMs, isPlankWorkout]);
+  }, [showSavePopup, getFinalElapsedMs]);
 
   const checkDailyCountForWorkout = async (userId, workoutNameNormalized) => {
     try {
@@ -1467,7 +1466,6 @@ return;
               }
 
               // Counting Logic
-              const timeSinceLastRep = now - lastRepTime.current;
 	      if (exerciseType === "plank") {
   const hipOffset = getTrackedHipOffset(kp);
   const torsoLength = getTrackedTorsoLength(kp);
@@ -2241,6 +2239,7 @@ return;
         processingRef.current = false;
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [workoutName, speak, sessionState, showSavePopup, finalizeAndShowSave, registerRep, cueStrictSquat, cueStrictPushup, cueStrictLunge, cueStrictBurpee, cueStrictPullup, cueStrictCrunch, cueStrictLegRaise, cueStrictJumpingJack, cueStrictPlank]
   );
   
@@ -2369,6 +2368,7 @@ return;
   } finally {
     busyRef.current = false;
   }
+// eslint-disable-next-line react-hooks/exhaustive-deps
 }, [processPose, sessionState, speak, isLegRaiseWorkout, isPlankWorkout, finalizeAndShowSave]);
 const runDetector = useCallback(async () => {
   try {
