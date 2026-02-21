@@ -86,8 +86,8 @@ export default function AIWorkoutLibrary() {
       <div className="ai-catalog">
         <div className="ai-catalog-header">
           <div>
-            <div className="ai-catalog-kicker">FlexFit AI</div>
-            <h1 className="ai-catalog-title">AI Workout Library</h1>
+            {/* <div className="ai-catalog-kicker">FlexFit AI</div> */}
+            <h1 className="ai-catalog-title">Select a Workout</h1>
             <p className="ai-catalog-sub">Choose a workout and tap Start to begin pose detection.</p>
           </div>
           <div className="ai-catalog-legend">
@@ -98,7 +98,7 @@ export default function AIWorkoutLibrary() {
 
         <section className="ai-catalog-section">
           <div className="ai-catalog-section-head">
-            <h2>AI Workouts</h2>
+            {/* <h2>AI Workouts</h2> */}
             <p>Best results when your full body is visible</p>
           </div>
 

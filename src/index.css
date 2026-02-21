@@ -129,6 +129,8 @@ img { max-width: 100%; height: auto; display: block; }
   .mainPart{ padding:16px; margin-left:0 !important; }
 }
 @media (max-width: 640px){
+  :root { --ff-container-pad: 16px; }
+  .container { padding-left: var(--ff-container-pad); padding-right: var(--ff-container-pad); }
   .ff-card{ flex-direction:column; align-items:flex-start; }
   .ff-hero-image img{ width:100%; height:auto; }
   .ai-popup{ width:calc(100% - 32px); }

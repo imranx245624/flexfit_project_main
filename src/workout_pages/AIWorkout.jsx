@@ -25,6 +25,7 @@ function AIWorkout() {
   const lastFrameTimeRef = useRef(0);
   const busyRef = useRef(false);
   const processingRef = useRef(false);
+  const pausedForSaveRef = useRef(false);
   const plankActiveRef = useRef(false);
   const missingPoseFramesRef = useRef(0);
   const missingPoseStartRef = useRef(null);
@@ -33,7 +34,7 @@ function AIWorkout() {
   const readyFramesRef = useRef(0);
   const initTokenRef = useRef(0);
 
-  // ?? SMOOTHING REFS
+  // SMOOTHING REFS
   const smoothAnglesRef = useRef({
     elbow: 180,
     knee: 180,
@@ -172,6 +173,7 @@ function AIWorkout() {
   const [ecaPoints, setEcaPoints] = useState(0);
   const [weightKg, setWeightKg] = useState(55);
   const [finalElapsedMs, setFinalElapsedMs] = useState(0);
+  const [saveError, setSaveError] = useState("");
   
   // ---------------- HELPER FUNCTIONS ----------------
 
@@ -185,6 +187,30 @@ function AIWorkout() {
     utt.rate = 1.1; 
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(utt);
+  }, []);
+
+  const pauseTrackingForSave = useCallback(() => {
+    if (pausedForSaveRef.current) return;
+    pausedForSaveRef.current = true;
+
+    try {
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+    } catch {}
+
+    try {
+      if (webcamRef.current?.srcObject) {
+        webcamRef.current.srcObject.getTracks().forEach((t) => t.stop());
+        webcamRef.current.srcObject = null;
+      }
+    } catch {}
+
+    try {
+      if (detectorRef.current?.dispose) detectorRef.current.dispose();
+    } catch {}
+    detectorRef.current = null;
   }, []);
   const updateRepMilestoneFeedback = useCallback((exerciseType, currentFormScore) => {
     if (exerciseType === "pushup") {
@@ -427,6 +453,7 @@ function AIWorkout() {
     detectorRef.current.dispose();
   }
   detectorRef.current = null;
+  pausedForSaveRef.current = false;
   setSessionState("IDLE");
   setShowSavePopup(false);
  // reset refs
@@ -587,6 +614,7 @@ function AIWorkout() {
     setEcaPoints(eca);
     const finalMs = getFinalElapsedMs();
     setFinalElapsedMs(finalMs);
+    setSaveError("");
     setShowSavePopup(true);
   }, [showSavePopup, getFinalElapsedMs]);
 
@@ -615,6 +643,28 @@ function AIWorkout() {
     } catch (err) {
       console.error("checkDailyCountForWorkout threw:", err);
       return { ok: false, error: err };
+    }
+  };
+
+  const ensureProfileRow = async (user) => {
+    if (!user?.id) return { ok: false, message: "No user id" };
+    try {
+      const payload = {
+        id: user.id,
+        email: user.email || null,
+        full_name: user.user_metadata?.full_name || user.user_metadata?.name || null,
+        username: user.user_metadata?.username || null,
+        avatar_url: user.user_metadata?.avatar_url || user.user_metadata?.picture || null,
+      };
+      const { error } = await supabase.from("profiles").upsert(payload);
+      if (error) {
+        console.warn("profiles upsert error:", error);
+        return { ok: false, message: error.message || "profiles upsert failed" };
+      }
+      return { ok: true };
+    } catch (err) {
+      console.warn("profiles upsert threw:", err);
+      return { ok: false, message: err.message || String(err) };
     }
   };
 
@@ -651,6 +701,11 @@ function AIWorkout() {
         return { ok: false, message: "Not signed in - cannot save. Please sign in first." };
       }
 
+      const profileSync = await ensureProfileRow(user);
+      if (!profileSync.ok) {
+        return { ok: false, message: profileSync.message || "Profile sync failed. Check profiles RLS policies." };
+      }
+
       const normalizedWorkoutName = String(workoutLabel || "").trim().toUpperCase();
       const repsCount = repsRef.current || 0;
       const avg = getAvgAccuracy();
@@ -662,15 +717,13 @@ function AIWorkout() {
       setFinalElapsedMs(elapsedForSave);
 
       const check = await checkDailyCountForWorkout(user.id, normalizedWorkoutName);
-      if (!check.ok) {
-        console.error("Pre-check failed:", check.error);
-        return { ok: false, message: "Could not verify daily count before saving. See console for details." };
-      }
-      if (check.count >= 5) {
+      if (check.ok && check.count >= 5) {
         return {
           ok: false,
           message: `Daily limit reached: you already saved ${check.count} sessions for "${normalizedWorkoutName}" today. (Max 5 allowed between 00:00 and 23:59)`
         };
+      } else if (!check.ok) {
+        console.warn("Daily count check failed; continuing to save anyway.", check.error);
       }
 
       const sessionPayload = {
@@ -685,12 +738,21 @@ function AIWorkout() {
         created_at: new Date().toISOString(),
       };
 
-      const { error: insertErr } = await supabase
+      let { error: insertErr } = await supabase
         .from("workout_sessions")
         .insert([sessionPayload]);
 
       if (insertErr) {
         console.error("workout_sessions insert error:", insertErr);
+        // Retry once after ensuring profile row (helps with FK constraints)
+        await ensureProfileRow(user);
+        const { error: retryErr } = await supabase
+          .from("workout_sessions")
+          .insert([sessionPayload]);
+        if (!retryErr) {
+          return { ok: true };
+        }
+        insertErr = retryErr;
         saveSessionToStorage({ ...sessionPayload, note: "insert failed, saved locally", dbError: insertErr });
         return { ok: false, message: "Could not save session - DB error: " + (insertErr.message || JSON.stringify(insertErr)) };
       }
@@ -719,6 +781,7 @@ function AIWorkout() {
   const handleSaveClick = async () => {
     if (buttonLocked) return;
     setButtonLocked(true);
+    setSaveError("");
     try {
       const result = await saveToDatabase();
       if (result.ok) {
@@ -727,7 +790,9 @@ function AIWorkout() {
         setShowSavePopup(false);
         setSessionState("SUMMARY");
       } else {
-        alert(result.message || "Save failed. Please try again.");
+        const msg = result.message || "Save failed. Please try again.";
+        setSaveError(msg);
+        alert(msg);
       }
     } finally {
       setButtonLocked(false);
@@ -771,6 +836,12 @@ function AIWorkout() {
       } catch (e) {}
     };
   }, [showIntro]);
+
+  useEffect(() => {
+    if (showSavePopup) {
+      pauseTrackingForSave();
+    }
+  }, [showSavePopup, pauseTrackingForSave]);
 
   /* --------------------- MATH HELPERS --------------------- */
   
@@ -1407,7 +1478,7 @@ if (holdTime < holdThresholdMs) {
   return;
 }
 
-// ?? START WORKOUT
+// START WORKOUT
 setSessionState("ACTIVE");
 if (exerciseType !== "plank" && !startTimeRef.current) {
   startTimeRef.current = now;
@@ -1460,7 +1531,7 @@ return;
               if (currentFormScore >= 80) goodFormFramesRef.current++;
 
               if (currentFormScore < 40) {
-                  setPoseStatus("?? Fix Form");
+                  setPoseStatus("Fix form");
                   // Even if form is bad, if they are moving, we don't pause. 
                   // But we might not count reps.
               }
@@ -2397,7 +2468,7 @@ const runDetector = useCallback(async () => {
  /* --------------------- LIFECYCLE --------------------- */
   useEffect(() => {
     if (showIntro) return;
-    if (sessionState === "SUMMARY") return;
+    if (sessionState === "SUMMARY" || showSavePopup) return;
     let stream = null;
     let canceled = false;
     const initToken = initTokenRef.current + 1;
@@ -2507,12 +2578,12 @@ const runDetector = useCallback(async () => {
       try { if (detectorRef.current?.dispose) detectorRef.current.dispose(); } catch {}
       detectorRef.current = null;
     };
-	  }, [showIntro, sessionState, runDetector, detectPose, isPlankWorkout, isCrunchWorkout, isLegRaiseWorkout]);
+	  }, [showIntro, sessionState, runDetector, detectPose, isPlankWorkout, isCrunchWorkout, isLegRaiseWorkout, showSavePopup]);
 
   return (
     <>
-   {/* ?? SAVE SESSION POPUP */}
-{showSavePopup && (
+   {/* SAVE SESSION POPUP */}
+      {showSavePopup && (
   <div
     style={{
       position: "fixed",
@@ -2618,12 +2689,18 @@ const runDetector = useCallback(async () => {
           Exit
         </button>
       </div>
+
+      {saveError && (
+        <div style={{ marginTop: "14px", color: "#ff8bb0", fontSize: "12px", lineHeight: 1.4 }}>
+          {saveError}
+        </div>
+      )}
     </div>
   </div>
 )}
 
 
-{/* ?? WORKOUT SUMMARY */}
+{/* WORKOUT SUMMARY */}
 {sessionState === "SUMMARY" && (
   <div
     style={{
@@ -2647,13 +2724,13 @@ const runDetector = useCallback(async () => {
       }}
     >
       <h2 style={{ color: "#76ff03", marginBottom: "20px" }}>
-        ?? Workout Summary
+        Workout Summary
       </h2>
 
       {/* SUMMARY DETAILS */}
       <div style={{ textAlign: "left", fontSize: "16px", color: "#fff" }}>
         <p>
-          ??? Exercise: <b>{workoutLabel}</b>
+          Exercise: <b>{workoutLabel}</b>
         </p>
 
         {!isPlankWorkout && (
@@ -2686,7 +2763,7 @@ const runDetector = useCallback(async () => {
         </p>
       </div>
 
-      {/* ?? START NEW SESSION (STEP 4 — FIXED) */}
+      {/* START NEW SESSION (STEP 4 - FIXED) */}
       <button
         disabled={buttonLocked}
        onClick={async () => {
@@ -2709,12 +2786,12 @@ const runDetector = useCallback(async () => {
           width: "100%",
         }}
       >
-        ?? Start New Session
+        Start New Session
       </button>
     </div>
   </div>
 )}
-    {/* ?? MAIN UI */}
+    {/* MAIN UI */}
     {showIntro && (
         <div
           style={{
@@ -2783,33 +2860,33 @@ const runDetector = useCallback(async () => {
                 fontWeight: "bold",
               }}
             >
-              ? START WORKOUT
+              Start Workout
             </button>
           </div>
         </div>
       )}
 
-      {/* ?? WORKOUT LAYOUT */}
+      {/* WORKOUT LAYOUT */}
       <div
         style={{
           display: "flex",
           justifyContent: "center",
-          alignItems: "center",
+          alignItems: "stretch",
           backgroundColor: "#1c1e26",
           color: "white",
           minHeight: "100vh",
-          padding: "20px",
-          gap: "30px",
+          padding: "clamp(12px, 3vw, 20px)",
+          gap: "clamp(16px, 4vw, 30px)",
           flexWrap: "wrap",
         }}
       >
-        {/* ? LEFT COLUMN */}
-        <div style={{ display: "flex", flexDirection: "column", width: "640px" }}>
+        {/* LEFT COLUMN */}
+        <div style={{ display: "flex", flexDirection: "column", width: "min(640px, 100%)", flex: "1 1 320px" }}>
           <h2 style={{ color: "#76ff03", marginBottom: "10px" }}>
-            ?? Pose Detection ({workoutLabel})
+            Pose Detection ({workoutLabel})
           </h2>
 
-          <div style={{ position: "relative", width: 640, height: 480 }}>
+          <div style={{ position: "relative", width: "100%", maxWidth: "640px", aspectRatio: "4 / 3" }}>
             <video
               ref={webcamRef}
               muted
@@ -2817,8 +2894,7 @@ const runDetector = useCallback(async () => {
               autoPlay
               style={{
                 position: "absolute",
-                width: "100%",
-                height: "100%",
+                inset: 0,
                 borderRadius: 15,
                 transform: mirrorView ? "scaleX(-1)" : "none",
                 objectFit: "cover",
@@ -2828,10 +2904,9 @@ const runDetector = useCallback(async () => {
               ref={canvasRef}
               style={{
                 position: "absolute",
+                inset: 0,
                 borderRadius: 15,
                 transform: mirrorView ? "scaleX(-1)" : "none",
-                width: "100%",
-                height: "100%",
                 pointerEvents: "none",
               }}
             />
@@ -2841,42 +2916,41 @@ const runDetector = useCallback(async () => {
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
 	              {isPlankWorkout ? (
                 <>
-                  <span style={{ fontSize: "2rem" }}>??</span>
-                  <h1 style={{ margin: 0, color: "#ffff00", fontSize: "2.5rem" }}>
+                  <h1 style={{ margin: 0, color: "#ffff00", fontSize: "clamp(1.8rem, 5vw, 2.5rem)" }}>
                     Plank: {formatTime(elapsedMs)}
                   </h1>
                 </>
               ) : (
                 <>
-                  <span style={{ fontSize: "2rem" }}>??</span>
-                  <h1 style={{ margin: 0, color: "#ffff00", fontSize: "2.5rem" }}>
+                  <h1 style={{ margin: 0, color: "#ffff00", fontSize: "clamp(1.8rem, 5vw, 2.5rem)" }}>
                     Reps: {reps}
                   </h1>
                 </>
               )}
             </div>
-            <h3 style={{ margin: "5px 0 0 0", color: "#76ff03", fontSize: "1.5rem" }}>
+            <h3 style={{ margin: "5px 0 0 0", color: "#76ff03", fontSize: "clamp(1.1rem, 3vw, 1.5rem)" }}>
               {poseStatus}
             </h3>
           </div>
         </div>
 
-        {/* ?? RIGHT COLUMN */}
+        {/* RIGHT COLUMN */}
         <div
           style={{
             backgroundColor: "#2a2d34",
             padding: "20px",
             borderRadius: "15px",
             border: "2px solid #76ff03",
-            minWidth: "300px",
+            width: "min(360px, 100%)",
+            flex: "1 1 280px",
             display: "flex",
             flexDirection: "column",
             gap: "15px",
-            alignSelf: "flex-start",
-            marginTop: "50px" 
+            alignSelf: "stretch",
+            marginTop: 0
           }}
         >
-          <h3 style={{ color: "#76ff03", marginTop: 0 }}>?? Performance Metrics</h3>
+          <h3 style={{ color: "#76ff03", marginTop: 0 }}>Performance Metrics</h3>
 
           <div style={{ backgroundColor: "#1c1e26", padding: "10px", borderRadius: "8px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
@@ -2896,7 +2970,7 @@ const runDetector = useCallback(async () => {
           {/* Form Quality Bar */}
           <div>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "5px" }}>
-              <span>? Form Quality:</span>
+              <span>Form Quality:</span>
               <span style={{ color: formScore > 80 ? "#00ff00" : formScore > 60 ? "#ffff00" : "#ff6600" }}>
                 {formScore}%
               </span>
@@ -2916,7 +2990,7 @@ const runDetector = useCallback(async () => {
           {/* Confidence Bar */}
           <div>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "5px" }}>
-              <span>?? Pose Confidence:</span>
+              <span>Pose Confidence:</span>
               <span style={{ color: "#00ccff" }}>{poseConfidence}%</span>
             </div>
             <div style={{ backgroundColor: "#1c1e26", borderRadius: "8px", height: "15px", overflow: "hidden" }}>
@@ -2928,11 +3002,11 @@ const runDetector = useCallback(async () => {
           <div style={{ backgroundColor: "#1c1e26", padding: "10px", borderRadius: "8px" }}>
             <h4 style={{ color: "#76ff03", margin: "0 0 10px 0" }}>Exercise Stats:</h4>
             <div style={{ fontSize: "13px", lineHeight: "1.8" }}>
-              <div>?? Avg Angle: <span style={{ color: "#00ff00" }}>{exerciseStats.avgAngle}°</span></div>
-              <div>?? Max Angle: <span style={{ color: "#ffff00" }}>{exerciseStats.maxAngle}°</span></div>
-              <div>?? Min Angle: <span style={{ color: "#ff6600" }}>{exerciseStats.minAngle}°</span></div>
+              <div>Avg Angle: <span style={{ color: "#00ff00" }}>{exerciseStats.avgAngle} deg</span></div>
+              <div>Max Angle: <span style={{ color: "#ffff00" }}>{exerciseStats.maxAngle} deg</span></div>
+              <div>Min Angle: <span style={{ color: "#ff6600" }}>{exerciseStats.minAngle} deg</span></div>
               {workoutName.includes("squat") && (
-                <div>?? Depth: <span style={{ color: "#00ccff" }}>{Math.round(exerciseStats.depthPercentage)}%</span></div>
+                <div>Depth: <span style={{ color: "#00ccff" }}>{Math.round(exerciseStats.depthPercentage)}%</span></div>
               )}
             </div>
           </div>
@@ -2952,11 +3026,11 @@ const runDetector = useCallback(async () => {
           {/* Good Form Message */}
           {alerts.length === 0 && (
             <div style={{ backgroundColor: "#1c1e26", padding: "10px", borderRadius: "8px", borderLeft: "4px solid #00ff00", textAlign: "center" }}>
-              <span style={{ color: "#00ff00", fontWeight: "bold" }}>? Great form! Keep it up!</span>
+              <span style={{ color: "#00ff00", fontWeight: "bold" }}>Great form! Keep it up!</span>
             </div>
           )}
 
-          {/* ?? STOP BUTTON */}
+          {/* STOP BUTTON */}
           <button
             onClick={() => {
               speak("Workout paused.");
@@ -2976,7 +3050,7 @@ const runDetector = useCallback(async () => {
               transition: "background 0.2s"
             }}
           >
-            ? Stop Workout
+            Stop Workout
           </button>
         </div>
       </div>

@@ -17,6 +17,8 @@ function SignUp({ setShowSignIn, setShowSignUp }) {
   const [msg, setMsg] = useState("");
   const [type, setType] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const savePendingProfile = () => {
     const pending = { username: username || "" };
@@ -85,7 +87,11 @@ function SignUp({ setShowSignIn, setShowSignUp }) {
     setType("");
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithOAuth({ provider: "google" });
+      const redirectTo = `${window.location.origin}/profile`;
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo },
+      });
       if (error) {
         setType("error");
         setMsg(error.message);
@@ -106,7 +112,7 @@ function SignUp({ setShowSignIn, setShowSignUp }) {
       <header className="auth-header">
         <div className="brand-head">
           <h1 className="brand-title">FlexFit</h1>
-          <p className="brand-sub">AI powered workouts &amp; progress tracking</p>
+          <p className="brand-sub">AI-powered workouts &amp; progress tracking</p>
         </div>
       </header>
 
@@ -128,28 +134,48 @@ function SignUp({ setShowSignIn, setShowSignUp }) {
               />
 
               <label className="auth-label" htmlFor="su-password">Password</label>
-              <input
-                id="su-password"
-                className="auth-input"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Minimum 8 characters"
-                autoComplete="new-password"
-              />
+              <div className="auth-input-wrap">
+                <input
+                  id="su-password"
+                  className="auth-input with-toggle"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Minimum 8 characters"
+                  autoComplete="new-password"
+                />
+                <button
+                  type="button"
+                  className="auth-toggle"
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? "Hide" : "Show"}
+                </button>
+              </div>
             </div>
 
             <div className="form-col">
               <label className="auth-label" htmlFor="su-confirm">Confirm Password</label>
-              <input
-                id="su-confirm"
-                className="auth-input"
-                type="password"
-                value={confirm}
-                onChange={(e) => setConfirm(e.target.value)}
-                placeholder="Retype password"
-                autoComplete="new-password"
-              />
+              <div className="auth-input-wrap">
+                <input
+                  id="su-confirm"
+                  className="auth-input with-toggle"
+                  type={showConfirm ? "text" : "password"}
+                  value={confirm}
+                  onChange={(e) => setConfirm(e.target.value)}
+                  placeholder="Retype password"
+                  autoComplete="new-password"
+                />
+                <button
+                  type="button"
+                  className="auth-toggle"
+                  onClick={() => setShowConfirm((v) => !v)}
+                  aria-label={showConfirm ? "Hide password" : "Show password"}
+                >
+                  {showConfirm ? "Hide" : "Show"}
+                </button>
+              </div>
 
               <label className="auth-label" htmlFor="su-email">Email</label>
               <input

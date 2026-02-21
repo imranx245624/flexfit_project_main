@@ -194,4 +194,17 @@
     margin: 0;
     border-radius: 0;
   }
+  .nav-inner {
+    padding: 0 12px;
+    justify-content: space-between;
+  }
+  .nav-title {
+    display: none;
+  }
+  .nav-btn {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+  .nav-right { gap: 8px; }
+  .nav-avatar { width: 32px; height: 32px; }
 }

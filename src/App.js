@@ -1,6 +1,6 @@
 // src/App.js
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useNavigate, Link } from "react-router-dom";
 
 import "./styles/theme.css"; // new global theme (kept)
 import "./App.css";
@@ -61,6 +61,7 @@ function RouterWrapper() {
               id: user.id,
               email: user.email,
               full_name: user.user_metadata?.full_name || null,
+              username: user.user_metadata?.username || null,
               avatar_url: user.user_metadata?.avatar_url || null,
             });
           } catch (err) {
@@ -164,10 +165,10 @@ function RouterWrapper() {
         title: "Progress & Reports",
         desc: "Session summaries, accuracy, ECA points, and performance insights.",
       },
-      {
-        title: "3D Muscle Visuals",
-        desc: "See which muscles work during each movement (expanding module).",
-      },
+      // {
+      //   title: "3D Muscle Visuals",
+      //   desc: "See which muscles work during each movement (expanding module).",
+      // },
       {
         title: "Privacy First",
         desc: "Video stays on your device; no raw camera stream is stored by default.",
@@ -175,7 +176,7 @@ function RouterWrapper() {
     ];
 
     const steps = [
-      { step: "01", title: "Choose a Workout", desc: "Pick Home, Gym, or AI workouts from the library." },
+      { step: "01", title: "Choose a Workout", desc: "Pick AI workouts from the Train with AI section." },
       { step: "02", title: "Allow Camera", desc: "Enable webcam to start live pose tracking." },
       { step: "03", title: "Train with Feedback", desc: "Get real-time tips, rep counts, and form scoring." },
       { step: "04", title: "Save Your Session", desc: "Store progress and review performance any time." },
@@ -214,10 +215,34 @@ function RouterWrapper() {
           </div>
         </section>
 
+        <section className="home-section start">
+          <div className="section-head">
+            <h2>Explore Workout Library</h2>
+            <p>Pick a category to view exercises, tips, and routines</p>
+          </div>
+          <div className="hero-card-row">
+            <div className="hero-card home" onClick={goHomeWorkout} role="button" tabIndex={0} onKeyDown={(e)=>{ if (e.key === "Enter") goHomeWorkout(); }}>
+              <div>
+                <div className="hero-card-title">Home Workout Library</div>
+                <div className="hero-card-sub">Bodyweight routines and beginner-friendly plans</div>
+              </div>
+              <button className="hero-pill"> View</button>
+            </div>
+            <div className="hero-card gym" onClick={goGymWorkout} role="button" tabIndex={0} onKeyDown={(e)=>{ if (e.key === "Enter") goGymWorkout(); }}>
+              <div>
+                <div className="hero-card-title">Gym Workout Library</div>
+                <div className="hero-card-sub">Machine + free‑weight workouts and progressive plans.</div>
+              </div>
+              <button className="hero-pill"> View</button>
+            </div>
+          </div>
+        </section>
+
+
         <section className="home-section">
           <div className="section-head">
             <h2>Core Features</h2>
-            <p>FlexFit combines AI guidance, a workout library, and progress insights to simulate a personal trainer experience.</p>
+            {/* <p>FlexFit combines AI guidance, a workout library, and progress insights to simulate a personal trainer experience.</p> */}
           </div>
           <div className="feature-grid">
             {features.map((f) => (
@@ -247,7 +272,7 @@ function RouterWrapper() {
 
         <section className="home-section">
           <div className="section-head">
-            <h2>Who It?s For</h2>
+            <h2>Who It's For</h2>
             <p>FlexFit is built for beginners, home users, campus fitness programs, and remote coaching.</p>
           </div>
           <div className="audience-grid">
@@ -260,28 +285,7 @@ function RouterWrapper() {
           </div>
         </section>
 
-        <section className="home-section start">
-          <div className="section-head">
-            <h2>Start Your Workout</h2>
-            <p>Choose Home Workout for bodyweight routines or Gym Workout for equipment training.</p>
-          </div>
-          <div className="hero-card-row">
-            <div className="hero-card home" onClick={goHomeWorkout} role="button" tabIndex={0} onKeyDown={(e)=>{ if (e.key === "Enter") goHomeWorkout(); }}>
-              <div>
-                <div className="hero-card-title">Home Workout</div>
-                <div className="hero-card-sub">Start your bodyweight journey</div>
-              </div>
-              <button className="hero-pill">Start</button>
-            </div>
-            <div className="hero-card gym" onClick={goGymWorkout} role="button" tabIndex={0} onKeyDown={(e)=>{ if (e.key === "Enter") goGymWorkout(); }}>
-              <div>
-                <div className="hero-card-title">Gym Workout</div>
-                <div className="hero-card-sub">Build strength with equipment</div>
-              </div>
-              <button className="hero-pill">Start</button>
-            </div>
-          </div>
-        </section>
+        
       </div>
     );
   }
@@ -294,38 +298,76 @@ function RouterWrapper() {
 
   return (
     <>
-      {!hideShell && (
-        <>
-          <NavBar />
-          <SideBar />
-        </>
-      )}
+      {!hideShell && <NavBar />}
 
-      <main
-        className={`mainPart ${hideShell ? "" : "app-main-content"}`}
-        style={{ paddingTop: hideShell ? 0 : undefined }}
-      >
-        <Routes>
-          <Route path="/" element={<HomeContent />} />
-          <Route path="/HWorkout" element={<RequireAuth><HWorkout /></RequireAuth>} />
-          <Route path="/GWorkout" element={<RequireAuth><GWorkout /></RequireAuth>} />
-          <Route path="/exercise/:slug" element={<RequireAuth><ExerciseDetail /></RequireAuth>} />
-          <Route path="/workouts" element={<RequireAuth><Workouts /></RequireAuth>} />
-          <Route path="/plans" element={<RequireAuth><Plans /></RequireAuth>} />
-          <Route path="/leaderboard" element={<RequireAuth><Leaderboard /></RequireAuth>} />
-          <Route path="/AIWorkoutLibrary" element={<RequireAuth><AIWorkoutLibrary /></RequireAuth>} />
-          <Route path="/AIWorkout" element={<RequireAuth><AIWorkout /></RequireAuth>} />
-          {/* PROFILE AS A STANDALONE PAGE */}
-          <Route path="/profile" element={<RequireAuth><Profile onSignOut={handleProfileSignOut} /></RequireAuth>} />
-          <Route path="/progress" element={<RequireAuth><Progress /></RequireAuth>} />
-          <Route path="/settings" element={<RequireAuth><Setting /></RequireAuth>} />
-        </Routes>
-      </main>
+      <div className={`app-shell ${hideShell ? "shell-hidden" : ""}`}>
+        {!hideShell && <SideBar />}
+
+        <main
+          className={`mainPart ${hideShell ? "" : "app-main-content"}`}
+          style={{ paddingTop: hideShell ? 0 : undefined }}
+        >
+          <Routes>
+            <Route path="/" element={<HomeContent />} />
+            <Route path="/HWorkout" element={<HWorkout />} />
+            <Route path="/GWorkout" element={<GWorkout />} />
+            <Route path="/exercise/:slug" element={<RequireAuth><ExerciseDetail /></RequireAuth>} />
+            <Route path="/workouts" element={<RequireAuth><Workouts /></RequireAuth>} />
+            <Route path="/plans" element={<RequireAuth><Plans /></RequireAuth>} />
+            <Route path="/leaderboard" element={<RequireAuth><Leaderboard /></RequireAuth>} />
+            <Route path="/AIWorkoutLibrary" element={<RequireAuth><AIWorkoutLibrary /></RequireAuth>} />
+            <Route path="/AIWorkout" element={<RequireAuth><AIWorkout /></RequireAuth>} />
+            {/* PROFILE AS A STANDALONE PAGE */}
+            <Route path="/profile" element={<RequireAuth><Profile onSignOut={handleProfileSignOut} /></RequireAuth>} />
+            <Route path="/progress" element={<RequireAuth><Progress /></RequireAuth>} />
+            <Route path="/settings" element={<RequireAuth><Setting /></RequireAuth>} />
+          </Routes>
+        </main>
+      </div>
 
       {!hideShell && (
-        <footer className="site-footer container">
-          <div className="footer-brand">FlexFit</div>
-          <div className="footer-text">AI-powered fitness guidance. Train smarter, safer, and anywhere.</div>
+        <footer className="site-footer">
+          <div className="footer-top">
+            <div className="footer-brand-block">
+              <div className="footer-brand">FlexFit</div>
+              <div className="footer-tagline">
+                AI-powered fitness guidance with live form feedback, smart libraries, and progress tracking.
+              </div>
+              <div className="footer-pill-row">
+                <span>Pose AI</span>
+                <span>Workout Library</span>
+                <span>Progress Tracker</span>
+              </div>
+            </div>
+
+            <div className="footer-col">
+              <div className="footer-title">Explore</div>
+              <Link to="/" className="footer-link">Home</Link>
+              <Link to="/workouts" className="footer-link">Workout Library</Link>
+              <Link to="/AIWorkoutLibrary" className="footer-link">AI Library</Link>
+              <Link to="/plans" className="footer-link">Plans</Link>
+            </div>
+
+            <div className="footer-col">
+              <div className="footer-title">Training</div>
+              <Link to="/HWorkout" className="footer-link">Home Workouts</Link>
+              <Link to="/GWorkout" className="footer-link">Gym Workouts</Link>
+              <Link to="/progress" className="footer-link">Progress Tracker</Link>
+              <Link to="/leaderboard" className="footer-link">Leaderboard</Link>
+            </div>
+
+            <div className="footer-col">
+              <div className="footer-title">Account</div>
+              <Link to="/profile" className="footer-link">Profile</Link>
+              <Link to="/settings" className="footer-link">Settings</Link>
+              <span className="footer-link muted">Secure sign-in with Google</span>
+            </div>
+          </div>
+
+          <div className="footer-bottom">
+            <div className="footer-legal">© 2026 FlexFit. Train smarter, safer, anywhere.</div>
+            <div className="footer-credits">Made for everyday athletes.</div>
+          </div>
         </footer>
       )}
     </>

@@ -594,24 +594,118 @@
 }
 
 .site-footer {
-  margin-top: 30px;
-  padding: 18px 20px;
-  border-radius: 16px;
-  background: linear-gradient(90deg, rgba(255,107,157,0.45), rgba(110,231,255,0.45));
-  border: 1px solid var(--ff-card-border);
+  margin-top: 40px;
+  padding: 32px var(--ff-container-pad) 18px;
+  border-radius: 0;
+  width: 100%;
+  background:
+    radial-gradient(900px 320px at -10% -30%, rgba(110,231,255,0.35), transparent 60%),
+    radial-gradient(700px 320px at 110% -20%, rgba(255,107,157,0.35), transparent 55%),
+    linear-gradient(135deg, #0b1018, #131b26);
+  border: 1px solid rgba(110,231,255,0.22);
+  box-shadow: 0 22px 50px rgba(10,12,18,0.35);
+  color: #e9f2ff;
+  position: relative;
+  overflow: hidden;
+}
+
+.footer-top,
+.footer-bottom {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.footer-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 1fr));
+  gap: 20px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.footer-brand-block {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 10px;
 }
 
 .footer-brand {
   font-weight: 900;
   letter-spacing: 1px;
+  font-size: 20px;
+  color: #6ee7ff;
+  font-family: "Orbitron", "Poppins", "Inter", system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial;
 }
 
-.footer-text {
+.footer-tagline {
   font-size: 13px;
-  color: var(--ff-muted);
+  color: rgba(232,241,255,0.74);
+  max-width: 360px;
+}
+
+.footer-pill-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.footer-pill-row span {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 6px 10px;
+  border-radius: 999px;
+  color: #e9f2ff;
+  background: rgba(110,231,255,0.12);
+  border: 1px solid rgba(110,231,255,0.25);
+}
+
+.footer-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.footer-title {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: rgba(255,255,255,0.75);
+  font-weight: 700;
+}
+
+.footer-link {
+  color: rgba(232,241,255,0.78);
+  font-size: 13px;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.footer-link:hover {
+  color: #ffffff;
+  transform: translateX(2px);
+}
+
+.footer-link.muted {
+  color: rgba(232,241,255,0.45);
+  cursor: default;
+}
+
+.footer-link.muted:hover {
+  color: rgba(232,241,255,0.45);
+  transform: none;
+}
+
+.footer-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 12px;
+  font-size: 12px;
+  color: rgba(232,241,255,0.6);
+}
+
+.footer-credits {
+  color: rgba(232,241,255,0.55);
 }
 
 @media (max-width: 1000px) {
@@ -619,9 +713,18 @@
   .feature-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .steps-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .audience-grid { grid-template-columns: 1fr; }
+  .footer-top { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 640px) {
   .feature-grid { grid-template-columns: 1fr; }
   .steps-grid { grid-template-columns: 1fr; }
+  .ff-hero-block.with-video { min-height: 70vh; padding: 18px; }
+  .ff-hero-left h1 { font-size: 28px; }
+  .hero-actions { width: 100%; }
+  .hero-actions .btn-primary,
+  .hero-actions .btn-ghost { flex: 1; justify-content: center; }
+  .hero-pills { gap: 8px; }
+  .footer-top { grid-template-columns: 1fr; }
+  .footer-bottom { flex-direction: column; align-items: flex-start; }
 }

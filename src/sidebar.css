@@ -4,15 +4,15 @@
 }
 
 .sidebar {
-  position: fixed;
-  left: 16px;
+  position: sticky;
   top: 16px;
-  bottom: 16px;
   width: var(--sidebar-width);
   display: flex;
   flex-direction: column;
   gap: 16px;
   padding: 12px;
+  align-self: flex-start;
+  height: calc(100vh - 32px);
   border-radius: 22px;
   background: linear-gradient(180deg, #6a5be8 0%, #7b6af0 45%, #9a7bff 100%);
   border: 1px solid rgba(255,255,255,0.22);
@@ -184,9 +184,8 @@
 
 @media (max-width: 900px) {
   .sidebar {
-    left: 10px;
     top: 10px;
-    bottom: 10px;
+    height: calc(100vh - 20px);
   }
 }
 

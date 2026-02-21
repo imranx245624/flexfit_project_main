@@ -14,7 +14,7 @@ const DEFAULT_LEADERBOARD = [
 ];
 
 function Leaderboard() {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [entries, setEntries] = useState([]);
   const cachedSnapshot = DEFAULT_LEADERBOARD;
 
@@ -71,16 +71,16 @@ function Leaderboard() {
         </button>
       </div>
 
-      {loading && (
+      {/* {loading && (
         <div className="leaderboard-loading" role="status">Loading leaderboard…</div>
-      )}
+      )} */}
 
-      {!entries?.length && !loading && (
+      {/* {!entries?.length && !loading && (
         <div className="ff-card cached-card">
           <div className="cached-title">Cached snapshot</div>
           <div className="cached-sub">Leaderboard will update when live data is available.</div>
         </div>
-      )}
+      )} */}
 
       <div className="leaderboard-list">
         {(entries?.length ? entries : cachedSnapshot).map((e) => (

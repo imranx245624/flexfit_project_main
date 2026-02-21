@@ -728,7 +728,7 @@ export const EXERCISE_DETAILS = {
     "name": "Lat Pulldown",
     "steps": [
       "Execution Starting position: Arms extended overhead, feeling a stretch in your lats.",
-      "Keep your shoulders depressed (dont shrug upward).",
+      "Keep your shoulders depressed (don't shrug upward).",
       "Pulling phase (concentric): Pull the bar down to your upper chest or collarbone area by driving your elbows down and back ."
     ],
     "primaryMuscles": [
@@ -907,7 +907,7 @@ export const EXERCISE_DETAILS = {
     "name": "Rear Delt Fly",
     "steps": [
       "The reverse cable fly, also known as the cable rear delt fly, is a deltoid muscle strengthening and definition exercise.",
-      "Its one of the best isolation exercises for your back and posterior deltoid.This workout targets your posterior (back) deltoids while using a range of upper body muscles.",
+      "It's one of the best isolation exercises for your back and posterior deltoid. This workout targets your posterior (back) deltoids while using a range of upper body muscles.",
       "Adjust the weight and the pulleys to the right height."
     ],
     "primaryMuscles": [

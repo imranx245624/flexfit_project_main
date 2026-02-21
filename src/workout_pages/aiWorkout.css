@@ -520,7 +520,11 @@
   .ai-bottom-bar { left: 8px; right: 8px; bottom: 8px; }
   .ai-popup { width: 92%; }
   .ai-exit-top { left: 8px; top: 8px; padding: 8px 10px; }
-  .ai-catalog-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ai-catalog { padding: 18px 16px 32px; }
+  .ai-catalog-header { flex-direction: column; align-items: flex-start; }
+  .ai-catalog-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+  .ai-catalog-card { width: 100%; }
+  .ai-catalog-video { height: 260px; }
 }
 
 /* very small screens */
@@ -534,6 +538,7 @@
   .ai-catalog-grid { grid-template-columns: 1fr; }
   .ai-catalog-grid { gap: 18px; }
   .ai-catalog-video { height: 220px; }
+  .ai-catalog-section-head { flex-direction: column; align-items: flex-start; }
 }
 
 /* reduced motion */
