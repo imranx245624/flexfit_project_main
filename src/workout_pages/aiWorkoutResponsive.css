@@ -1,0 +1,51 @@
+/* Mobile layout tweaks for AIWorkout */
+.aiw-layout { width: 100%; }
+.aiw-video-wrap { width: 100%; max-width: 640px; }
+.aiw-video-el, .aiw-canvas-el { width: 100%; height: 100%; }
+
+@media (max-width: 720px) {
+  .aiw-layout {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    padding: 12px !important;
+    gap: 16px !important;
+    min-height: auto !important;
+  }
+  .aiw-left,
+  .aiw-right {
+    width: 100% !important;
+    flex: 1 1 auto !important;
+  }
+  .aiw-video-wrap {
+    max-width: 100% !important;
+  }
+  .aiw-video-el,
+  .aiw-canvas-el {
+    object-fit: contain !important;
+  }
+  .aiw-left h2 {
+    font-size: 16px !important;
+  }
+  .aiw-left h1 {
+    font-size: 22px !important;
+  }
+  .aiw-left h3 {
+    font-size: 14px !important;
+  }
+  .aiw-right {
+    padding: 14px !important;
+  }
+  .aiw-right h3 {
+    font-size: 16px !important;
+  }
+  .aiw-right h4 {
+    font-size: 13px !important;
+  }
+  .aiw-card {
+    padding: 8px !important;
+  }
+  .aiw-stop-btn {
+    padding: 10px !important;
+    font-size: 14px !important;
+  }
+}

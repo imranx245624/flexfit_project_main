@@ -4,6 +4,7 @@ import * as poseDetection from "@tensorflow-models/pose-detection";
 import * as tf from "@tensorflow/tfjs";
 import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "../utils/supabaseClient";
+import "./aiWorkoutResponsive.css";
 
 function AIWorkout() {
   const location = useLocation();
@@ -825,8 +826,10 @@ function AIWorkout() {
       window.dispatchEvent(new CustomEvent("flexfit-hide-shell", { detail: shouldHideShell }));
     } catch (e) {}
     try {
-      document.body.style.overflow = shouldHideShell ? "hidden" : "";
-      document.documentElement.style.overflow = shouldHideShell ? "hidden" : "";
+      const isMobileView = window.matchMedia && window.matchMedia("(max-width: 720px)").matches;
+      const lockScroll = shouldHideShell && !isMobileView;
+      document.body.style.overflow = lockScroll ? "hidden" : "";
+      document.documentElement.style.overflow = lockScroll ? "hidden" : "";
     } catch (e) {}
     return () => {
       try {
@@ -2865,6 +2868,7 @@ const runDetector = useCallback(async () => {
 
       {/* WORKOUT LAYOUT */}
       <div
+        className="aiw-layout"
         style={{
           display: "flex",
           justifyContent: "center",
@@ -2878,17 +2882,18 @@ const runDetector = useCallback(async () => {
         }}
       >
         {/* LEFT COLUMN */}
-        <div style={{ display: "flex", flexDirection: "column", width: "min(640px, 100%)", flex: "1 1 320px" }}>
+        <div className="aiw-left" style={{ display: "flex", flexDirection: "column", width: "min(640px, 100%)", flex: "1 1 320px" }}>
           <h2 style={{ color: "#76ff03", marginBottom: "10px" }}>
             Pose Detection ({workoutLabel})
           </h2>
 
-          <div style={{ position: "relative", width: "100%", maxWidth: "640px", aspectRatio: "4 / 3" }}>
+          <div className="aiw-video-wrap" style={{ position: "relative", width: "100%", maxWidth: "640px", aspectRatio: "4 / 3" }}>
             <video
               ref={webcamRef}
               muted
               playsInline
               autoPlay
+              className="aiw-video-el"
               style={{
                 position: "absolute",
                 inset: 0,
@@ -2899,6 +2904,7 @@ const runDetector = useCallback(async () => {
             />
             <canvas
               ref={canvasRef}
+              className="aiw-canvas-el"
               style={{
                 position: "absolute",
                 inset: 0,
@@ -2909,7 +2915,7 @@ const runDetector = useCallback(async () => {
             />
           </div>
 
-          <div style={{ marginTop: "15px" }}>
+          <div className="aiw-status-block" style={{ marginTop: "15px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
               {isPlankWorkout ? (
                 <>
@@ -2933,6 +2939,7 @@ const runDetector = useCallback(async () => {
 
         {/* RIGHT COLUMN */}
         <div
+          className="aiw-right"
           style={{
             backgroundColor: "#2a2d34",
             padding: "20px",
@@ -2949,7 +2956,7 @@ const runDetector = useCallback(async () => {
         >
           <h3 style={{ color: "#76ff03", marginTop: 0 }}>Performance Metrics</h3>
 
-          <div style={{ backgroundColor: "#1c1e26", padding: "10px", borderRadius: "8px" }}>
+          <div className="aiw-card" style={{ backgroundColor: "#1c1e26", padding: "10px", borderRadius: "8px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
               <span>Reps:</span>
               <span style={{ color: "#ffff00" }}>{reps}</span>
@@ -2996,7 +3003,7 @@ const runDetector = useCallback(async () => {
           </div>
 
           {/* Exercise Stats */}
-          <div style={{ backgroundColor: "#1c1e26", padding: "10px", borderRadius: "8px" }}>
+          <div className="aiw-card" style={{ backgroundColor: "#1c1e26", padding: "10px", borderRadius: "8px" }}>
             <h4 style={{ color: "#76ff03", margin: "0 0 10px 0" }}>Exercise Stats:</h4>
             <div style={{ fontSize: "13px", lineHeight: "1.8" }}>
               <div>Avg Angle: <span style={{ color: "#00ff00" }}>{exerciseStats.avgAngle} deg</span></div>
@@ -3010,7 +3017,7 @@ const runDetector = useCallback(async () => {
 
           {/* Alerts / Form Tips */}
           {alerts.length > 0 && (
-            <div style={{ backgroundColor: "#1c1e26", padding: "10px", borderRadius: "8px", borderLeft: "4px solid #ff6600" }}>
+            <div className="aiw-card" style={{ backgroundColor: "#1c1e26", padding: "10px", borderRadius: "8px", borderLeft: "4px solid #ff6600" }}>
               <h4 style={{ color: "#ff6600", margin: "0 0 8px 0" }}>Form Tips:</h4>
               {alerts.map((alert, idx) => (
                 <div key={idx} style={{ fontSize: "12px", marginBottom: "5px", color: "#ffff00" }}>
@@ -3022,13 +3029,14 @@ const runDetector = useCallback(async () => {
 
           {/* Good Form Message */}
           {alerts.length === 0 && (
-            <div style={{ backgroundColor: "#1c1e26", padding: "10px", borderRadius: "8px", borderLeft: "4px solid #00ff00", textAlign: "center" }}>
+            <div className="aiw-card" style={{ backgroundColor: "#1c1e26", padding: "10px", borderRadius: "8px", borderLeft: "4px solid #00ff00", textAlign: "center" }}>
               <span style={{ color: "#00ff00", fontWeight: "bold" }}>Great form! Keep it up!</span>
             </div>
           )}
 
           {/* STOP BUTTON */}
           <button
+            className="aiw-stop-btn"
             onClick={() => {
               speak("Workout paused.");
               finalizeAndShowSave("Manual stop");
