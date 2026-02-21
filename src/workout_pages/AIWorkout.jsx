@@ -4,7 +4,6 @@ import * as poseDetection from "@tensorflow-models/pose-detection";
 import * as tf from "@tensorflow/tfjs";
 import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "../utils/supabaseClient";
-import "./aiWorkoutLive.css";
 
 function AIWorkout() {
   const location = useLocation();
@@ -2480,20 +2479,15 @@ const runDetector = useCallback(async () => {
 
 	    (async () => {
 	      try {
-          const baseVideoConstraints = {
-            width: { ideal: 640 },
-            height: { ideal: 480 },
-            aspectRatio: 4 / 3,
-          };
           const cameraAttempts = (isPlankWorkout || isCrunchWorkout || isLegRaiseWorkout)
             ? [
-                { video: { ...baseVideoConstraints, facingMode: { ideal: "environment" } }, audio: false },
-                { video: { ...baseVideoConstraints, facingMode: "user" }, audio: false },
-                { video: { ...baseVideoConstraints }, audio: false },
+                { video: { facingMode: { ideal: "environment" } }, audio: false },
+                { video: { facingMode: "user" }, audio: false },
+                { video: true, audio: false },
               ]
             : [
-                { video: { ...baseVideoConstraints, facingMode: "user" }, audio: false },
-                { video: { ...baseVideoConstraints }, audio: false },
+                { video: { facingMode: "user" }, audio: false },
+                { video: true, audio: false },
               ];
 
           let lastCameraError = null;
@@ -2870,53 +2864,191 @@ const runDetector = useCallback(async () => {
       )}
 
       {/* WORKOUT LAYOUT */}
-      <div className="aiw-root">
-        <div className="aiw-camera">
-          <video
-            ref={webcamRef}
-            muted
-            playsInline
-            autoPlay
-            className="aiw-video"
-            style={{ transform: mirrorView ? "scaleX(-1)" : "none" }}
-          />
-          <canvas
-            ref={canvasRef}
-            className="aiw-canvas"
-            style={{ transform: mirrorView ? "scaleX(-1)" : "none" }}
-          />
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: "#1c1e26",
+          color: "white",
+          minHeight: "100vh",
+          padding: "20px",
+          gap: "30px",
+          flexWrap: "wrap",
+        }}
+      >
+        {/* LEFT COLUMN */}
+        <div style={{ display: "flex", flexDirection: "column", width: "min(640px, 100%)", flex: "1 1 320px" }}>
+          <h2 style={{ color: "#76ff03", marginBottom: "10px" }}>
+            Pose Detection ({workoutLabel})
+          </h2>
 
-          <div className="aiw-overlay">
-            <div className="aiw-top">
-              <div className="aiw-title">Pose Detection · {workoutLabel}</div>
-              <button
-                className="aiw-stop"
-                onClick={() => {
-                  speak("Workout paused.");
-                  finalizeAndShowSave("Manual stop");
-                }}
-              >
-                Stop Workout
-              </button>
-            </div>
-
-            <div className="aiw-stats">
-              <div className="aiw-stat">
-                <span>{isPlankWorkout ? "Time" : "Reps"}</span>
-                <strong>{isPlankWorkout ? formatTime(elapsedMs) : reps}</strong>
-              </div>
-              <div className="aiw-stat">
-                <span>Accuracy</span>
-                <strong>{avgAccuracy}%</strong>
-              </div>
-              <div className="aiw-stat">
-                <span>Total ECA</span>
-                <strong>{ecaPoints}</strong>
-              </div>
-            </div>
-
-            <div className="aiw-status">{poseStatus}</div>
+          <div style={{ position: "relative", width: "100%", maxWidth: "640px", aspectRatio: "4 / 3" }}>
+            <video
+              ref={webcamRef}
+              muted
+              playsInline
+              autoPlay
+              style={{
+                position: "absolute",
+                inset: 0,
+                borderRadius: 15,
+                transform: mirrorView ? "scaleX(-1)" : "none",
+                objectFit: "cover",
+              }}
+            />
+            <canvas
+              ref={canvasRef}
+              style={{
+                position: "absolute",
+                inset: 0,
+                borderRadius: 15,
+                transform: mirrorView ? "scaleX(-1)" : "none",
+                pointerEvents: "none",
+              }}
+            />
           </div>
+
+          <div style={{ marginTop: "15px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              {isPlankWorkout ? (
+                <>
+                  <h1 style={{ margin: 0, color: "#ffff00", fontSize: "clamp(1.8rem, 5vw, 2.5rem)" }}>
+                    Plank: {formatTime(elapsedMs)}
+                  </h1>
+                </>
+              ) : (
+                <>
+                  <h1 style={{ margin: 0, color: "#ffff00", fontSize: "clamp(1.8rem, 5vw, 2.5rem)" }}>
+                    Reps: {reps}
+                  </h1>
+                </>
+              )}
+            </div>
+            <h3 style={{ margin: "5px 0 0 0", color: "#76ff03", fontSize: "clamp(1.1rem, 3vw, 1.5rem)" }}>
+              {poseStatus}
+            </h3>
+          </div>
+        </div>
+
+        {/* RIGHT COLUMN */}
+        <div
+          style={{
+            backgroundColor: "#2a2d34",
+            padding: "20px",
+            borderRadius: "15px",
+            border: "2px solid #76ff03",
+            width: "min(360px, 100%)",
+            flex: "1 1 280px",
+            display: "flex",
+            flexDirection: "column",
+            gap: "15px",
+            alignSelf: "stretch",
+            marginTop: 0
+          }}
+        >
+          <h3 style={{ color: "#76ff03", marginTop: 0 }}>Performance Metrics</h3>
+
+          <div style={{ backgroundColor: "#1c1e26", padding: "10px", borderRadius: "8px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
+              <span>Reps:</span>
+              <span style={{ color: "#ffff00" }}>{reps}</span>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
+              <span>Avg Accuracy:</span>
+              <span style={{ color: avgAccuracy > 80 ? "#00ff00" : "#ffcc00" }}>{avgAccuracy}%</span>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span>Total ECA:</span>
+              <span style={{ color: "#00ccff" }}>{ecaPoints}</span>
+            </div>
+          </div>
+
+          {/* Form Quality Bar */}
+          <div>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "5px" }}>
+              <span>Form Quality:</span>
+              <span style={{ color: formScore > 80 ? "#00ff00" : formScore > 60 ? "#ffff00" : "#ff6600" }}>
+                {formScore}%
+              </span>
+            </div>
+            <div style={{ backgroundColor: "#1c1e26", borderRadius: "8px", height: "15px", overflow: "hidden" }}>
+              <div
+                style={{
+                  height: "100%",
+                  backgroundColor: formScore > 80 ? "#00ff00" : formScore > 60 ? "#ffff00" : "#ff6600",
+                  width: `${formScore}%`,
+                  transition: "width 0.3s",
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Confidence Bar */}
+          <div>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "5px" }}>
+              <span>Pose Confidence:</span>
+              <span style={{ color: "#00ccff" }}>{poseConfidence}%</span>
+            </div>
+            <div style={{ backgroundColor: "#1c1e26", borderRadius: "8px", height: "15px", overflow: "hidden" }}>
+              <div style={{ height: "100%", backgroundColor: "#00ccff", width: `${poseConfidence}%`, transition: "width 0.3s" }} />
+            </div>
+          </div>
+
+          {/* Exercise Stats */}
+          <div style={{ backgroundColor: "#1c1e26", padding: "10px", borderRadius: "8px" }}>
+            <h4 style={{ color: "#76ff03", margin: "0 0 10px 0" }}>Exercise Stats:</h4>
+            <div style={{ fontSize: "13px", lineHeight: "1.8" }}>
+              <div>Avg Angle: <span style={{ color: "#00ff00" }}>{exerciseStats.avgAngle} deg</span></div>
+              <div>Max Angle: <span style={{ color: "#ffff00" }}>{exerciseStats.maxAngle} deg</span></div>
+              <div>Min Angle: <span style={{ color: "#ff6600" }}>{exerciseStats.minAngle} deg</span></div>
+              {workoutName.includes("squat") && (
+                <div>Depth: <span style={{ color: "#00ccff" }}>{Math.round(exerciseStats.depthPercentage)}%</span></div>
+              )}
+            </div>
+          </div>
+
+          {/* Alerts / Form Tips */}
+          {alerts.length > 0 && (
+            <div style={{ backgroundColor: "#1c1e26", padding: "10px", borderRadius: "8px", borderLeft: "4px solid #ff6600" }}>
+              <h4 style={{ color: "#ff6600", margin: "0 0 8px 0" }}>Form Tips:</h4>
+              {alerts.map((alert, idx) => (
+                <div key={idx} style={{ fontSize: "12px", marginBottom: "5px", color: "#ffff00" }}>
+                  {alert}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Good Form Message */}
+          {alerts.length === 0 && (
+            <div style={{ backgroundColor: "#1c1e26", padding: "10px", borderRadius: "8px", borderLeft: "4px solid #00ff00", textAlign: "center" }}>
+              <span style={{ color: "#00ff00", fontWeight: "bold" }}>Great form! Keep it up!</span>
+            </div>
+          )}
+
+          {/* STOP BUTTON */}
+          <button
+            onClick={() => {
+              speak("Workout paused.");
+              finalizeAndShowSave("Manual stop");
+            }}
+            style={{
+              marginTop: "auto", 
+              padding: "12px",
+              width: "100%",
+              borderRadius: "10px",
+              border: "2px solid #ff4444",
+              background: "rgba(255, 68, 68, 0.1)",
+              color: "#ff4444",
+              fontWeight: "bold",
+              cursor: "pointer",
+              fontSize: "16px",
+              transition: "background 0.2s"
+            }}
+          >
+            Stop Workout
+          </button>
         </div>
       </div>
     </>
