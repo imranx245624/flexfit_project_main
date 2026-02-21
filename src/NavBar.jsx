@@ -132,6 +132,7 @@ export default function NavBar() {
                       <div className="popover-email">{user?.email || "No email"}</div>
                       <div className="popover-actions">
                         <Link to="/progress" className="popover-link" onClick={() => setPopoverOpen(false)}>Go to Dashboard</Link>
+                        <Link to="/settings" className="popover-link" onClick={() => setPopoverOpen(false)}>Settings</Link>
                         <button
                           className="popover-link ghost"
                           type="button"
