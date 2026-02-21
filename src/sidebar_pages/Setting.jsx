@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./settings.css";
 
 export default function Settings() {
@@ -6,10 +6,25 @@ export default function Settings() {
   const [units, setUnits] = useState("kg");
   const [difficulty, setDifficulty] = useState("standard");
   const [debugLogs, setDebugLogs] = useState(false);
+  const [theme, setTheme] = useState(() => {
+    if (typeof window === "undefined") return "light";
+    const saved = localStorage.getItem("ff-theme");
+    return saved === "dark" ? "dark" : "light";
+  });
 
   const handleSave = () => {
     // TODO: Hook to existing settings save handlers without changing API calls.
   };
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === "dark") {
+      root.setAttribute("data-theme", "dark");
+    } else {
+      root.removeAttribute("data-theme");
+    }
+    try { localStorage.setItem("ff-theme", theme); } catch (e) {}
+  }, [theme]);
 
   return (
     <div className="settings-page container">
@@ -89,6 +104,24 @@ export default function Settings() {
                 onClick={() => setDifficulty("hard")}
               >
                 Hard
+              </button>
+            </div>
+          </div>
+
+          <div className="settings-item">
+            <div className="settings-label">Theme</div>
+            <div className="settings-options">
+              <button
+                className={`option ${theme === "light" ? "active" : ""}`}
+                onClick={() => setTheme("light")}
+              >
+                Light
+              </button>
+              <button
+                className={`option ${theme === "dark" ? "active" : ""}`}
+                onClick={() => setTheme("dark")}
+              >
+                Dark
               </button>
             </div>
           </div>

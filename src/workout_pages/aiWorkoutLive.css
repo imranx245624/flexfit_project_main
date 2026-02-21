@@ -1,0 +1,116 @@
+/* src/workout_pages/aiWorkoutLive.css */
+.aiw-root {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  background: #0b1018;
+  overflow: hidden;
+}
+
+.aiw-camera {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: #0b1018;
+}
+
+.aiw-video,
+.aiw-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #0b1018;
+  border-radius: 0;
+}
+
+.aiw-overlay {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  top: 10px;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.aiw-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(11, 16, 24, 0.6);
+  border: 1px solid rgba(110, 231, 255, 0.2);
+  backdrop-filter: blur(6px);
+}
+
+.aiw-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #e6f7ff;
+  letter-spacing: 0.3px;
+}
+
+.aiw-stop {
+  pointer-events: auto;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 68, 68, 0.6);
+  background: rgba(255, 68, 68, 0.12);
+  color: #ff6464;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.aiw-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.aiw-stat {
+  background: rgba(11, 16, 24, 0.55);
+  border: 1px solid rgba(110, 231, 255, 0.2);
+  padding: 6px 8px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.aiw-stat span {
+  display: block;
+  font-size: 10px;
+  color: rgba(230, 247, 255, 0.7);
+}
+
+.aiw-stat strong {
+  display: block;
+  margin-top: 2px;
+  font-size: 14px;
+  color: #e6f7ff;
+}
+
+.aiw-status {
+  align-self: flex-start;
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: rgba(11, 16, 24, 0.55);
+  border: 1px solid rgba(110, 231, 255, 0.15);
+  color: rgba(230, 247, 255, 0.8);
+  font-size: 12px;
+}
+
+@media (max-width: 640px) {
+  .aiw-overlay { left: 8px; right: 8px; top: 8px; gap: 6px; }
+  .aiw-title { font-size: 13px; }
+  .aiw-top { padding: 6px 8px; }
+  .aiw-stop { padding: 5px 8px; font-size: 11px; }
+  .aiw-stat { padding: 5px 6px; }
+  .aiw-stat strong { font-size: 13px; }
+  .aiw-status { font-size: 11px; }
+}

@@ -33,21 +33,34 @@ export default function GWorkout() {
 
   return (
     <PageWrapper>
-      <div className="main-workout-title">Gym Workout</div>
+      <div className="main-workout-title split-title">
+        <span>Gym</span>
+        <span>Workout</span>
+      </div>
 
       <div className="workout-groups">
-        {GYM_GROUPS.map((group) => (
-          <section key={group.title} className="workout-group-card">
-            <div className="workout-group-header">
-              <h2>{group.title}</h2>
-            </div>
-            <div className="workout-group-body">
-              {group.sections.map((section) => (
-                <GroupSection key={section.title} title={section.title} items={section.items} />
-              ))}
-            </div>
-          </section>
-        ))}
+        {GYM_GROUPS.map((group) => {
+          const isSingle =
+            group.sections.length === 1 &&
+            !group.sections[0].subsections &&
+            group.sections[0].title === group.title;
+          return (
+            <section key={group.title} className="workout-group-card">
+              <div className="workout-group-header">
+                <h2>{group.title}</h2>
+              </div>
+              <div className="workout-group-body">
+                {isSingle ? (
+                  <ExerciseGrid items={group.sections[0].items} />
+                ) : (
+                  group.sections.map((section) => (
+                    <GroupSection key={section.title} title={section.title} items={section.items} />
+                  ))
+                )}
+              </div>
+            </section>
+          );
+        })}
       </div>
     </PageWrapper>
   );

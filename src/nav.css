@@ -58,8 +58,9 @@
 }
 
 .nav-cta {
-  background: linear-gradient(90deg, var(--ff-accent-3), var(--ff-accent-2));
-  color: #0f1724;
+  background: linear-gradient(90deg, #00f5ff, #00c8ff);
+  color: #05141b;
+  box-shadow: 0 10px 24px rgba(0,245,255,0.25);
 }
 
 .nav-btn:hover {
@@ -195,16 +196,23 @@
     border-radius: 0;
   }
   .nav-inner {
-    padding: 0 12px;
-    justify-content: space-between;
+    padding: 0 10px;
+    justify-content: flex-end;
   }
   .nav-title {
     display: none;
   }
   .nav-btn {
-    padding: 6px 12px;
-    font-size: 13px;
+    padding: 5px 10px;
+    font-size: 12px;
   }
-  .nav-right { gap: 8px; }
-  .nav-avatar { width: 32px; height: 32px; }
+  .nav-right { gap: 6px; margin-left: auto; }
+  .nav-avatar { width: 28px; height: 28px; }
+  .profile-popover {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    top: calc(var(--nav-height, 64px) + 8px);
+    width: auto;
+  }
 }

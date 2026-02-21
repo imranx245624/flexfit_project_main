@@ -545,3 +545,49 @@
 @media (prefers-reduced-motion: reduce) {
   .ai-popup, .ai-btn-save-fixed, .ai-left-stats .stat, .ai-right-panel, .ai-video-area { transition: none !important; transform: none !important; }
 }
+
+/* =======================
+   Dark Theme (AI Workout Library)
+   ======================= */
+:root[data-theme="dark"] .ai-catalog,
+body[data-theme="dark"] .ai-catalog{
+  background: radial-gradient(800px 420px at 10% -10%, rgba(34,245,255,0.18), transparent 60%),
+              radial-gradient(700px 400px at 100% 0%, rgba(255,107,214,0.16), transparent 55%),
+              #0b0f14;
+}
+:root[data-theme="dark"] .ai-catalog-section,
+body[data-theme="dark"] .ai-catalog-section{
+  background: linear-gradient(180deg, rgba(10,16,24,0.95), rgba(15,22,34,0.95));
+  border: 1px solid rgba(34,245,255,0.75);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.6), 0 0 24px rgba(34,245,255,0.15);
+}
+:root[data-theme="dark"] .ai-catalog-card,
+body[data-theme="dark"] .ai-catalog-card{
+  background: linear-gradient(135deg, rgba(14,20,30,0.95), rgba(18,27,42,0.95));
+  border: 2px solid rgba(34,245,255,0.85);
+  box-shadow: 0 16px 36px rgba(0,0,0,0.6), 0 0 22px rgba(34,245,255,0.2);
+}
+:root[data-theme="dark"] .ai-catalog-video,
+body[data-theme="dark"] .ai-catalog-video{
+  background: linear-gradient(180deg, rgba(12,18,28,0.95), rgba(14,21,33,0.95));
+  border-bottom: 1px solid rgba(34,245,255,0.55);
+}
+:root[data-theme="dark"] .ai-catalog-body,
+body[data-theme="dark"] .ai-catalog-body{
+  background: linear-gradient(90deg, rgba(34,245,255,0.12), rgba(255,107,214,0.12));
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+:root[data-theme="dark"] .ai-catalog-subhead.good,
+body[data-theme="dark"] .ai-catalog-subhead.good{
+  color: #7bf6ff;
+}
+:root[data-theme="dark"] .ai-catalog-subhead.partial,
+body[data-theme="dark"] .ai-catalog-subhead.partial{
+  color: #ff9bd8;
+}
+:root[data-theme="dark"] .legend-pill,
+body[data-theme="dark"] .legend-pill{
+  background: rgba(16,23,34,0.9);
+  border-color: rgba(34,245,255,0.4);
+  color: #cfe9ff;
+}

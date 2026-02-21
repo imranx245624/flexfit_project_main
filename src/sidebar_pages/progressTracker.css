@@ -150,6 +150,13 @@
 .bar { fill: #06b6d4; }
 .bar-label { font-size:2px; fill:var(--ff-muted); text-anchor:middle; }
 
+.chart-range {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 8px;
+}
+.chart-range .range-toggle { display: inline-flex; gap: 8px; flex-wrap: wrap; }
+
 .table-nums { margin-top:8px; display:flex; flex-direction:column; gap:8px; }
 .num-row { display:flex; justify-content:space-between; align-items:center; padding:8px; border-radius:8px; background: var(--ff-surface-2); border:1px solid var(--ff-card-border); }
 .nlabel { color:var(--ff-muted); font-size:13px; }
@@ -174,11 +181,18 @@
 }
 
 @media (max-width:600px){
+  .page-header { gap: 8px; }
+  .title { font-size: 18px; }
+  .subtitle { font-size: 12px; }
   .mini-calendar { padding:8px; }
   .days-grid { gap:4px; }
-  .day { padding:8px; }
+  .day { padding:6px; }
   .stat-card { padding:8px; }
-  .report-list { max-height:200px; }
+  .stat-card .val { font-size: 16px; margin-top: 4px; }
+  .report-list { max-height:180px; }
+  .chart-area { height:200px; }
+  .chart-range { justify-content: center; }
+  .range-toggle .chip { padding: 5px 8px; font-size: 12px; }
 }
 
 @media (min-width:1200px){

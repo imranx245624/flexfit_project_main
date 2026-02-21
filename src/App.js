@@ -204,7 +204,7 @@ function RouterWrapper() {
             <span className="hero-badge">FlexFit AI</span>
             <h1>AI-Powered Fitness Assistant</h1>
             <div className="hero-actions">
-              <button className="btn-primary" onClick={goAI}>Train with AI</button>
+              <button className="btn-primary ai-cta" onClick={goAI}>Train with AI</button>
               <button className="btn-ghost" onClick={goLibrary}>Workout Library</button>
             </div>
             <div className="hero-pills">

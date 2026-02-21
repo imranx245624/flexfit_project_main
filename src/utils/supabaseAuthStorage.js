@@ -10,12 +10,19 @@ export const clearSupabaseAuthStorage = () => {
     if (ref) prefixes.push(`sb-${ref}-`);
     prefixes.push("supabase.auth.");
 
+    const shouldClear = (key) => {
+      if (!key) return false;
+      if (prefixes.some((p) => key.startsWith(p))) return true;
+      if (key.startsWith("sb-")) return true;
+      return false;
+    };
+
     const clearStore = (store) => {
       if (!store) return;
       for (let i = store.length - 1; i >= 0; i -= 1) {
         const key = store.key(i);
         if (!key) continue;
-        if (prefixes.some((p) => key.startsWith(p))) {
+        if (shouldClear(key)) {
           store.removeItem(key);
         }
       }

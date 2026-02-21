@@ -106,6 +106,12 @@ export default function Progress(){
   const didInitRef = useRef(false);
 
   const [loadingDate, setLoadingDate] = useState(false);
+  const [loadingMonth, setLoadingMonth] = useState(false);
+  const [loadingYear, setLoadingYear] = useState(false);
+  const [loadError, setLoadError] = useState("");
+  const [refreshTick, setRefreshTick] = useState(0);
+  const [initLoaded, setInitLoaded] = useState(false);
+  const MIN_LOADING_MS = 800;
 
   const monthCells = useMemo(()=> {
     const blanks = dayOfWeek(viewYear, viewMonth, 1);
@@ -177,6 +183,25 @@ export default function Progress(){
     return msg.includes("jwt") || msg.includes("token") || msg.includes("expired");
   };
 
+  const minDelay = async (startMs) => {
+    const elapsed = Date.now() - startMs;
+    const remain = Math.max(0, MIN_LOADING_MS - elapsed);
+    if (remain > 0) await new Promise((r) => setTimeout(r, remain));
+  };
+
+  const forceRefresh = () => setRefreshTick((t) => t + 1);
+
+  useEffect(() => {
+    const onFocus = () => forceRefresh();
+    const onVisible = () => { if (document.visibilityState === "visible") forceRefresh(); };
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, []);
+
   /* ---------------- init to latest session date ---------------- */
   useEffect(() => {
     if (authLoading || !user || didInitRef.current) return;
@@ -215,18 +240,22 @@ export default function Progress(){
     })();
 
     return () => { mounted = false; };
-  }, [user, authLoading]);
+  }, [user, authLoading, refreshTick]);
 
   /* ---------------- fetch month sessions ---------------- */
   useEffect(() => {
     if (authLoading) return;
     if(!user){
       setMonthSessionsRaw([]);
+      setLoadingMonth(false);
       return;
     }
     let mounted = true;
     (async () => {
+      const startMs = Date.now();
       try {
+        setLoadingMonth(true);
+        setLoadError("");
         const start = new Date(viewYear, viewMonth, 1, 0, 0, 0, 0);
         const end = new Date(viewYear, viewMonth, daysInMonth(viewYear, viewMonth), 23, 59, 59, 999);
         const runQuery = async () => await supabase
@@ -245,31 +274,43 @@ export default function Progress(){
 
         if(error){
           console.error("month fetch error:", error);
+          setLoadError("Could not load month sessions. Please refresh.");
           if(mounted) setMonthSessionsRaw([]);
         } else {
           if(mounted) setMonthSessionsRaw(data || []);
         }
       } catch (err) {
         console.error("month fetch threw:", err);
+        setLoadError("Could not load month sessions. Please refresh.");
         if(mounted) setMonthSessionsRaw([]);
       } finally {
-        // no-op
+        await minDelay(startMs);
+        if (mounted) {
+          setLoadingMonth(false);
+          setInitLoaded(true);
+        }
       }
     })();
     return () => { mounted = false; };
-  }, [user, authLoading, viewMonth, viewYear]);
+  }, [user, authLoading, viewMonth, viewYear, refreshTick]);
 
   /* ---------------- fetch year sessions (for year chart) ---------------- */
   useEffect(() => {
     if (authLoading) return;
     if(!user){
       setYearSessionsRaw([]);
+      setLoadingYear(false);
       return;
     }
-    if (rangeMode !== "year") return;
+    if (rangeMode !== "year") {
+      setLoadingYear(false);
+      return;
+    }
     let mounted = true;
     (async () => {
+      const startMs = Date.now();
       try {
+        setLoadingYear(true);
         const start = new Date(viewYear, 0, 1, 0, 0, 0, 0);
         const end = new Date(viewYear, 11, 31, 23, 59, 59, 999);
         const runQuery = async () => await supabase
@@ -288,34 +329,43 @@ export default function Progress(){
 
         if(error){
           console.error("year fetch error:", error);
+          setLoadError("Could not load year sessions. Please refresh.");
           if(mounted) setYearSessionsRaw([]);
         } else {
           if(mounted) setYearSessionsRaw(data || []);
         }
       } catch (err) {
         console.error("year fetch threw:", err);
+        setLoadError("Could not load year sessions. Please refresh.");
         if(mounted) setYearSessionsRaw([]);
+      } finally {
+        await minDelay(startMs);
+        if (mounted) setLoadingYear(false);
       }
     })();
     return () => { mounted = false; };
-  }, [user, authLoading, rangeMode, viewYear]);
+  }, [user, authLoading, rangeMode, viewYear, refreshTick]);
 
   /* ---------------- fetch selected date sessions ---------------- */
   useEffect(() => {
     if (authLoading) {
       setSessionsForDate([]);
       setItems([]);
+      setLoadingDate(false);
       return;
     }
     if(!user){
       setSessionsForDate([]);
       setItems([]);
+      setLoadingDate(false);
       return;
     }
     let mounted = true;
     (async () => {
+      const startMs = Date.now();
       try {
         setLoadingDate(true);
+        setLoadError("");
         const foundInMonth = monthSessionsRaw && monthSessionsRaw.some(r => dateOnlyISO(r.created_at) === selectedDate);
         if(foundInMonth){
           const rows = monthSessionsRaw.filter(r => dateOnlyISO(r.created_at) === selectedDate);
@@ -346,6 +396,7 @@ export default function Progress(){
 
         if(error){
           console.error("date fetch error:", error);
+          setLoadError("Could not load sessions for this date. Please refresh.");
           if(mounted) {
             setSessionsForDate([]);
             setItems([]);
@@ -360,16 +411,21 @@ export default function Progress(){
         }
       } catch (err) {
         console.error("date fetch threw:", err);
+        setLoadError("Could not load sessions for this date. Please refresh.");
         if(mounted){
           setSessionsForDate([]);
           setItems([]);
         }
       } finally {
-        if(mounted) setLoadingDate(false);
+        await minDelay(startMs);
+        if(mounted) {
+          setLoadingDate(false);
+          setInitLoaded(true);
+        }
       }
     })();
     return () => { mounted = false; };
-  }, [user, authLoading, selectedDate, monthSessionsRaw]);
+  }, [user, authLoading, selectedDate, monthSessionsRaw, refreshTick]);
 
   /* ---------------- pagination observer ---------------- */
   useEffect(()=>{
@@ -402,6 +458,7 @@ export default function Progress(){
   }
 
   const sessionsCountText = `${sessionsForDate.length} session(s) on this date`;
+  const isBusy = authLoading || loadingMonth || loadingDate || (rangeMode === "year" && loadingYear);
 
   return (
     <div className="progress-wrap container small-calendar">
@@ -411,14 +468,10 @@ export default function Progress(){
           <p className="subtitle">Compact calendar, quick stats and chart. Click a date to see sessions.</p>
         </div>
         <div className="top-actions">
-          <div className="range-toggle">
-            <button className={rangeMode==="week"?"chip active":"chip"} onClick={()=>setRangeMode("week")}>WEEK</button>
-            <button className={rangeMode==="month"?"chip active":"chip"} onClick={()=>setRangeMode("month")}>MONTH</button>
-            <button className={rangeMode==="year"?"chip active":"chip"} onClick={()=>setRangeMode("year")}>YEAR</button>
-          </div>
           <div className="export-actions">
             <button className="btn ghost" onClick={exportVisible}>Export Visible</button>
             <button className="btn" onClick={exportDay}>Export Date</button>
+            <button className="btn ghost" onClick={forceRefresh}>Refresh</button>
           </div>
         </div>
       </div>
@@ -497,7 +550,7 @@ export default function Progress(){
             <div className="report-head">
               <div>
                 <h3>Sessions — {selectedDate}</h3>
-                <div className="muted">{loadingDate ? "Loading..." : sessionsCountText}</div>
+                <div className="muted">{isBusy ? "Loading..." : sessionsCountText}</div>
               </div>
               <div className="report-actions">
                 <button className="btn ghost" onClick={()=>{ setSelectedDate(isoDate(today.getFullYear(), today.getMonth(), today.getDate())); setViewMonth(today.getMonth()); setViewYear(today.getFullYear()); }}>Today</button>
@@ -505,8 +558,14 @@ export default function Progress(){
             </div>
 
             <div className="report-list" id="report-list">
-              {items.length === 0 ? (
-                <div className="empty">{loadingDate ? "Loading sessions..." : "No sessions on this date — start your first AI workout!"}</div>
+              {loadError && !isBusy && (
+                <div className="empty">
+                  {loadError}
+                  <button className="btn ghost" onClick={forceRefresh} style={{ marginTop: 10 }}>Retry</button>
+                </div>
+              )}
+              {!loadError && items.length === 0 ? (
+                <div className="empty">{(isBusy || !initLoaded) ? "Loading sessions..." : "No sessions on this date — start your first AI workout!"}</div>
               ) : items.map(s => (
                 <div className="session" key={s.id}>
                   <div className="s-left">
@@ -560,6 +619,14 @@ export default function Progress(){
                     })
                 })() }
               </svg>
+            </div>
+
+            <div className="chart-range">
+              <div className="range-toggle">
+                <button className={rangeMode==="week"?"chip active":"chip"} onClick={()=>setRangeMode("week")}>WEEK</button>
+                <button className={rangeMode==="month"?"chip active":"chip"} onClick={()=>setRangeMode("month")}>MONTH</button>
+                <button className={rangeMode==="year"?"chip active":"chip"} onClick={()=>setRangeMode("year")}>YEAR</button>
+              </div>
             </div>
 
             <div className="table-nums">

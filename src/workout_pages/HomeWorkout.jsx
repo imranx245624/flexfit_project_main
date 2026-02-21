@@ -33,32 +33,45 @@ function HomeWorkout() {
 
   return (
     <PageWrapper>
-      <div className="homeworkout-title">Home Workout</div>
+      <div className="homeworkout-title split-title">
+        <span>Home</span>
+        <span>Workout</span>
+      </div>
 
       <div className="workout-groups">
-        {HOME_GROUPS.map((group) => (
-          <section key={group.title} className="workout-group-card">
-            <div className="workout-group-header">
-              <h2>{group.title}</h2>
-            </div>
-            <div className="workout-group-body">
-              {group.sections.map((section) => (
-                section.subsections ? (
-                  <div key={section.title} className="workout-group-section">
-                    <div className="workout-group-subtitle">{section.title}</div>
-                    <div className="workout-group-subgrid">
-                      {section.subsections.map((sub) => (
-                        <GroupSection key={sub.title} title={sub.title} items={sub.items} />
-                      ))}
-                    </div>
-                  </div>
+        {HOME_GROUPS.map((group) => {
+          const isSingle =
+            group.sections.length === 1 &&
+            !group.sections[0].subsections &&
+            group.sections[0].title === group.title;
+          return (
+            <section key={group.title} className="workout-group-card">
+              <div className="workout-group-header">
+                <h2>{group.title}</h2>
+              </div>
+              <div className="workout-group-body">
+                {isSingle ? (
+                  <ExerciseGrid items={group.sections[0].items} />
                 ) : (
-                  <GroupSection key={section.title} title={section.title} items={section.items} />
-                )
-              ))}
-            </div>
-          </section>
-        ))}
+                  group.sections.map((section) => (
+                    section.subsections ? (
+                      <div key={section.title} className="workout-group-section">
+                        <div className="workout-group-subtitle">{section.title}</div>
+                        <div className="workout-group-subgrid">
+                          {section.subsections.map((sub) => (
+                            <GroupSection key={sub.title} title={sub.title} items={sub.items} />
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <GroupSection key={section.title} title={section.title} items={section.items} />
+                    )
+                  ))
+                )}
+              </div>
+            </section>
+          );
+        })}
       </div>
     </PageWrapper>
   );
