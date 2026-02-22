@@ -57,7 +57,7 @@ function RouterWrapper() {
       }
     };
     init();
-  }, []);
+  }, [navigate]);
 
   useEffect(() => {
     const { data: { subscription } = {} } = supabase.auth.onAuthStateChange(async (event, session) => {
