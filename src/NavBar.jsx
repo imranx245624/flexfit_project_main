@@ -14,6 +14,13 @@ export default function NavBar() {
   const [showSignIn, setShowSignIn] = useState(false);
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [theme, setTheme] = useState(() => {
+    if (typeof window === "undefined") return "light";
+    const saved = localStorage.getItem("ff-theme");
+    if (saved === "dark") return "dark";
+    const attr = document.documentElement.getAttribute("data-theme");
+    return attr === "dark" ? "dark" : "light";
+  });
   const popoverRef = useRef(null);
   const loc = useLocation();
   const navigate = useNavigate();
@@ -28,7 +35,7 @@ export default function NavBar() {
     "/leaderboard": "Flex Rankings",
     "/plans": "Plans",
     "/profile": "Dashboard",
-    "/progress": "Dashboard",
+    "/progress": "MY Progress",
     "/settings": "Settings",
   };
   const pageTitle = (() => {
@@ -61,6 +68,30 @@ export default function NavBar() {
     return () => window.removeEventListener("flexfit-open-signin", handler);
   }, []);
 
+  useEffect(() => {
+    const root = document.documentElement;
+    const sync = () => {
+      const attr = root.getAttribute("data-theme");
+      setTheme(attr === "dark" ? "dark" : "light");
+    };
+    sync();
+    const obs = new MutationObserver(sync);
+    obs.observe(root, { attributes: true, attributeFilter: ["data-theme"] });
+    return () => obs.disconnect();
+  }, []);
+
+  const toggleTheme = () => {
+    const next = theme === "dark" ? "light" : "dark";
+    const root = document.documentElement;
+    if (next === "dark") {
+      root.setAttribute("data-theme", "dark");
+    } else {
+      root.removeAttribute("data-theme");
+    }
+    try { localStorage.setItem("ff-theme", next); } catch (e) {}
+    setTheme(next);
+  };
+
   const displayName = user?.user_metadata?.full_name
     || user?.user_metadata?.name
     || (user?.email ? user.email.split("@")[0] : "User");
@@ -91,8 +122,18 @@ export default function NavBar() {
     <>
       <header className="navbar">
         <div className="nav-inner">
+          <div className="nav-brand">FlexFit</div>
           <div className="nav-title">{pageTitle}</div>
           <div className="nav-right" ref={popoverRef}>
+            <button
+              className={`nav-theme-btn ${theme === "dark" ? "is-dark" : ""}`}
+              type="button"
+              onClick={toggleTheme}
+              aria-label="Toggle theme"
+              title="Toggle theme"
+            >
+              ☀
+            </button>
             {user ? (
               <Link className="nav-btn nav-cta" to="/AIWorkoutLibrary">Train with AI</Link>
             ) : (
@@ -131,7 +172,7 @@ export default function NavBar() {
                       <div className="popover-name">{displayName}</div>
                       <div className="popover-email">{user?.email || "No email"}</div>
                       <div className="popover-actions">
-                        <Link to="/progress" className="popover-link" onClick={() => setPopoverOpen(false)}>Go to Dashboard</Link>
+                        <Link to="/progress" className="popover-link" onClick={() => setPopoverOpen(false)}>Go to MY Progress</Link>
                         <Link to="/settings" className="popover-link" onClick={() => setPopoverOpen(false)}>Settings</Link>
                         <button
                           className="popover-link ghost"

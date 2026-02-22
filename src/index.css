@@ -17,6 +17,12 @@
   --ff-accent-fill: rgba(124,58,237,0.12);
   --ff-positive: #22C55E;
   --ff-subtle: rgba(31,43,58,0.35);
+  --ff-shell-divider: rgba(213, 255, 249, 0.218);
+  --ff-shell-divider-glow: rgba(56,189,248,0.5);
+  --ff-main-surface: linear-gradient(180deg, rgba(255,255,255,0.85), rgba(236,241,250,0.95));
+  --ff-main-surface-border: rgba(15,23,36,0.08);
+  --ff-shell-left-bg: rgba(106,91,232,0.12);
+  --ff-shell-right-bg: rgba(110,231,255,0.08);
   --ff-radius: 12px;
   --ff-space-1: 4px;
   --ff-space-2: 8px;
@@ -71,6 +77,12 @@ body[data-theme="dark"]{
   --ff-accent-fill: rgba(34,211,238,0.16);
   --ff-positive: #34d399;
   --ff-subtle: rgba(230,240,255,0.35);
+  --ff-shell-divider: rgba(34,211,238,0.98);
+  --ff-shell-divider-glow: rgba(56,189,248,0.7);
+  --ff-main-surface: linear-gradient(180deg, rgba(11,15,20,0.9), rgba(15,22,34,0.95));
+  --ff-main-surface-border: rgba(34,211,238,0.15);
+  --ff-shell-left-bg: rgba(12,20,38,0.75);
+  --ff-shell-right-bg: rgba(10,16,26,0.45);
 }
 
 * { box-sizing: border-box; }
@@ -296,4 +308,11 @@ body[data-theme="dark"] .progress-wrap .day{
 :root[data-theme="dark"] .settings-page .toggle span,
 body[data-theme="dark"] .settings-page .toggle span{
   background: var(--ff-surface-2);
+}
+
+:root[data-theme="dark"] .nav-brand,
+body[data-theme="dark"] .nav-brand{
+  background: linear-gradient(90deg, rgba(34,211,238,0.45), rgba(255,107,214,0.45));
+  color: #e6f7ff;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.45);
 }

@@ -62,7 +62,7 @@ export default function SideBar({ open = true, setOpen }) {
 
   const navItems = useMemo(() => ([
     { label: "Home", to: "/", icon: ICONS.home },
-    { label: "Dashboard", to: "/progress", icon: ICONS.dashboard },
+    { label: "MY Progress", to: "/progress", icon: ICONS.dashboard },
     { label: "Workout Library", to: "/workouts", icon: ICONS.library },
     { label: "AI Workout", to: "/AIWorkoutLibrary", icon: ICONS.ai },
     { label: "Flex Rankings", to: "/leaderboard", icon: ICONS.ranking },

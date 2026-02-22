@@ -5,14 +5,15 @@
 
 .sidebar {
   position: sticky;
-  top: 16px;
+  top: 0;
   width: var(--sidebar-width);
   display: flex;
   flex-direction: column;
   gap: 16px;
   padding: 12px;
   align-self: flex-start;
-  height: calc(100vh - 32px);
+  height: 100vh;
+  margin-top: calc(-1 * var(--nav-height, 64px));
   border-radius: 22px;
   background: linear-gradient(180deg, #6a5be8 0%, #7b6af0 45%, #9a7bff 100%);
   border: 1px solid rgba(255,255,255,0.22);
@@ -202,6 +203,7 @@
     justify-content: space-between;
     width: auto;
     padding: 8px 10px;
+    margin-top: 0;
   }
   .sidebar-top,
   .sidebar-bottom {

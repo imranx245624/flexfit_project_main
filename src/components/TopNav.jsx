@@ -11,7 +11,7 @@ const PAGE_TITLES = {
   "/AIWorkoutLibrary": "AI Workout Library",
   "/AIWorkout": "AI Workout",
   "/profile": "Dashboard",
-  "/progress": "Dashboard",
+  "/progress": "MY Progress",
   "/settings": "Dashboard",
   "/leaderboard": "Flex Rankings",
 };

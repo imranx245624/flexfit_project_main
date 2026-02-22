@@ -1,6 +1,6 @@
 // src/App.js
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, useNavigate, Link } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useNavigate, Link, useLocation } from "react-router-dom";
 
 import "./styles/theme.css"; // new global theme (kept)
 import "./App.css";
@@ -28,6 +28,14 @@ import { useAuth } from "./utils/auth";
 function RouterWrapper() {
   const [hideShell, setHideShell] = useState(false);
   const [, setCurrentUser] = useState(null);
+  const location = useLocation();
+
+  // Always reset to top on route change (no full page reload needed)
+  useEffect(() => {
+    try {
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    } catch (e) {}
+  }, [location.pathname]);
 
   useEffect(() => {
     const init = async () => {
@@ -336,7 +344,7 @@ function RouterWrapper() {
               <div className="footer-pill-row">
                 <span>Pose AI</span>
                 <span>Workout Library</span>
-                <span>Progress Tracker</span>
+                <span>MY Progress</span>
               </div>
             </div>
 
@@ -352,7 +360,7 @@ function RouterWrapper() {
               <div className="footer-title">Training</div>
               <Link to="/HWorkout" className="footer-link">Home Workouts</Link>
               <Link to="/GWorkout" className="footer-link">Gym Workouts</Link>
-              <Link to="/progress" className="footer-link">Progress Tracker</Link>
+              <Link to="/progress" className="footer-link">MY Progress</Link>
               <Link to="/leaderboard" className="footer-link">Leaderboard</Link>
             </div>
 

@@ -131,6 +131,7 @@ export default function Progress(){
   const summary = useMemo(()=> aggregate(sessionsForDate), [sessionsForDate]);
 
   const [rangeMode, setRangeMode] = useState("month"); // week|month|year
+  const [view, setView] = useState("calendar"); // calendar | chart
   const chartData = useMemo(()=> {
     const anchor = new Date(selectedDate);
     const points = [];
@@ -446,15 +447,10 @@ export default function Progress(){
   function nextMonth(){ let m=viewMonth+1, y=viewYear; if(m>11){ m=0; y++; } if(y > YEAR_MAX) return; setViewYear(y); setViewMonth(m); }
   function pickDate(day){ if(!day) return; setSelectedDate(isoDate(viewYear, viewMonth, day)); }
 
-  function exportDay(){
+  function exportSelectedReport(){
     downloadCSV(sessionsForDate.map(s=>({
       date: s.date, time: s.time, workoutName: s.workoutName, reps: s.reps, accuracy: s.accuracy, minutes: s.minutes, calories: s.calories, eca: s.eca
     })), `progress_${selectedDate}.csv`);
-  }
-  function exportVisible(){
-    downloadCSV(items.map(s=>({
-      date: s.date, time: s.time, workoutName: s.workoutName, reps: s.reps, accuracy: s.accuracy, minutes: s.minutes, calories: s.calories, eca: s.eca
-    })), `progress_visible_${selectedDate}.csv`);
   }
 
   const sessionsCountText = `${sessionsForDate.length} session(s) on this date`;
@@ -464,24 +460,24 @@ export default function Progress(){
     <div className="progress-wrap container small-calendar">
       <div className="page-header">
         <div>
-          <h1 className="title">Progress Tracker</h1>
+          <h1 className="title">MY Progress</h1>
           <p className="subtitle">Compact calendar, quick stats and chart. Click a date to see sessions.</p>
         </div>
         <div className="top-actions">
-          <div className="export-actions">
-            <button className="btn ghost" onClick={exportVisible}>Export Visible</button>
-            <button className="btn" onClick={exportDay}>Export Date</button>
-            <button className="btn ghost" onClick={forceRefresh}>Refresh</button>
+          <div className="view-toggle">
+            <button className={view==="calendar"?"chip active":"chip"} onClick={()=>setView("calendar")}>Calendar</button>
+            <button className={view==="chart"?"chip active":"chip"} onClick={()=>setView("chart")}>Activity Chart</button>
           </div>
         </div>
       </div>
 
+      {view === "calendar" && (
       <div className="content-grid">
         {/* LEFT: calendar + stats grid + report stacked */}
         <aside className="left-col">
           <div className="mini-calendar card">
             <div className="cal-head">
-              <button className="icon-btn" onClick={prevMonth} aria-label="prev">‹</button>
+              <button className="icon-btn" onClick={prevMonth} aria-label="prev">&lt;</button>
               <div className="month-select">
                 <select value={viewMonth} onChange={e=>setViewMonth(Number(e.target.value))}>
                   {monthNames.map((m, i)=> <option key={i} value={i}>{m}</option>)}
@@ -492,7 +488,7 @@ export default function Progress(){
                   })}
                 </select>
               </div>
-              <button className="icon-btn" onClick={nextMonth} aria-label="next">›</button>
+              <button className="icon-btn" onClick={nextMonth} aria-label="next">&gt;</button>
             </div>
 
             <div className="weekdays">
@@ -509,7 +505,7 @@ export default function Progress(){
                   <button key={iso}
                     className={`day ${has? "has": "no"} ${isSel? "sel": ""}`}
                     onClick={()=>{ pickDate(d); }}
-                    title={`${iso}${has ? " — sessions available" : ""}`}>
+                    title={`${iso}${has ? " - sessions available" : ""}`}>
                     <div className="num">{d}</div>
                     {has && <div className="dot" />}
                   </button>
@@ -549,10 +545,11 @@ export default function Progress(){
           <div className="report card">
             <div className="report-head">
               <div>
-                <h3>Sessions — {selectedDate}</h3>
+                <h3>Sessions - {selectedDate}</h3>
                 <div className="muted">{isBusy ? "Loading..." : sessionsCountText}</div>
               </div>
               <div className="report-actions">
+                <button className="btn" onClick={exportSelectedReport}>Export Report</button>
                 <button className="btn ghost" onClick={()=>{ setSelectedDate(isoDate(today.getFullYear(), today.getMonth(), today.getDate())); setViewMonth(today.getMonth()); setViewYear(today.getFullYear()); }}>Today</button>
               </div>
             </div>
@@ -565,7 +562,7 @@ export default function Progress(){
                 </div>
               )}
               {!loadError && items.length === 0 ? (
-                <div className="empty">{(isBusy || !initLoaded) ? "Loading sessions..." : "No sessions on this date — start your first AI workout!"}</div>
+                <div className="empty">{(isBusy || !initLoaded) ? "Loading sessions..." : "No sessions on this date - start your first AI workout!"}</div>
               ) : items.map(s => (
                 <div className="session" key={s.id}>
                   <div className="s-left">
@@ -587,8 +584,11 @@ export default function Progress(){
             </div>
           </div>
         </aside>
+      </div>
+      )}
 
-        {/* RIGHT: big chart only (summary moved left) */}
+      {view === "chart" && (
+      <div className="content-grid chart-only">
         <main className="right-col">
           <div className="chart-card card">
             <div className="chart-head">
@@ -638,8 +638,9 @@ export default function Progress(){
           </div>
         </main>
       </div>
+      )}
 
-      <div className="note muted">Live mode — data pulled from Supabase `workout_sessions` table. Calories computed using MET mapping on client.</div>
+      <div className="note muted">Live mode - data pulled from Supabase `workout_sessions` table. Calories computed using MET mapping on client.</div>
     </div>
   );
 }
