@@ -225,11 +225,11 @@ function RouterWrapper() {
           <div className="ff-hero-left">
             <span className="hero-badge">FlexFit AI</span>
             <h1>AI-Powered Fitness Assistant</h1>
-            <p className="hero-lead">
+            {/* <p className="hero-lead">
               FlexFit AI is a privacy-first fitness assistant that uses your webcam for real-time pose detection
               and voice feedback. Explore home and gym workouts, track accuracy and reps, and review progress
               reports. 3D body model visualization is coming soon.
-            </p>
+            </p> */}
             <div className="hero-actions">
               <button className="btn-primary ai-cta" onClick={goAI}>Train with AI</button>
               <button className="btn-ghost" onClick={goLibrary}>Workout Library</button>
