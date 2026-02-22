@@ -102,7 +102,7 @@ function RouterWrapper() {
         subscription?.unsubscribe?.();
       } catch (e) {}
     };
-  }, []);
+  }, [navigate]);
 
   // keep session fresh to avoid unexpected logouts
   useEffect(() => {
