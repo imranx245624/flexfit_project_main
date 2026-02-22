@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="refresh" content="0;url=/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FlexFit AI</title>
+    <script>
+      (function () {
+        try {
+          var loc = window.location;
+          var target = "/" + "?redirect=" + encodeURIComponent(loc.pathname + loc.search + loc.hash);
+          window.location.replace(target);
+        } catch (e) {}
+      })();
+    </script>
+    <style>
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #0b0f14;
+        color: #e9f2ff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+      }
+      .msg {
+        text-align: center;
+        padding: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="msg">Loading FlexFit AI…</div>
+  </body>
+</html>

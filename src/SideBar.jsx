@@ -15,17 +15,17 @@ const ICONS = {
   ),
   dashboard: (
     <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-      <path d="M4 13h7v7H4v-7zm9-9h7v15h-7V4zM4 4h7v7H4V4z" fill="currentColor" />
+      <path d="M3 3h9v9H3V3zm10 0h8v6h-8V3zM13 10h8v11h-8V10zM3 13h9v8H3v-8z" fill="currentColor" />
     </svg>
   ),
   library: (
     <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-      <path d="M6 3h11a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6V3zm-2 4h2v14H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1z" fill="currentColor" />
+      <path d="M5 3h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm2 4h7v2H7V7zm0 4h7v2H7v-2zm0 4h5v2H7v-2z" fill="currentColor" />
     </svg>
   ),
   ai: (
     <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-      <path d="M7 4h10a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3zm2 6h6v6H9v-6z" fill="currentColor" />
+      <path d="M9 3h6v2h2a2 2 0 0 1 2 2v2h2v6h-2v2a2 2 0 0 1-2 2h-2v2H9v-2H7a2 2 0 0 1-2-2v-2H3v-6h2V7a2 2 0 0 1 2-2h2V3zm-2 6v6h10V9H7zm3-2h4V5h-4v2zm0 10h4v2h-4v-2z" fill="currentColor" />
     </svg>
   ),
   ranking: (
@@ -35,13 +35,13 @@ const ICONS = {
   ),
   settings: (
     <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-      <path d="M19.4 13a7.7 7.7 0 0 0 .1-2l2-1.2-2-3.4-2.3.7a7 7 0 0 0-1.7-1l-.3-2.4H9l-.3 2.4a7 7 0 0 0-1.7 1l-2.3-.7-2 3.4 2 1.2a7.7 7.7 0 0 0 .1 2l-2 1.2 2 3.4 2.3-.7a7 7 0 0 0 1.7 1l.3 2.4h6.2l.3-2.4a7 7 0 0 0 1.7-1l2.3.7 2-3.4-2-1.2zM12 15.5A3.5 3.5 0 1 1 12 8a3.5 3.5 0 0 1 0 7.5z" fill="currentColor" />
+      <path d="M12 3l1.6 2.7 3-.2.8 3 2.6 1.5-1.5 2.6 1.5 2.6-2.6 1.5-.8 3-3-.2L12 21l-1.6-2.7-3 .2-.8-3-2.6-1.5 1.5-2.6-1.5-2.6 2.6-1.5.8-3 3 .2L12 3zm0 5a4 4 0 1 0 0 8 4 4 0 0 0 0-8z" fill="currentColor" />
     </svg>
   ),
   signout: (
     <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-      <path d="M10 4h7a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-7v-2h7V6h-7V4z" fill="currentColor" />
-      <path d="M3 12l4-4v3h8v2H7v3l-4-4z" fill="currentColor" />
+      <path d="M5 4h9a2 2 0 0 1 2 2v4h-2V6H5v12h9v-4h2v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" fill="currentColor" />
+      <path d="M13 11h7l-3-3 1.4-1.4L23 12l-4.6 5.4L17 16l3-3h-7v-2z" fill="currentColor" />
     </svg>
   ),
 };

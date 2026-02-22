@@ -7,7 +7,6 @@ import "./App.css";
 import "./HomeContent.css"; // updated file
 import NavBar from "./NavBar.jsx";
 import SideBar from "./SideBar.jsx";
-import RequireAuth from "./components/RequireAuth.jsx";
 
 import HWorkout from "./workout_pages/HomeWorkout.jsx";
 import GWorkout from "./workout_pages/GymWorkout.jsx";
@@ -23,10 +22,10 @@ import Setting from "./sidebar_pages/Setting.jsx";
 
 /* TODO: DO NOT CHANGE API CALLS (supabase) */
 import { supabase } from "./utils/supabaseClient";
-import { useAuth } from "./utils/auth";
 
 function RouterWrapper() {
   const [hideShell, setHideShell] = useState(false);
+  const [routeLoading, setRouteLoading] = useState(false);
   const [, setCurrentUser] = useState(null);
   const location = useLocation();
   const navigate = useNavigate();
@@ -36,6 +35,19 @@ function RouterWrapper() {
     try {
       window.scrollTo({ top: 0, left: 0, behavior: "auto" });
     } catch (e) {}
+  }, [location.pathname]);
+
+  // Show a short loading notice on every route change
+  useEffect(() => {
+    let alive = true;
+    setRouteLoading(true);
+    const timer = setTimeout(() => {
+      if (alive) setRouteLoading(false);
+    }, 4000);
+    return () => {
+      alive = false;
+      clearTimeout(timer);
+    };
   }, [location.pathname]);
 
   useEffect(() => {
@@ -153,21 +165,10 @@ function RouterWrapper() {
   /* --------------------- NEW HomeContent (redesigned) --------------------- */
   function HomeContent() {
     const navigate = useNavigate();
-    const { user } = useAuth();
-
-    const guardNavigate = (path) => {
-      if (!user) {
-        alert("Sign in first");
-        try { window.dispatchEvent(new CustomEvent("flexfit-open-signin")); } catch (e) {}
-        return;
-      }
-      navigate(path);
-    };
-
-    const goHomeWorkout = () => guardNavigate("/HWorkout");
-    const goGymWorkout = () => guardNavigate("/GWorkout");
-    const goAI = () => guardNavigate("/AIWorkoutLibrary");
-    const goLibrary = () => guardNavigate("/workouts");
+    const goHomeWorkout = () => navigate("/HWorkout");
+    const goGymWorkout = () => navigate("/GWorkout");
+    const goAI = () => navigate("/AIWorkoutLibrary");
+    const goLibrary = () => navigate("/workouts");
 
     const features = [
       {
@@ -186,10 +187,10 @@ function RouterWrapper() {
         title: "Progress & Reports",
         desc: "Session summaries, accuracy, ECA points, and performance insights.",
       },
-      // {
-      //   title: "3D Muscle Visuals",
-      //   desc: "See which muscles work during each movement (expanding module).",
-      // },
+      {
+        title: "3D Body Model (Coming Soon)",
+        desc: "Planned muscle visualization to explain form and engagement.",
+      },
       {
         title: "Privacy First",
         desc: "Video stays on your device; no raw camera stream is stored by default.",
@@ -224,6 +225,11 @@ function RouterWrapper() {
           <div className="ff-hero-left">
             <span className="hero-badge">FlexFit AI</span>
             <h1>AI-Powered Fitness Assistant</h1>
+            <p className="hero-lead">
+              FlexFit AI is a privacy-first fitness assistant that uses your webcam for real-time pose detection
+              and voice feedback. Explore home and gym workouts, track accuracy and reps, and review progress
+              reports. 3D body model visualization is coming soon.
+            </p>
             <div className="hero-actions">
               <button className="btn-primary ai-cta" onClick={goAI}>Train with AI</button>
               <button className="btn-ghost" onClick={goLibrary}>Workout Library</button>
@@ -328,20 +334,29 @@ function RouterWrapper() {
           className={`mainPart ${hideShell ? "" : "app-main-content"}`}
           style={{ paddingTop: hideShell ? 0 : undefined }}
         >
+          {routeLoading && (
+            <div className="route-notice" role="status" aria-live="polite">
+              <span className="route-notice-dot" aria-hidden="true" />
+              <div className="route-notice-text">
+                <strong>Loading page...</strong>
+                <span>If this page takes time or looks stuck, please refresh.</span>
+              </div>
+            </div>
+          )}
           <Routes>
             <Route path="/" element={<HomeContent />} />
             <Route path="/HWorkout" element={<HWorkout />} />
             <Route path="/GWorkout" element={<GWorkout />} />
-            <Route path="/exercise/:slug" element={<RequireAuth><ExerciseDetail /></RequireAuth>} />
-            <Route path="/workouts" element={<RequireAuth><Workouts /></RequireAuth>} />
-            <Route path="/plans" element={<RequireAuth><Plans /></RequireAuth>} />
-            <Route path="/leaderboard" element={<RequireAuth><Leaderboard /></RequireAuth>} />
-            <Route path="/AIWorkoutLibrary" element={<RequireAuth><AIWorkoutLibrary /></RequireAuth>} />
-            <Route path="/AIWorkout" element={<RequireAuth><AIWorkout /></RequireAuth>} />
+            <Route path="/exercise/:slug" element={<ExerciseDetail />} />
+            <Route path="/workouts" element={<Workouts />} />
+            <Route path="/plans" element={<Plans />} />
+            <Route path="/leaderboard" element={<Leaderboard />} />
+            <Route path="/AIWorkoutLibrary" element={<AIWorkoutLibrary />} />
+            <Route path="/AIWorkout" element={<AIWorkout />} />
             {/* PROFILE AS A STANDALONE PAGE */}
-            <Route path="/profile" element={<RequireAuth><Profile onSignOut={handleProfileSignOut} /></RequireAuth>} />
-            <Route path="/progress" element={<RequireAuth><Progress /></RequireAuth>} />
-            <Route path="/settings" element={<RequireAuth><Setting /></RequireAuth>} />
+            <Route path="/profile" element={<Profile onSignOut={handleProfileSignOut} />} />
+            <Route path="/progress" element={<Progress />} />
+            <Route path="/settings" element={<Setting />} />
           </Routes>
         </main>
       </div>

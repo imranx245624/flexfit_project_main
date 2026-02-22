@@ -250,10 +250,10 @@ export default function NavBar() {
                 aria-label="Install app"
                 title="Install app"
               >
-                Install
+                Install App
               </button>
             )}
-            {user ? (
+            {/* {user ? (
               <Link className="nav-btn nav-cta" to="/AIWorkoutLibrary">Train with AI</Link>
             ) : (
               <button
@@ -266,7 +266,7 @@ export default function NavBar() {
               >
                 Train with AI
               </button>
-            )}
+            )} */}
             {!user && (
               <button className="nav-btn" onClick={() => setShowSignIn(true)}>Sign in</button>
             )}

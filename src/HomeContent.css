@@ -439,7 +439,7 @@
 
 .ff-hero-left h1 {
   margin: 8px 0 10px;
-  font-size: 36px;
+  font-size: 24px;
   color: var(--ff-text);
   font-family: "Orbitron", "Poppins", "Inter", system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial;
 }
@@ -450,9 +450,10 @@
   gap: 8px;
   font-size: 12px;
   font-weight: 800;
+  max-width: fit-content;
   letter-spacing: 1px;
   padding: 6px 12px;
-  border-radius: 999px;
+  border-radius: 9px;
   background: linear-gradient(90deg, rgba(255,107,157,0.55), rgba(110,231,255,0.55));
   color: var(--ff-text);
 }
@@ -721,6 +722,7 @@
   .home-section { padding: 32px 0 24px; }
   .feature-grid { grid-template-columns: 1fr; }
   .steps-grid { grid-template-columns: 1fr; }
+  /* OLD mobile hero layout (commented as requested)
   .ff-hero-block.with-video {
     min-height: 62vh;
     padding: 14px;
@@ -735,6 +737,51 @@
   .hero-actions .btn-primary,
   .hero-actions .btn-ghost { flex: 1; justify-content: center; }
   .hero-pills { gap: 8px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .hero-pills span { text-align: center; }
+  */
+
+  /* NEW mobile hero layout: keep video clear, move actions to bottom */
+  .ff-hero-block.with-video {
+    min-height: 74vh;
+    padding: 12px;
+    border-radius: 22px;
+    background: #0b1018;
+  }
+  .ff-hero-video-bg { object-fit: cover; object-position: center 30%; background: #0b1018; }
+  .ff-hero-video-overlay {
+    background: linear-gradient(180deg, rgba(8,12,20,0.55) 0%, rgba(8,12,20,0.2) 35%, rgba(8,12,20,0) 100%);
+  }
+  .ff-hero-left {
+    height: 100%;
+    position: relative;
+    gap: 6px;
+    padding-top: 6px;
+    padding-bottom: 120px;
+  }
+  .hero-badge { font-size: 11px; padding: 4px 10px; }
+  .ff-hero-left h1 { font-size: 23px; line-height: 1.15; max-width: 92%; }
+  .hero-actions {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 56px;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .hero-actions .btn-primary,
+  .hero-actions .btn-ghost { width: 100%; justify-content: center; }
+  .hero-pills {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 10px;
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
   .hero-pills span { text-align: center; }
   .hero-card { padding: 12px; min-height: 72px; }
   .hero-card-title { font-size: 14px; }

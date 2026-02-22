@@ -8,6 +8,56 @@
   padding: 0;
 }
 
+.route-notice {
+  position: sticky;
+  top: 0;
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  margin: 6px 0 12px;
+  border-radius: 14px;
+  background: rgba(12, 18, 28, 0.85);
+  color: #e9f2ff;
+  border: 1px solid rgba(110, 231, 255, 0.25);
+  box-shadow: 0 12px 24px rgba(8, 10, 16, 0.35);
+  backdrop-filter: blur(10px);
+}
+
+.route-notice-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--ff-accent);
+  box-shadow: 0 0 12px var(--ff-accent);
+  animation: routePulse 1.2s ease infinite;
+  flex: 0 0 auto;
+}
+
+.route-notice-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+}
+
+.route-notice-text strong {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+}
+
+.route-notice-text span {
+  color: rgba(232, 241, 255, 0.78);
+}
+
+@keyframes routePulse {
+  0% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.5); opacity: 0.4; }
+  100% { transform: scale(1); opacity: 0.9; }
+}
+
 .app-shell {
   display: flex;
   align-items: flex-start;
