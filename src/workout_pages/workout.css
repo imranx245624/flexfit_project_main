@@ -347,11 +347,15 @@ body[data-theme="dark"] .workout-exercise-card:nth-child(3n){
   .main-workout-title, .section-title { font-size: 18px; }
   .homeworkout-title, .main-workout-title { padding: 8px 14px; }
   .video-card video { height: 200px; }
-  .workout-groups { padding: 0 16px; }
-  .workout-group-card { padding: 14px; }
-  .workout-group-section { padding: 8px 10px; }
+  .workout-groups { padding: 0 12px; gap: 14px; margin: 18px auto 28px; }
+  .workout-group-card { padding: 12px; border-radius: 14px; }
+  .workout-group-header { margin-bottom: 8px; }
+  .workout-group-header h2 { font-size: 18px; }
+  .workout-group-section { padding: 8px; border-radius: 10px; }
   .workout-group-subtitle { font-size: 13px; }
-  .workout-exercise-card { padding: 8px 10px; }
+  .workout-group-subgrid { grid-template-columns: 1fr; gap: 10px; }
+  .workout-exercise-grid { grid-template-columns: 1fr; gap: 8px; }
+  .workout-exercise-card { padding: 8px; border-radius: 10px; }
   .workout-exercise-name { font-size: 13px; }
   .workout-exercise-cta { font-size: 11px; }
 }

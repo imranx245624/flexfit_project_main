@@ -721,13 +721,21 @@
   .home-section { padding: 32px 0 24px; }
   .feature-grid { grid-template-columns: 1fr; }
   .steps-grid { grid-template-columns: 1fr; }
-  .ff-hero-block.with-video { min-height: 70vh; padding: 16px; background: #0b1018; }
+  .ff-hero-block.with-video {
+    min-height: 62vh;
+    padding: 14px;
+    border-radius: 22px;
+    background: #0b1018;
+  }
   .ff-hero-video-bg { object-fit: contain; object-position: center; background: #0b1018; }
-  .ff-hero-left h1 { font-size: 28px; }
-  .hero-actions { width: 100%; }
+  .ff-hero-left { height: auto; gap: 8px; justify-content: flex-start; }
+  .hero-badge { font-size: 11px; padding: 4px 10px; }
+  .ff-hero-left h1 { font-size: 24px; line-height: 1.15; }
+  .hero-actions { width: 100%; margin-top: 8px; margin-bottom: 10px; flex-direction: column; }
   .hero-actions .btn-primary,
   .hero-actions .btn-ghost { flex: 1; justify-content: center; }
-  .hero-pills { gap: 8px; }
+  .hero-pills { gap: 8px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .hero-pills span { text-align: center; }
   .hero-card { padding: 12px; min-height: 72px; }
   .hero-card-title { font-size: 14px; }
   .hero-card-sub { font-size: 11px; }

@@ -67,6 +67,16 @@
 .toggle input:checked + span { background: rgba(31,184,166,0.4); }
 .toggle input:checked + span::before { transform: translateX(24px); }
 
+.settings-install-btn {
+  padding: 6px 12px;
+  font-size: 12px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #22d3ee, #38bdf8);
+  color: #05141b;
+  border: none;
+  box-shadow: 0 8px 18px rgba(56,189,248,0.2);
+}
+
 @media (max-width: 900px) {
   .settings-groups { grid-template-columns: 1fr; }
   .settings-header { flex-direction: column; align-items: flex-start; }

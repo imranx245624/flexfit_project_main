@@ -6,6 +6,9 @@ export default function Settings() {
   const [units, setUnits] = useState("kg");
   const [difficulty, setDifficulty] = useState("standard");
   const [debugLogs, setDebugLogs] = useState(false);
+  const [installPrompt, setInstallPrompt] = useState(null);
+  const [canInstall, setCanInstall] = useState(false);
+  const [isInstalled, setIsInstalled] = useState(false);
   const [theme, setTheme] = useState(() => {
     if (typeof window === "undefined") return "light";
     const saved = localStorage.getItem("ff-theme");
@@ -25,6 +28,50 @@ export default function Settings() {
     }
     try { localStorage.setItem("ff-theme", theme); } catch (e) {}
   }, [theme]);
+
+  useEffect(() => {
+    const sync = () => {
+      const prompt = window.__ffInstallPrompt || null;
+      const standalone = window.matchMedia("(display-mode: standalone)").matches;
+      const iOSStandalone = window.navigator.standalone === true;
+      setIsInstalled(standalone || iOSStandalone);
+      setInstallPrompt(prompt);
+      setCanInstall(Boolean(prompt) && !(standalone || iOSStandalone));
+    };
+    sync();
+    const handleAvailable = () => sync();
+    const handleInstalled = () => {
+      setIsInstalled(true);
+      setCanInstall(false);
+      setInstallPrompt(null);
+    };
+    const handleUsed = () => {
+      setCanInstall(false);
+      setInstallPrompt(null);
+    };
+    window.addEventListener("flexfit-install-available", handleAvailable);
+    window.addEventListener("appinstalled", handleInstalled);
+    window.addEventListener("flexfit-install-used", handleUsed);
+    return () => {
+      window.removeEventListener("flexfit-install-available", handleAvailable);
+      window.removeEventListener("appinstalled", handleInstalled);
+      window.removeEventListener("flexfit-install-used", handleUsed);
+    };
+  }, []);
+
+  const handleInstall = async () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    try {
+      const choice = await installPrompt.userChoice;
+      if (choice?.outcome === "accepted") {
+        setIsInstalled(true);
+      }
+    } catch (e) {}
+    setCanInstall(false);
+    setInstallPrompt(null);
+    try { window.dispatchEvent(new CustomEvent("flexfit-install-used")); } catch (e) {}
+  };
 
   return (
     <div className="settings-page container">
@@ -125,6 +172,15 @@ export default function Settings() {
               </button>
             </div>
           </div>
+
+          {canInstall && !isInstalled && (
+            <div className="settings-item">
+              <div className="settings-label">Install App</div>
+              <button className="btn settings-install-btn" onClick={handleInstall}>
+                Install
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="settings-group ff-card">

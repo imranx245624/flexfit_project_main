@@ -232,6 +232,44 @@
   border: 1px solid var(--ff-card-border);
 }
 
+.install-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 10, 18, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9600;
+}
+
+.install-modal {
+  background: var(--ff-surface);
+  border: 1px solid var(--ff-card-border);
+  border-radius: 16px;
+  padding: 18px;
+  width: min(360px, 90vw);
+  box-shadow: var(--ff-shadow);
+}
+
+.install-modal-title {
+  font-weight: 800;
+  color: var(--ff-text);
+  margin-bottom: 6px;
+  font-size: 18px;
+}
+
+.install-modal-sub {
+  color: var(--ff-muted);
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+.install-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
 @media (max-width: 640px) {
   .navbar {
     width: 100%;

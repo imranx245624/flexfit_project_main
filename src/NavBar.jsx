@@ -17,6 +17,8 @@ export default function NavBar() {
   const [installPrompt, setInstallPrompt] = useState(null);
   const [canInstall, setCanInstall] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
+  const [showInstallModal, setShowInstallModal] = useState(false);
+  const [pendingInstallHint, setPendingInstallHint] = useState(false);
   const [theme, setTheme] = useState(() => {
     if (typeof window === "undefined") return "light";
     const saved = localStorage.getItem("ff-theme");
@@ -25,6 +27,8 @@ export default function NavBar() {
     return attr === "dark" ? "dark" : "light";
   });
   const popoverRef = useRef(null);
+  const installDelayRef = useRef(null);
+  const isInstalledRef = useRef(false);
   const loc = useLocation();
   const navigate = useNavigate();
 
@@ -84,31 +88,84 @@ export default function NavBar() {
   }, []);
 
   useEffect(() => {
+    isInstalledRef.current = isInstalled;
+  }, [isInstalled]);
+
+  useEffect(() => {
     const checkInstalled = () => {
       const standalone = window.matchMedia("(display-mode: standalone)").matches;
       const iOSStandalone = window.navigator.standalone === true;
       setIsInstalled(standalone || iOSStandalone);
     };
+    const syncFromWindow = () => {
+      const existing = window.__ffInstallPrompt || null;
+      if (existing) {
+        setInstallPrompt(existing);
+        setCanInstall(true);
+      }
+    };
     checkInstalled();
+    syncFromWindow();
 
     const handleBeforeInstall = (e) => {
       e.preventDefault();
       setInstallPrompt(e);
       setCanInstall(true);
+      try {
+        window.__ffInstallPrompt = e;
+        window.dispatchEvent(new CustomEvent("flexfit-install-available"));
+      } catch (err) {}
     };
     const handleInstalled = () => {
       setInstallPrompt(null);
       setCanInstall(false);
       setIsInstalled(true);
+      setShowInstallModal(false);
+    };
+    const handleInstallHint = () => {
+      if (isInstalledRef.current) return;
+      try {
+        if (localStorage.getItem("ff-install-hint-seen") === "1") return;
+      } catch (e) {}
+      setPendingInstallHint(true);
+    };
+    const handleInstallUsed = () => {
+      setInstallPrompt(null);
+      setCanInstall(false);
     };
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstall);
     window.addEventListener("appinstalled", handleInstalled);
+    window.addEventListener("flexfit-install-hint", handleInstallHint);
+    window.addEventListener("flexfit-install-available", syncFromWindow);
+    window.addEventListener("flexfit-install-used", handleInstallUsed);
     return () => {
       window.removeEventListener("beforeinstallprompt", handleBeforeInstall);
       window.removeEventListener("appinstalled", handleInstalled);
+      window.removeEventListener("flexfit-install-hint", handleInstallHint);
+      window.removeEventListener("flexfit-install-available", syncFromWindow);
+      window.removeEventListener("flexfit-install-used", handleInstallUsed);
     };
   }, []);
+
+  useEffect(() => {
+    if (!pendingInstallHint) return;
+    if (!canInstall || isInstalled) return;
+    try {
+      if (localStorage.getItem("ff-install-hint-seen") === "1") return;
+    } catch (e) {}
+    if (installDelayRef.current) {
+      clearTimeout(installDelayRef.current);
+    }
+    installDelayRef.current = setTimeout(() => {
+      setShowInstallModal(true);
+      setPendingInstallHint(false);
+      try { localStorage.setItem("ff-install-hint-seen", "1"); } catch (e) {}
+    }, 1800);
+    return () => {
+      if (installDelayRef.current) clearTimeout(installDelayRef.current);
+    };
+  }, [pendingInstallHint, canInstall, isInstalled]);
 
   const toggleTheme = () => {
     const next = theme === "dark" ? "light" : "dark";
@@ -133,6 +190,14 @@ export default function NavBar() {
     } catch (e) {}
     setCanInstall(false);
     setInstallPrompt(null);
+    setShowInstallModal(false);
+    try { localStorage.setItem("ff-install-hint-seen", "1"); } catch (e) {}
+    try { window.dispatchEvent(new CustomEvent("flexfit-install-used")); } catch (e) {}
+  };
+
+  const handleInstallLater = () => {
+    setShowInstallModal(false);
+    try { localStorage.setItem("ff-install-hint-seen", "1"); } catch (e) {}
   };
 
   const displayName = user?.user_metadata?.full_name
@@ -247,6 +312,19 @@ export default function NavBar() {
           </div>
         </div>
       </header>
+
+      {showInstallModal && (
+        <div className="install-modal-backdrop" role="dialog" aria-modal="true">
+          <div className="install-modal">
+            <div className="install-modal-title">Install FlexFit</div>
+            <div className="install-modal-sub">Get the app for faster access and offline support.</div>
+            <div className="install-modal-actions">
+              <button className="btn ghost" type="button" onClick={handleInstallLater}>Not now</button>
+              <button className="btn nav-install" type="button" onClick={handleInstallClick}>Install</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <SigninModal open={showSignIn} onClose={() => setShowSignIn(false)} nonDismissible={false} />
       <ConfirmSignOutModal

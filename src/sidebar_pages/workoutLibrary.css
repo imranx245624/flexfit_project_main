@@ -295,6 +295,15 @@
   .preview-video { height: 60vh; max-height:60vh; }
 }
 
+@media (max-width: 640px) {
+  .library-page { padding: 12px 12px 22px; }
+  .library-title { font-size: 22px; margin-bottom: 4px; }
+  .library-section { margin: 12px 0; padding: 10px 0; }
+  .section-title-row { flex-direction: column; align-items: flex-start; gap: 6px; }
+  .section-title-row h2 { font-size: 16px; }
+  .section-title-row span { font-size: 12px; }
+}
+
 /* respect reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .workout-card, .play-bar, .preview-modal { transition: none !important; }

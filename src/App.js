@@ -29,6 +29,7 @@ function RouterWrapper() {
   const [hideShell, setHideShell] = useState(false);
   const [, setCurrentUser] = useState(null);
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Always reset to top on route change (no full page reload needed)
   useEffect(() => {
@@ -64,6 +65,18 @@ function RouterWrapper() {
         if (event === "SIGNED_IN" && session?.user) {
           const user = session.user;
           setCurrentUser(user);
+          try {
+            const dest = sessionStorage.getItem("ff-auth-redirect");
+            if (dest) {
+              sessionStorage.removeItem("ff-auth-redirect");
+              navigate(dest);
+            }
+          } catch (e) {}
+          try {
+            setTimeout(() => {
+              window.dispatchEvent(new CustomEvent("flexfit-install-hint"));
+            }, 2000);
+          } catch (e) {}
           try {
             await supabase.from("profiles").upsert({
               id: user.id,

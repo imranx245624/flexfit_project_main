@@ -87,7 +87,8 @@ function SignUp({ setShowSignIn, setShowSignUp }) {
     setType("");
     setLoading(true);
     try {
-      const redirectTo = `${window.location.origin}/profile`;
+      try { sessionStorage.setItem("ff-auth-redirect", "/profile"); } catch (e) {}
+      const redirectTo = new URL("/", window.location.origin).toString();
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: { redirectTo },
