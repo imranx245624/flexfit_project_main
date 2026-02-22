@@ -14,6 +14,9 @@ export default function NavBar() {
   const [showSignIn, setShowSignIn] = useState(false);
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [installPrompt, setInstallPrompt] = useState(null);
+  const [canInstall, setCanInstall] = useState(false);
+  const [isInstalled, setIsInstalled] = useState(false);
   const [theme, setTheme] = useState(() => {
     if (typeof window === "undefined") return "light";
     const saved = localStorage.getItem("ff-theme");
@@ -80,6 +83,33 @@ export default function NavBar() {
     return () => obs.disconnect();
   }, []);
 
+  useEffect(() => {
+    const checkInstalled = () => {
+      const standalone = window.matchMedia("(display-mode: standalone)").matches;
+      const iOSStandalone = window.navigator.standalone === true;
+      setIsInstalled(standalone || iOSStandalone);
+    };
+    checkInstalled();
+
+    const handleBeforeInstall = (e) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+      setCanInstall(true);
+    };
+    const handleInstalled = () => {
+      setInstallPrompt(null);
+      setCanInstall(false);
+      setIsInstalled(true);
+    };
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstall);
+    window.addEventListener("appinstalled", handleInstalled);
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstall);
+      window.removeEventListener("appinstalled", handleInstalled);
+    };
+  }, []);
+
   const toggleTheme = () => {
     const next = theme === "dark" ? "light" : "dark";
     const root = document.documentElement;
@@ -90,6 +120,19 @@ export default function NavBar() {
     }
     try { localStorage.setItem("ff-theme", next); } catch (e) {}
     setTheme(next);
+  };
+
+  const handleInstallClick = async () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    try {
+      const choice = await installPrompt.userChoice;
+      if (choice?.outcome === "accepted") {
+        setIsInstalled(true);
+      }
+    } catch (e) {}
+    setCanInstall(false);
+    setInstallPrompt(null);
   };
 
   const displayName = user?.user_metadata?.full_name
@@ -134,6 +177,17 @@ export default function NavBar() {
             >
               ☀
             </button>
+            {canInstall && !isInstalled && (
+              <button
+                className="nav-btn nav-install"
+                type="button"
+                onClick={handleInstallClick}
+                aria-label="Install app"
+                title="Install app"
+              >
+                Install
+              </button>
+            )}
             {user ? (
               <Link className="nav-btn nav-cta" to="/AIWorkoutLibrary">Train with AI</Link>
             ) : (
