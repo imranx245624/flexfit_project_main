@@ -50,8 +50,8 @@ export default function Workouts() {
             <section className="workout-group-card">
               <div className="workout-group-header">
                 <h2 className="split-title">
-                  <span>Home</span>
-                  <span>Workout</span>
+                  <span>Home Workout</span>
+                  <span></span>
                 </h2>
               </div>
               <div className="workout-group-body">

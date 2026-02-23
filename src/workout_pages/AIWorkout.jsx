@@ -2751,7 +2751,7 @@ const runDetector = useCallback(async () => {
       try { if (detectorRef.current?.dispose) detectorRef.current.dispose(); } catch {}
       detectorRef.current = null;
     };
-	  }, [showIntro, sessionState, runDetector, detectPose, isPlankWorkout, isCrunchWorkout, isLegRaiseWorkout, showSavePopup]);
+	  }, [showIntro, sessionState, runDetector, detectPose, isPlankWorkout, isCrunchWorkout, isLegRaiseWorkout, showSavePopup, getCameraErrorMessage]);
 
   return (
     <>
