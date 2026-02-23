@@ -189,6 +189,47 @@ function AIWorkout() {
   
   // ---------------- HELPER FUNCTIONS ----------------
 
+  useEffect(() => {
+    const handleRejection = (event) => {
+      const err = event?.reason;
+      const msg = err?.message || "";
+      const name = err?.name || "";
+      if (name === "AbortError" || msg.includes("signal is aborted")) {
+        event.preventDefault();
+      }
+    };
+    const handleError = (event) => {
+      const err = event?.error;
+      const msg = err?.message || event?.message || "";
+      const name = err?.name || "";
+      if (name === "AbortError" || msg.includes("signal is aborted")) {
+        event.preventDefault();
+      }
+    };
+    window.addEventListener("unhandledrejection", handleRejection);
+    window.addEventListener("error", handleError);
+    return () => {
+      window.removeEventListener("unhandledrejection", handleRejection);
+      window.removeEventListener("error", handleError);
+    };
+  }, []);
+
+  const getCameraErrorMessage = useCallback((err) => {
+    if (!window.isSecureContext) {
+      return "Camera blocked on HTTP. Use https or localhost.";
+    }
+    if (!navigator.mediaDevices?.getUserMedia) {
+      return "Camera not supported in this browser.";
+    }
+    const name = err?.name || "";
+    if (name === "NotAllowedError") return "Camera permission denied. Allow access and retry.";
+    if (name === "NotFoundError") return "No camera found on this device.";
+    if (name === "NotReadableError") return "Camera is in use by another app.";
+    if (name === "OverconstrainedError") return "Camera constraints not supported. Try another camera.";
+    if (name === "SecurityError") return "Camera blocked. Use https or localhost.";
+    return err?.message || "Error initializing camera";
+  }, []);
+
   const voiceCooldownRef = useRef(0); // throttle speech synthesis
   const speak = useCallback((text) => { // voice feedback helper
     if (!("speechSynthesis" in window)) return;
@@ -2597,6 +2638,14 @@ const runDetector = useCallback(async () => {
   useEffect(() => {
     if (showIntro) return;
     if (sessionState === "SUMMARY" || showSavePopup) return;
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setPoseStatus("Camera not supported in this browser.");
+      return;
+    }
+    if (!window.isSecureContext) {
+      setPoseStatus("Camera blocked on HTTP. Use https or localhost.");
+      return;
+    }
     let stream = null;
     let canceled = false;
     const initToken = initTokenRef.current + 1;
@@ -2690,7 +2739,7 @@ const runDetector = useCallback(async () => {
         rafRef.current = requestAnimationFrame(loop);
       } catch (err) {
         console.error("Camera / detector init failed:", err);
-        setPoseStatus("Error initializing camera");
+        setPoseStatus(getCameraErrorMessage(err));
       }
     })();
 
@@ -2709,6 +2758,7 @@ const runDetector = useCallback(async () => {
    {/* SAVE SESSION POPUP */}
       {showSavePopup && (
   <div
+    className="aiw-modal-backdrop"
     style={{
       position: "fixed",
       inset: 0,
@@ -2720,6 +2770,7 @@ const runDetector = useCallback(async () => {
     }}
   >
     <div
+      className="aiw-modal-card"
       style={{
         background: "#1c1e26",
         padding: "28px",
@@ -2730,41 +2781,42 @@ const runDetector = useCallback(async () => {
         boxShadow: "0 0 30px rgba(0,0,0,0.6)",
       }}
     >
-      <h2 style={{ color: "#76ff03", marginBottom: "16px" }}>
+      <h2 className="aiw-modal-title" style={{ color: "#76ff03", marginBottom: "16px" }}>
         Save Session
       </h2>
 
       {/* Snapshot of the session before saving */}
-      <div style={{ textAlign: "left", fontSize: "14px", color: "#fff", marginBottom: "18px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid #333" }}>
+      <div className="aiw-modal-body" style={{ textAlign: "left", fontSize: "14px", color: "#fff", marginBottom: "18px" }}>
+        <div className="aiw-modal-row" style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid #333" }}>
           <span>Workout:</span>
           <strong>{workoutLabel}</strong>
         </div>
-        <div style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid #333" }}>
+        <div className="aiw-modal-row" style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid #333" }}>
           <span>Reps:</span>
           <strong>{reps}</strong>
         </div>
-        <div style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid #333" }}>
+        <div className="aiw-modal-row" style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid #333" }}>
           <span>Avg Accuracy:</span>
           <strong>{avgAccuracy}%</strong>
         </div>
-        <div style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid #333" }}>
+        <div className="aiw-modal-row" style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid #333" }}>
           <span>ECA Points:</span>
           <strong>{ecaPoints}</strong>
         </div>
-        <div style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid #333" }}>
+        <div className="aiw-modal-row" style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid #333" }}>
           <span>Time:</span>
           <strong>{formatTime(finalElapsedMs || elapsedMs)}</strong>
         </div>
-        <div style={{ display: "flex", justifyContent: "space-between", padding: "6px 0" }}>
+        <div className="aiw-modal-row" style={{ display: "flex", justifyContent: "space-between", padding: "6px 0" }}>
           <span>Weight:</span>
           <strong>{Number(parseFloat(weightKg) || 0)} kg</strong>
         </div>
       </div>
 
       {/* Save actions */}
-      <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+      <div className="aiw-modal-actions" style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
         <button
+          className="aiw-modal-btn primary"
           disabled={buttonLocked}
           onClick={handleSaveClick}
           style={{
@@ -2782,6 +2834,7 @@ const runDetector = useCallback(async () => {
         </button>
 
         <button
+          className="aiw-modal-btn ghost"
           disabled={buttonLocked}
           onClick={handleDiscard}
           style={{
@@ -2799,6 +2852,7 @@ const runDetector = useCallback(async () => {
         </button>
 
         <button
+          className="aiw-modal-btn danger"
           disabled={buttonLocked}
           onClick={handleExit}
           style={{
@@ -2818,7 +2872,7 @@ const runDetector = useCallback(async () => {
 
       {/* Save error message */}
       {saveError && (
-        <div style={{ marginTop: "14px", color: "#ff8bb0", fontSize: "12px", lineHeight: 1.4 }}>
+        <div className="aiw-modal-error" style={{ marginTop: "14px", color: "#ff8bb0", fontSize: "12px", lineHeight: 1.4 }}>
           {saveError}
         </div>
       )}
@@ -2830,6 +2884,7 @@ const runDetector = useCallback(async () => {
 {/* WORKOUT SUMMARY */}
 {sessionState === "SUMMARY" && (
   <div
+    className="aiw-modal-backdrop"
     style={{
       position: "fixed",
       inset: 0,
@@ -2841,6 +2896,7 @@ const runDetector = useCallback(async () => {
     }}
   >
     <div
+      className="aiw-modal-card"
       style={{
         background: "#2a2d34",
         padding: "30px",
@@ -2850,12 +2906,12 @@ const runDetector = useCallback(async () => {
         textAlign: "center",
       }}
     >
-      <h2 style={{ color: "#76ff03", marginBottom: "20px" }}>
+      <h2 className="aiw-modal-title" style={{ color: "#76ff03", marginBottom: "20px" }}>
         Workout Summary
       </h2>
 
       {/* SUMMARY DETAILS */}
-      <div style={{ textAlign: "left", fontSize: "16px", color: "#fff" }}>
+      <div className="aiw-modal-body" style={{ textAlign: "left", fontSize: "16px", color: "#fff" }}>
         <p>
           Exercise: <b>{workoutLabel}</b>
         </p>
@@ -2892,6 +2948,7 @@ const runDetector = useCallback(async () => {
 
       {/* START NEW SESSION (STEP 4 - FIXED) */}
       <button
+        className="aiw-modal-btn primary full"
         disabled={buttonLocked}
        onClick={async () => {
   if (buttonLocked) return;
@@ -2922,6 +2979,7 @@ const runDetector = useCallback(async () => {
     {/* MAIN UI */}
     {showIntro && (
         <div
+          className="aiw-modal-backdrop"
           style={{
             position: "fixed",
             inset: 0,
@@ -2933,6 +2991,7 @@ const runDetector = useCallback(async () => {
           }}
         >
           <div
+            className="aiw-modal-card"
             style={{
               background: "#2a2d34",
               padding: "40px",
@@ -2943,11 +3002,11 @@ const runDetector = useCallback(async () => {
             }}
           >
             {/* Workout title */}
-            <h2 style={{ color: "#76ff03", marginBottom: "10px" }}>
+            <h2 className="aiw-modal-title" style={{ color: "#76ff03", marginBottom: "10px" }}>
               {workoutLabel}
             </h2>
             {/* Short hint before starting */}
-            <p style={{ color: "#ccc", marginBottom: "20px" }}>
+            <p className="aiw-modal-sub" style={{ color: "#ccc", marginBottom: "20px" }}>
                 {(isPlankWorkout || isCrunchWorkout || isLegRaiseWorkout)
                   ? "Set camera to your side profile before starting."
                   : "Get ready to start"}
@@ -2962,12 +3021,13 @@ const runDetector = useCallback(async () => {
                 marginBottom: "16px",
               }}
             >
-              <label style={{ color: "#ccc", fontSize: "14px" }}>Weight (kg):</label>
+              <label className="aiw-modal-label" style={{ color: "#ccc", fontSize: "14px" }}>Weight (kg):</label>
               <input
                 type="number"
                 step="0.5"
                 value={weightKg}
                 onChange={(e) => setWeightKg(e.target.value)}
+                className="aiw-modal-input"
                 style={{
                   width: "90px",
                   padding: "6px 8px",
@@ -2980,6 +3040,7 @@ const runDetector = useCallback(async () => {
             </div>
             {/* Start button hides intro and begins init */}
             <button
+              className="aiw-modal-btn primary"
               onClick={() => setShowIntro(false)}
               style={{
                 padding: "12px 25px",

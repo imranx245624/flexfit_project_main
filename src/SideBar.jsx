@@ -40,8 +40,8 @@ const ICONS = {
   ),
   signout: (
     <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-      <path d="M5 4h9a2 2 0 0 1 2 2v4h-2V6H5v12h9v-4h2v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" fill="currentColor" />
-      <path d="M13 11h7l-3-3 1.4-1.4L23 12l-4.6 5.4L17 16l3-3h-7v-2z" fill="currentColor" />
+      <path d="M20 3H12a2 2 0 0 0-2 2v4h2V5h8v14h-8v-4h-2v4a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z" fill="currentColor" />
+      <path d="M13 8l-4 4 4 4v-3h8v-2h-8V8z" fill="currentColor" />
     </svg>
   ),
 };

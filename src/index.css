@@ -11,7 +11,7 @@
   --ff-accent: #7C3AED;
   --ff-accent-2: #FF6B9D;
   --ff-accent-3: #6EE7FF;
-  --ff-card-border: rgba(124,58,237,0.08);
+  --ff-card-border: rgba(148,163,184,0.5);
   --ff-shadow: 0 12px 40px rgba(16,24,40,0.16);
   --ff-accent-600: #6D28D9;
   --ff-accent-fill: rgba(124,58,237,0.12);
@@ -163,6 +163,21 @@ img { max-width: 100%; height: auto; display: block; }
 /* bottom stat bar */
 .ai-bottom-bar{ position:sticky; bottom:12px; left:0; right:0; display:flex; justify-content:flex-end; gap:12px; padding:12px 24px; }
 .ai-popup{ background:var(--ff-surface-2); border:1px solid var(--ff-card-border); color:var(--ff-text); border-radius:12px; padding:18px; box-shadow:var(--ff-shadow); }
+
+/* Stronger borders on light theme (clearer white boxes/divisions) */
+:root:not([data-theme="dark"]) [class*="card"],
+:root:not([data-theme="dark"]) [class*="box"],
+:root:not([data-theme="dark"]) [class*="panel"],
+:root:not([data-theme="dark"]) .leaderboard-note,
+:root:not([data-theme="dark"]) .leaderboard-loading,
+:root:not([data-theme="dark"]) .workout-group-section,
+:root:not([data-theme="dark"]) .option,
+:root:not([data-theme="dark"]) .toggle span,
+:root:not([data-theme="dark"]) .day,
+:root:not([data-theme="dark"]) .month-select select,
+:root:not([data-theme="dark"]) .icon-btn {
+  border-width: 2px;
+}
 
 /* breakpoints */
 @media (max-width: 1024px){

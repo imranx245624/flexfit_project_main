@@ -87,6 +87,14 @@ function downloadCSV(rows, filename="export.csv"){
   a.href = url; a.download = filename; a.click(); URL.revokeObjectURL(url);
 }
 
+function getInitials(name){
+  if(!name) return "FF";
+  const parts = String(name).trim().split(/\s+/).filter(Boolean);
+  if(parts.length === 0) return "FF";
+  if(parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
 /* ---------------- React component ---------------- */
 export default function Progress(){
   const today = new Date();
@@ -455,6 +463,13 @@ export default function Progress(){
 
   const sessionsCountText = `${sessionsForDate.length} session(s) on this date`;
   const isBusy = authLoading || loadingMonth || loadingDate || (rangeMode === "year" && loadingYear);
+  const userName = authLoading
+    ? "Loading..."
+    : (user?.user_metadata?.full_name || user?.user_metadata?.name || user?.user_metadata?.display_name || (user?.email ? user.email.split("@")[0] : "Guest"));
+  const userEmail = authLoading ? "Fetching profile..." : (user?.email || "Sign in to personalize");
+  const userUsername = authLoading ? "" : (user?.user_metadata?.username || "Username not set");
+  const userAvatar = user?.user_metadata?.avatar_url || user?.user_metadata?.picture || null;
+  const userInitials = getInitials(userName);
 
   return (
     <div className="progress-wrap container small-calendar">
@@ -469,6 +484,22 @@ export default function Progress(){
             <button className={view==="chart"?"chip active":"chip"} onClick={()=>setView("chart")}>Activity Chart</button>
           </div>
         </div>
+      </div>
+
+      <div className="progress-user card">
+        <div className="progress-user-avatar" aria-hidden="true">
+          {userAvatar ? (
+            <img src={userAvatar} alt="" />
+          ) : (
+            <span>{userInitials}</span>
+          )}
+        </div>
+        <div className="progress-user-meta">
+          <div className="progress-user-name">{userName}</div>
+          <div className="progress-user-email">{userEmail}</div>
+          {userUsername && <div className="progress-user-username">{userUsername}</div>}
+        </div>
+        <div className="progress-user-tag">Your Progress</div>
       </div>
 
       {view === "calendar" && (

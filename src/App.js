@@ -223,7 +223,7 @@ function RouterWrapper() {
           />
           <div className="ff-hero-video-overlay" />
           <div className="ff-hero-left">
-            <span className="hero-badge">FlexFit AI</span>
+            <span className="hero-badge">FlexFit</span>
             <h1>AI-Powered Fitness Assistant</h1>
             {/* <p className="hero-lead">
               FlexFit AI is a privacy-first fitness assistant that uses your webcam for real-time pose detection
