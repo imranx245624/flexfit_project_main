@@ -3,6 +3,10 @@ import { render, screen } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import Sidebar from "./SideBar.jsx";
 
+jest.mock("./utils/auth", () => ({
+  useAuth: () => ({ user: null, loading: false }),
+}));
+
 function renderSidebar(path = "/") {
   const setOpen = jest.fn();
   render(

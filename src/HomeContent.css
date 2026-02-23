@@ -227,6 +227,13 @@
   box-shadow: 0 16px 32px rgba(0,0,0,0.14);
 }
 
+/* Dark theme: neon-cyan card edges */
+:root[data-theme="dark"] .hero-card,
+body[data-theme="dark"] .hero-card {
+  border: 1px solid rgba(34,245,255,0.6);
+  box-shadow: 0 16px 32px rgba(0,0,0,0.2), 0 0 18px rgba(34,245,255,0.12);
+}
+
 .hero-card-title {
   font-size: 16px;
   font-weight: 700;

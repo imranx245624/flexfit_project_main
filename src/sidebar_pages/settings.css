@@ -77,6 +77,24 @@
   box-shadow: 0 8px 18px rgba(56,189,248,0.2);
 }
 
+/* Dark theme: neon-cyan borders */
+:root[data-theme="dark"] .settings-group.ff-card,
+body[data-theme="dark"] .settings-group.ff-card {
+  border-color: rgba(34,245,255,0.6);
+  box-shadow: var(--ff-shadow), 0 0 18px rgba(34,245,255,0.18);
+}
+:root[data-theme="dark"] .settings-page .option,
+body[data-theme="dark"] .settings-page .option,
+:root[data-theme="dark"] .settings-page .toggle span,
+body[data-theme="dark"] .settings-page .toggle span {
+  border-color: rgba(34,245,255,0.55);
+}
+:root[data-theme="dark"] .settings-page .option.active,
+body[data-theme="dark"] .settings-page .option.active {
+  border-color: rgba(34,245,255,0.9);
+  color: var(--ff-neon-cyan);
+}
+
 @media (max-width: 900px) {
   .settings-groups { grid-template-columns: 1fr; }
   .settings-header { flex-direction: column; align-items: flex-start; }

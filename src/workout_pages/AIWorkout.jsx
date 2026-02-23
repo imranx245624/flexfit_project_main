@@ -938,6 +938,31 @@ function AIWorkout() {
     return (newVal * alpha) + (oldVal * (1 - alpha));
   };
 
+  // Calories helper (MET-based). Adjust MET values as needed.
+  const getMetForWorkout = (name) => {
+    const n = String(name || "").toLowerCase();
+    if (n.includes("burpee")) return 8.5;
+    if (n.includes("jumping jack") || n.includes("jumpingjack")) return 8.0;
+    if (n.includes("push")) return 8.0;
+    if (n.includes("pull")) return 8.0;
+    if (n.includes("plank")) return 3.8;
+    if (n.includes("crunch")) return 3.8;
+    if (n.includes("leg raise") || n.includes("legraise")) return 4.0;
+    if (n.includes("lunge")) return 6.0;
+    if (n.includes("sumo")) return 5.5;
+    if (n.includes("squat")) return 5.0;
+    return 5.5; // default moderate bodyweight training
+  };
+
+  const calcCalories = (kg, elapsedMs, workoutNameForMet) => {
+    const weight = Number(parseFloat(kg) || 0);
+    if (!weight || !elapsedMs) return 0;
+    const hours = Math.max(0, elapsedMs) / 3600000;
+    const met = getMetForWorkout(workoutNameForMet);
+    const kcal = met * weight * hours;
+    return Math.round(kcal * 10) / 10;
+  };
+
   // Compute angle ABC in degrees (used for elbows, knees, etc.)
   const getAngle = (a, b, c) => {
     if (!a || !b || !c) return 180;
@@ -2753,6 +2778,13 @@ const runDetector = useCallback(async () => {
     };
 	  }, [showIntro, sessionState, runDetector, detectPose, isPlankWorkout, isCrunchWorkout, isLegRaiseWorkout, showSavePopup, getCameraErrorMessage]);
 
+  const caloriesBurned = calcCalories(
+    weightKg,
+    finalElapsedMs || elapsedMs,
+    workoutName
+  );
+  const caloriesText = caloriesBurned ? `${caloriesBurned} kcal` : "--";
+
   return (
     <>
    {/* SAVE SESSION POPUP */}
@@ -2806,6 +2838,10 @@ const runDetector = useCallback(async () => {
         <div className="aiw-modal-row" style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid #333" }}>
           <span>Time:</span>
           <strong>{formatTime(finalElapsedMs || elapsedMs)}</strong>
+        </div>
+        <div className="aiw-modal-row" style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid #333" }}>
+          <span>Calories Burned:</span>
+          <strong>{caloriesText}</strong>
         </div>
         <div className="aiw-modal-row" style={{ display: "flex", justifyContent: "space-between", padding: "6px 0" }}>
           <span>Weight:</span>

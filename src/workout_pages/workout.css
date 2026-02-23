@@ -315,6 +315,19 @@ body[data-theme="dark"] .workout-exercise-card:nth-child(3n){
   border-color: rgba(255,177,239,0.75);
 }
 
+/* Dark theme: unify workout library borders to neon-cyan */
+:root[data-theme="dark"] .workout-group-card,
+body[data-theme="dark"] .workout-group-card{
+  border-color: rgba(34,245,255,0.85);
+  box-shadow: var(--ff-shadow), 0 0 20px rgba(34,245,255,0.22);
+}
+:root[data-theme="dark"] .workout-group-section,
+body[data-theme="dark"] .workout-group-section,
+:root[data-theme="dark"] .workout-exercise-card,
+body[data-theme="dark"] .workout-exercise-card{
+  border-color: rgba(34,245,255,0.7);
+}
+
 .workout-exercise-card:hover {
   transform: translateY(-2px);
   box-shadow: var(--ff-shadow);

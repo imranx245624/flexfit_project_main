@@ -15,6 +15,13 @@
   --library-edge: rgba(124,58,237,0.08);
 }
 
+/* Dark theme: neon-cyan borders for library cards */
+:root[data-theme="dark"],
+body[data-theme="dark"]{
+  --library-border: rgba(34,245,255,0.6);
+  --library-edge: rgba(34,245,255,0.22);
+}
+
 /* Page / header */
 .library-page {
   padding: 18px 24px;
@@ -162,6 +169,12 @@
   box-shadow: 0 30px 80px rgba(31,43,58,0.18);
   border-color: rgba(124,58,237,0.2);
   filter: saturate(1.05);
+}
+/* Dark theme hover: keep neon-cyan edge */
+:root[data-theme="dark"] .workout-card:hover,
+body[data-theme="dark"] .workout-card:hover{
+  border-color: rgba(34,245,255,0.85);
+  box-shadow: 0 30px 80px rgba(0,0,0,0.25), 0 0 20px rgba(34,245,255,0.18);
 }
 
 /* subtle inner edge using pseudo-element */

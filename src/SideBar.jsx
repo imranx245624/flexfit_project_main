@@ -123,6 +123,7 @@ export default function SideBar({ open = true, setOpen }) {
             to={item.to}
             className="sidebar-link"
             aria-label={item.label}
+            title={item.label}
             onClick={(e) => handleProtectedClick(e, item.to)}
           >
             {({ isActive }) => (
@@ -142,6 +143,7 @@ export default function SideBar({ open = true, setOpen }) {
             to={item.to}
             className="sidebar-link"
             aria-label={item.label}
+            title={item.label}
             onClick={(e) => handleProtectedClick(e, item.to)}
           >
             {({ isActive }) => (
