@@ -1,6 +1,6 @@
 // src/navbar_pages/ProfilePage.jsx
-import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 /* TODO: DO NOT CHANGE API CALLS (supabase) */
 import { supabase } from "../utils/supabaseClient";
 import CompleteProfile from "./CompleteProfile";
@@ -27,7 +27,7 @@ function ProfilePage({ onSignOut, initialTab = "overview" }) {
   });
   const navigate = useNavigate();
 
-  const computeOverviewStats = (rows = []) => {
+  const computeOverviewStats = useCallback((rows = []) => {
     const totalSessions = rows.length;
     const totalEca = rows.reduce((sum, r) => sum + (Number(r.eca_points) || 0), 0);
 
@@ -44,9 +44,9 @@ function ProfilePage({ onSignOut, initialTab = "overview" }) {
     }).length;
 
     return { totalSessions, totalEca, bestScore, sessionsThisWeek };
-  };
+  }, []);
 
-  const fetchOverviewStats = async (userId) => {
+  const fetchOverviewStats = useCallback(async (userId) => {
     if (!userId) {
       setOverviewStats({
         totalSessions: 0,
@@ -87,9 +87,9 @@ function ProfilePage({ onSignOut, initialTab = "overview" }) {
     } finally {
       setStatsLoading(false);
     }
-  };
+  }, [computeOverviewStats]);
 
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
     setLoading(true);
     try {
       const {
@@ -136,7 +136,7 @@ function ProfilePage({ onSignOut, initialTab = "overview" }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [fetchOverviewStats]);
 
   useEffect(() => {
     fetchProfile();
@@ -146,7 +146,7 @@ function ProfilePage({ onSignOut, initialTab = "overview" }) {
       fetchProfile();
     });
     return () => subscription?.unsubscribe?.();
-  }, []);
+  }, [fetchProfile]);
 
   useEffect(() => {
     if (VALID_TABS.has(initialTab)) {
@@ -182,7 +182,6 @@ function ProfilePage({ onSignOut, initialTab = "overview" }) {
   if (loading) return <div className="profile-loading">Loading...</div>;
   if (!profile) return <div className="profile-loading">No profile (please sign in)</div>;
 
-  const incomplete = !profile.username || profile.profile_completed === false;
   const hasSessions = overviewStats.totalSessions > 0;
 
   return (
