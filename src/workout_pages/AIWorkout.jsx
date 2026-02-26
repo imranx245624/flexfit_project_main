@@ -181,8 +181,8 @@ function AIWorkout() {
 
   const [alerts, setAlerts] = useState([]); // list of form tips
   const [elapsedMs, setElapsedMs] = useState(0); // live timer for plank/session
-  const [avgAccuracy, setAvgAccuracy] = useState(0); // avg of per-rep form scores
-  const [ecaPoints, setEcaPoints] = useState(0); // custom score used in UI
+  const [, setAvgAccuracy] = useState(0); // avg of per-rep form scores (saved to DB)
+  const [ecaPoints, setEcaPoints] = useState(0); // flex points (stored as eca_points in DB)
   const [weightKg, setWeightKg] = useState(55); // user input for weight
   const [finalElapsedMs, setFinalElapsedMs] = useState(0); // frozen time at session end
   const [saveError, setSaveError] = useState(""); // error message in save popup
@@ -266,6 +266,38 @@ function AIWorkout() {
     } catch {}
     detectorRef.current = null;
   }, []);
+
+  // MET helper used for calories + flex points
+  const getMetForWorkout = useCallback((name) => {
+    const n = String(name || "").toLowerCase();
+    if (n.includes("burpee")) return 8.5;
+    if (n.includes("jumping jack") || n.includes("jumpingjack")) return 8.0;
+    if (n.includes("push")) return 8.0;
+    if (n.includes("pull")) return 8.0;
+    if (n.includes("plank")) return 3.8;
+    if (n.includes("crunch")) return 3.8;
+    if (n.includes("leg raise") || n.includes("legraise")) return 4.0;
+    if (n.includes("lunge")) return 6.0;
+    if (n.includes("sumo")) return 5.5;
+    if (n.includes("squat")) return 5.0;
+    return 5.5; // default moderate bodyweight training
+  }, []);
+
+  // Flex points = f(reps/time, MET, weight). Stored in DB as eca_points.
+  const calcFlexPoints = useCallback((repsCount, elapsedMsForPoints = 0) => {
+    const weight = Number(parseFloat(weightKg) || 0);
+    if (!weight) return 0;
+    const met = getMetForWorkout(workoutName);
+    const repsVal = Number(repsCount) || 0;
+    let effort = repsVal;
+    if (!effort) {
+      const minutes = Math.ceil(Math.max(0, elapsedMsForPoints) / 60000);
+      effort = minutes > 0 ? minutes : 0;
+    }
+    if (!effort) return 0;
+    const points = effort * met * (weight / 60);
+    return Math.round(points);
+  }, [getMetForWorkout, weightKg, workoutName]);
   // Streak-based encouragement messages for each exercise type
   const updateRepMilestoneFeedback = useCallback((exerciseType, currentFormScore) => {
     if (exerciseType === "pushup") {
@@ -408,14 +440,14 @@ function AIWorkout() {
         ? 0
         : Math.round(accuracyList.reduce((sum, val) => sum + val, 0) / accuracyList.length);
     setAvgAccuracy(avg);
-    setEcaPoints(Math.round(repsRef.current * avg));
+    setEcaPoints(calcFlexPoints(repsRef.current, 0));
     const hitMilestone = updateRepMilestoneFeedback(exerciseType, currentFormScore);
     if (!hitMilestone) {
       speak(voiceText || repsRef.current.toString());
       setPoseStatus(statusText);
     }
     lastRepTime.current = now;
-  }, [speak, updateRepMilestoneFeedback]);
+  }, [calcFlexPoints, speak, updateRepMilestoneFeedback]);
   // Exercise-specific cue helpers (each one throttles repeat messages)
   const cueStrictPushup = useCallback((statusText, voiceText = statusText) => {
     const now = Date.now();
@@ -663,6 +695,13 @@ function AIWorkout() {
     return Math.max(0, elapsedMs || 0);
   }, [elapsedMs, isPlankWorkout]);
 
+  // Keep flex points synced (especially for time-based workouts and weight changes)
+  useEffect(() => {
+    if (sessionState === "IDLE") return;
+    const elapsedForPoints = finalElapsedMs || elapsedMs;
+    setEcaPoints(calcFlexPoints(repsRef.current || 0, elapsedForPoints));
+  }, [calcFlexPoints, elapsedMs, finalElapsedMs, sessionState]);
+
   // Fallback: save session locally if DB save fails
   const saveSessionToStorage = (payload) => {
     try {
@@ -681,14 +720,14 @@ function AIWorkout() {
     if (showSavePopup) return;
     const count = repsRef.current || 0;
     const avg = getAvgAccuracy();
-    const eca = Math.round(count * avg);
-    setAvgAccuracy(avg);
-    setEcaPoints(eca);
     const finalMs = getFinalElapsedMs();
+    const flexPoints = calcFlexPoints(count, finalMs);
+    setAvgAccuracy(avg);
+    setEcaPoints(flexPoints);
     setFinalElapsedMs(finalMs);
     setSaveError("");
     setShowSavePopup(true);
-  }, [showSavePopup, getFinalElapsedMs]);
+  }, [showSavePopup, getFinalElapsedMs, calcFlexPoints]);
 
   // Enforce per-day save limit for a given workout
   const checkDailyCountForWorkout = async (userId, workoutNameNormalized) => {
@@ -751,6 +790,10 @@ function AIWorkout() {
     savingRef.current = true;
 
     try {
+      const repsCountGuard = repsRef.current || 0;
+      if (repsCountGuard <= 0) {
+        return { ok: false, message: "Please complete at least 1 rep before saving." };
+      }
       let user = null;
       // Prefer cached session first (faster), then fall back to getUser
       try {
@@ -787,11 +830,11 @@ function AIWorkout() {
       const normalizedWorkoutName = String(workoutLabel || "").trim().toUpperCase();
       const repsCount = repsRef.current || 0;
       const avg = getAvgAccuracy();
-      const eca = Math.round(repsCount * avg);
       const elapsedForSave = finalElapsedMs || getFinalElapsedMs();
+      const flexPoints = calcFlexPoints(repsCount, elapsedForSave);
 
       setAvgAccuracy(avg);
-      setEcaPoints(eca);
+      setEcaPoints(flexPoints);
       setFinalElapsedMs(elapsedForSave);
 
       // Optional daily limit guard
@@ -813,8 +856,8 @@ function AIWorkout() {
         reps: repsCount,
         time_seconds: Math.floor(elapsedForSave / 1000),
         weight_kg: Number(parseFloat(weightKg) || 0),
-        accuracy: avg,
-        eca_points: eca,
+        accuracy: avg, // keep saving accuracy for DB history
+        eca_points: flexPoints, // flex points stored in existing DB column
         created_at: new Date().toISOString(),
       };
 
@@ -845,7 +888,7 @@ function AIWorkout() {
         workout_name: String(workoutLabel || "").trim().toUpperCase(),
         reps: repsRef.current || 0,
         accuracy: getAvgAccuracy(),
-        eca_points: Math.round((repsRef.current || 0) * getAvgAccuracy()),
+        eca_points: calcFlexPoints(repsRef.current || 0, finalElapsedMs || getFinalElapsedMs()),
         time_seconds: Math.floor((finalElapsedMs || getFinalElapsedMs()) / 1000),
         weight_kg: Number(parseFloat(weightKg) || 0),
         created_at: new Date().toISOString(),
@@ -938,22 +981,7 @@ function AIWorkout() {
     return (newVal * alpha) + (oldVal * (1 - alpha));
   };
 
-  // Calories helper (MET-based). Adjust MET values as needed.
-  const getMetForWorkout = (name) => {
-    const n = String(name || "").toLowerCase();
-    if (n.includes("burpee")) return 8.5;
-    if (n.includes("jumping jack") || n.includes("jumpingjack")) return 8.0;
-    if (n.includes("push")) return 8.0;
-    if (n.includes("pull")) return 8.0;
-    if (n.includes("plank")) return 3.8;
-    if (n.includes("crunch")) return 3.8;
-    if (n.includes("leg raise") || n.includes("legraise")) return 4.0;
-    if (n.includes("lunge")) return 6.0;
-    if (n.includes("sumo")) return 5.5;
-    if (n.includes("squat")) return 5.0;
-    return 5.5; // default moderate bodyweight training
-  };
-
+  // Calories helper (MET-based)
   const calcCalories = (kg, elapsedMs, workoutNameForMet) => {
     const weight = Number(parseFloat(kg) || 0);
     if (!weight || !elapsedMs) return 0;
@@ -2828,11 +2856,7 @@ const runDetector = useCallback(async () => {
           <strong>{reps}</strong>
         </div>
         <div className="aiw-modal-row" style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid #333" }}>
-          <span>Avg Accuracy:</span>
-          <strong>{avgAccuracy}%</strong>
-        </div>
-        <div className="aiw-modal-row" style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid #333" }}>
-          <span>ECA Points:</span>
+          <span>Flex Points:</span>
           <strong>{ecaPoints}</strong>
         </div>
         <div className="aiw-modal-row" style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid #333" }}>
@@ -2963,18 +2987,7 @@ const runDetector = useCallback(async () => {
         </p>
 
         <p>
-          Avg Accuracy:{" "}
-          <b
-            style={{
-              color: avgAccuracy > 80 ? "#00ff00" : "#ffcc00",
-            }}
-          >
-            {avgAccuracy}%
-          </b>
-        </p>
-
-        <p>
-          ECA Points: <b>{ecaPoints}</b>
+          Flex Points: <b>{ecaPoints}</b>
         </p>
 
         <p>
@@ -3189,20 +3202,16 @@ const runDetector = useCallback(async () => {
           <h3 style={{ color: "#76ff03", marginTop: 0 }}>Performance Metrics</h3>
 
           {/* High-level session stats */}
-          <div className="aiw-card" style={{ backgroundColor: "#1c1e26", padding: "10px", borderRadius: "8px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
-              <span>Reps:</span>
-              <span style={{ color: "#ffff00" }}>{reps}</span>
+            <div className="aiw-card" style={{ backgroundColor: "#1c1e26", padding: "10px", borderRadius: "8px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
+                <span>Reps:</span>
+                <span style={{ color: "#ffff00" }}>{reps}</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <span>Flex Points:</span>
+                <span style={{ color: "#00ccff" }}>{ecaPoints}</span>
+              </div>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
-              <span>Avg Accuracy:</span>
-              <span style={{ color: avgAccuracy > 80 ? "#00ff00" : "#ffcc00" }}>{avgAccuracy}%</span>
-            </div>
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span>Total ECA:</span>
-              <span style={{ color: "#00ccff" }}>{ecaPoints}</span>
-            </div>
-          </div>
 
           {/* Form Quality Bar */}
           <div>

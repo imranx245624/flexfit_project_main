@@ -33,14 +33,6 @@ export default function Workouts() {
   }, []);
 
   const openPreview = async (name) => {
-    if (!process.env.REACT_APP_PEXELS_API_KEY) {
-      setPreviewTitle(name);
-      setPreviewOpen(true);
-      setPreviewError("Pexels API key not configured.");
-      setPreviewDebug("Missing REACT_APP_PEXELS_API_KEY");
-      return;
-    }
-
     const controller = new AbortController();
     setPreviewTitle(name);
     setPreviewOpen(true);
@@ -77,7 +69,12 @@ export default function Workouts() {
     } catch (err) {
       if (!controller.signal.aborted) {
         setPreviewError("Could not load video preview.");
-        setPreviewDebug(String(err?.message || err));
+        const msg = String(err?.message || err || "");
+        setPreviewDebug(
+          msg.includes("Missing Pexels API key")
+            ? "Missing Pexels API key (set REACT_APP_PEXELS_API_KEY or configure /api/pexels)."
+            : msg
+        );
       }
     } finally {
       setPreviewLoading(false);
@@ -155,7 +152,7 @@ export default function Workouts() {
               with creator attribution.
             </p>
           </div>
-          <div className="library-toggle">
+          {/* <div className="library-toggle">
             <button
               type="button"
               className={`chip ${filterType === "home" ? "active" : ""}`}
@@ -177,7 +174,7 @@ export default function Workouts() {
             >
               All
             </button>
-          </div>
+          </div> */}
         </div>
 
         <section className="library-section">

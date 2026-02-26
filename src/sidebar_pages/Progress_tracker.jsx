@@ -59,7 +59,6 @@ function mapDbRowToSession(row){
     time: timeStr,
     workoutName: row.workout_name || "Workout",
     reps: row.reps ?? 0,
-    accuracy: row.accuracy ?? 0,
     minutes,
     calories,
     eca: row.eca_points ?? 0,
@@ -68,13 +67,12 @@ function mapDbRowToSession(row){
 }
 
 function aggregate(sessions){
-  if(!sessions || sessions.length===0) return { totalSessions:0, avgAccuracy:0, totalEca:0, totalCalories:0, totalMinutes:0 };
+  if(!sessions || sessions.length===0) return { totalSessions:0, totalEca:0, totalCalories:0, totalMinutes:0 };
   const totalSessions = sessions.length;
-  const avgAccuracy = Math.round((sessions.reduce((s,x)=>s + (Number(x.accuracy)||0), 0) / totalSessions) * 10) / 10;
   const totalEca = sessions.reduce((s,x)=>s + (Number(x.eca)||0), 0);
   const totalCalories = Math.round(sessions.reduce((s,x)=>s + (Number(x.calories)||0), 0) * 100) / 100;
   const totalMinutes = sessions.reduce((s,x)=>s + (Number(x.minutes)||0), 0);
-  return { totalSessions, avgAccuracy, totalEca, totalCalories, totalMinutes };
+  return { totalSessions, totalEca, totalCalories, totalMinutes };
 }
 
 function downloadCSV(rows, filename="export.csv"){
@@ -457,7 +455,7 @@ export default function Progress(){
 
   function exportSelectedReport(){
     downloadCSV(sessionsForDate.map(s=>({
-      date: s.date, time: s.time, workoutName: s.workoutName, reps: s.reps, accuracy: s.accuracy, minutes: s.minutes, calories: s.calories, eca: s.eca
+      date: s.date, time: s.time, workoutName: s.workoutName, reps: s.reps, minutes: s.minutes, calories: s.calories, flexPoints: s.eca
     })), `progress_${selectedDate}.csv`);
   }
 
@@ -552,11 +550,7 @@ export default function Progress(){
               <div className="val">{summary.totalSessions}</div>
             </div>
             <div className="stat-card">
-              <div className="label">Avg Accuracy</div>
-              <div className="val">{summary.avgAccuracy ? `${summary.avgAccuracy}%` : "--"}</div>
-            </div>
-            <div className="stat-card">
-              <div className="label">Total ECA</div>
+              <div className="label">Flex Points</div>
               <div className="val">{summary.totalEca}</div>
             </div>
           </div>
@@ -606,8 +600,7 @@ export default function Progress(){
                   </div>
                   <div className="s-right">
                     <div className="s-row"><span className="k">Reps</span><span className="v">{s.reps}</span></div>
-                    <div className="s-row"><span className="k">Acc</span><span className="v">{s.accuracy}%</span></div>
-                    <div className="s-row"><span className="k">ECA</span><span className="v">{s.eca}</span></div>
+                    <div className="s-row"><span className="k">Flex Points</span><span className="v">{s.eca}</span></div>
                   </div>
                 </div>
               ))}
@@ -624,31 +617,107 @@ export default function Progress(){
           <div className="chart-card card">
             <div className="chart-head">
               <div>
-                <div className="chart-title">Activity (minutes)</div>
+                <div className="chart-title">Activity Overview</div>
                 <div className="muted">Mode: {rangeMode}</div>
               </div>
               <div className="chart-controls">
-                <div className="legend"><span className="dot small" /> time</div>
+                <div className="legend time"><span className="dot small" /> time</div>
+                <div className="legend calories"><span className="dot small" /> calories</div>
+                <div className="legend flex"><span className="dot small" /> flex points</div>
               </div>
             </div>
 
             <div className="chart-area">
               <svg viewBox="0 0 100 40" preserveAspectRatio="none" className="bar-svg">
-                { (() => {
-                    const max = Math.max(...chartData.map(p=>p.totalMinutes||0), 1);
-                    const w = 100 / Math.max(1, chartData.length);
-                    return chartData.map((p,i) => {
-                      const h = (p.totalMinutes / max) * 34;
-                      const x = i * w + 1;
-                      const y = 38 - h;
-                      return (
-                        <g key={i}>
-                          <rect x={x} y={y} width={w-3} height={h} rx="1" className="bar" />
-                          <text x={x + (w-3)/2} y={39} className="bar-label">{p.label}</text>
-                        </g>
-                      );
-                    })
-                })() }
+                {(() => {
+                  const plot = { x: 12, y: 3, w: 86, h: 30 };
+                  const maxVal = Math.max(
+                    ...chartData.map((p) =>
+                      Math.max(p.totalMinutes || 0, p.totalCalories || 0, p.totalEca || 0)
+                    ),
+                    1
+                  );
+                  const tickCount = 4;
+                  const ticks = Array.from({ length: tickCount + 1 }, (_, i) =>
+                    Math.round((maxVal * i) / tickCount)
+                  );
+                  const groupW = plot.w / Math.max(1, chartData.length);
+                  const innerGap = Math.min(0.4, groupW * 0.12);
+                  const barW = Math.max(0.35, (groupW - innerGap * 2) / 3);
+
+                  return (
+                    <>
+                      <line
+                        className="axis-line"
+                        x1={plot.x}
+                        y1={plot.y}
+                        x2={plot.x}
+                        y2={plot.y + plot.h}
+                      />
+                      <line
+                        className="axis-line"
+                        x1={plot.x}
+                        y1={plot.y + plot.h}
+                        x2={plot.x + plot.w}
+                        y2={plot.y + plot.h}
+                      />
+                      {ticks.map((val, idx) => {
+                        const ratio = maxVal ? val / maxVal : 0;
+                        const y = plot.y + plot.h - plot.h * ratio;
+                        return (
+                          <g key={`tick-${idx}`}>
+                            <line
+                              className="axis-grid"
+                              x1={plot.x}
+                              y1={y}
+                              x2={plot.x + plot.w}
+                              y2={y}
+                            />
+                            <text className="axis-text" x={plot.x - 1.2} y={y + 1}>
+                              {val}
+                            </text>
+                          </g>
+                        );
+                      })}
+
+                      {chartData.map((p, i) => {
+                        const baseX = plot.x + i * groupW;
+                        const values = [
+                          { key: "time", val: p.totalMinutes || 0 },
+                          { key: "calories", val: p.totalCalories || 0 },
+                          { key: "flex", val: p.totalEca || 0 },
+                        ];
+                        return (
+                          <g key={`group-${i}`}>
+                            {values.map((v, j) => {
+                              const h = maxVal ? (v.val / maxVal) * plot.h : 0;
+                              const x = baseX + j * (barW + innerGap);
+                              const y = plot.y + plot.h - h;
+                              return (
+                                <rect
+                                  key={`${i}-${v.key}`}
+                                  x={x}
+                                  y={y}
+                                  width={barW}
+                                  height={h}
+                                  rx="0.6"
+                                  className={`bar bar-${v.key}`}
+                                />
+                              );
+                            })}
+                            <text
+                              x={baseX + groupW / 2}
+                              y={plot.y + plot.h + 4}
+                              className="bar-label"
+                            >
+                              {p.label}
+                            </text>
+                          </g>
+                        );
+                      })}
+                    </>
+                  );
+                })()}
               </svg>
             </div>
 
@@ -664,7 +733,7 @@ export default function Progress(){
               <div className="num-row"><div className="nlabel">Total Time</div><div className="nval">{chartData.reduce((s,x)=>s+(x.totalMinutes||0),0)}m</div></div>
               <div className="num-row"><div className="nlabel">Calories</div><div className="nval">{Math.round(chartData.reduce((s,x)=>s+(x.totalCalories||0),0) * 100) / 100}</div></div>
               <div className="num-row"><div className="nlabel">Sessions</div><div className="nval">{chartData.reduce((s,x)=>s+(x.totalSessions||0),0)}</div></div>
-              <div className="num-row"><div className="nlabel">ECA</div><div className="nval">{chartData.reduce((s,x)=>s+(x.totalEca||0),0)}</div></div>
+              <div className="num-row"><div className="nlabel">Flex Points</div><div className="nval">{chartData.reduce((s,x)=>s+(x.totalEca||0),0)}</div></div>
             </div>
           </div>
         </main>

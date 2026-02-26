@@ -9,8 +9,8 @@
   width: var(--sidebar-width);
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 12px;
+  gap: 18px;
+  padding: 18px 14px;
   align-self: flex-start;
   height: 100vh;
   margin-top: calc(-1 * var(--nav-height, 64px));

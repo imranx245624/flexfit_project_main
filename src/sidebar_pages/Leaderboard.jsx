@@ -1,45 +1,91 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { supabase } from "../utils/supabaseClient";
 import "./leaderboard.css";
 
-const DEFAULT_LEADERBOARD = [
-  { rank: 1, name: "Athena", score: 1840 },
-  { rank: 2, name: "Nova", score: 1715 },
-  { rank: 3, name: "Orion", score: 1640 },
-  { rank: 4, name: "Rhea", score: 1500 },
-  { rank: 5, name: "Atlas", score: 1400 },
-  { rank: 6, name: "Lyra", score: 1320 },
-  { rank: 7, name: "Vega", score: 1265 },
-  { rank: 8, name: "Sol", score: 1190 },
-];
+const getWeekRange = () => {
+  const now = new Date();
+  const start = new Date(now);
+  start.setHours(0, 0, 0, 0);
+  start.setDate(start.getDate() - start.getDay()); // Sunday
+  const end = new Date(start);
+  end.setDate(start.getDate() + 7); // next Sunday
+  return { start, end };
+};
+
+const toDateKey = (dt) => {
+  const d = new Date(dt);
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${mm}-${dd}`;
+};
 
 function Leaderboard() {
   const [loading, setLoading] = useState(true);
   const [entries, setEntries] = useState([]);
-  const cachedSnapshot = DEFAULT_LEADERBOARD;
 
-  const fetchLeaderboard = async () => {
+  const fetchLeaderboard = useCallback(async () => {
     try {
       setLoading(true);
-      // read from the view we created
+      const { start, end } = getWeekRange();
       const { data, error } = await supabase
-        .from("leaderboard_avg_30")
-        .select("user_id, name, avg_eca_per_day, active_days")
-        .order("avg_eca_per_day", { ascending: false })
-        .limit(20);
+        .from("workout_sessions")
+        .select("user_id, eca_points, created_at")
+        .gte("created_at", start.toISOString())
+        .lt("created_at", end.toISOString());
 
       if (error) {
         console.error("Leaderboard fetch error:", error);
         setEntries([]);
       } else if (data) {
-        // map to UI shape: rank & score
-        const mapped = (data || []).map((row, idx) => ({
-          rank: idx + 1,
-          name: row.name || `User ${idx + 1}`,
-          score: Math.round(Number(row.avg_eca_per_day) * 100) / 100, // show 2dp
-          meta: { user_id: row.user_id, active_days: row.active_days }
-        }));
-        setEntries(mapped);
+        const byUser = new Map();
+        (data || []).forEach((row) => {
+          if (!row?.user_id) return;
+          const entry = byUser.get(row.user_id) || { total: 0, days: new Set() };
+          entry.total += Number(row.eca_points) || 0;
+          if (row.created_at) entry.days.add(toDateKey(row.created_at));
+          byUser.set(row.user_id, entry);
+        });
+
+        const userIds = Array.from(byUser.keys());
+        const profileMap = {};
+        if (userIds.length > 0) {
+          const { data: profiles, error: profileErr } = await supabase
+            .from("profiles")
+            .select("id, full_name, username, email")
+            .in("id", userIds);
+
+          if (profileErr) {
+            console.warn("Leaderboard profile fetch error:", profileErr);
+          } else {
+            (profiles || []).forEach((p) => {
+              profileMap[p.id] = p;
+            });
+          }
+        }
+
+        const ranked = userIds
+          .map((userId) => {
+            const info = byUser.get(userId);
+            const activeDays = info?.days?.size || 0;
+            const avg = activeDays ? info.total / activeDays : 0;
+            const profile = profileMap[userId];
+            const name =
+              profile?.full_name ||
+              profile?.username ||
+              profile?.email ||
+              "User";
+            return { userId, name, score: Math.round(avg * 100) / 100, activeDays };
+          })
+          .sort((a, b) => b.score - a.score)
+          .slice(0, 20)
+          .map((row, idx) => ({
+            rank: idx + 1,
+            name: row.name || `User ${idx + 1}`,
+            score: row.score,
+            meta: { user_id: row.userId, active_days: row.activeDays },
+          }));
+
+        setEntries(ranked);
       }
     } catch (err) {
       console.error("Leaderboard fetch threw:", err);
@@ -47,13 +93,13 @@ function Leaderboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     // initial load
     fetchLeaderboard();
     // you may want to poll or refresh on an interval; for now just initial load
-  }, []);
+  }, [fetchLeaderboard]);
 
   const handleRefresh = async () => {
     await fetchLeaderboard();
@@ -64,26 +110,29 @@ function Leaderboard() {
       <div className="leaderboard-header">
         <div>
           <h1 className="leaderboard-title">Flex Rankings</h1>
-          <p className="leaderboard-sub">Top performers by average ECA points per day.</p>
+          <p className="leaderboard-sub">Top performers by average Flex Points per active day (Sun–Sat).</p>
         </div>
         <button className="btn-ghost" onClick={handleRefresh} aria-label="Refresh leaderboard">
           {loading ? "Refreshing..." : "Refresh"}
         </button>
       </div>
 
-      {/* {loading && (
-        <div className="leaderboard-loading" role="status">Loading leaderboard…</div>
-      )} */}
-
-      {/* {!entries?.length && !loading && (
-        <div className="ff-card cached-card">
-          <div className="cached-title">Cached snapshot</div>
-          <div className="cached-sub">Leaderboard will update when live data is available.</div>
-        </div>
-      )} */}
-
       <div className="leaderboard-list">
-        {(entries?.length ? entries : cachedSnapshot).map((e) => (
+        {loading && (
+          <div className="ff-card cached-card">
+            <div className="cached-title">Loading leaderboard...</div>
+            <div className="cached-sub">Fetching latest rankings.</div>
+          </div>
+        )}
+
+        {!loading && (!entries || entries.length === 0) && (
+          <div className="ff-card cached-card">
+            <div className="cached-title">No user performed any work</div>
+            <div className="cached-sub">Once users finish workouts, rankings will appear here.</div>
+          </div>
+        )}
+
+        {!loading && entries?.length > 0 && entries.map((e) => (
           <div key={e.rank} className="leaderboard-row ff-card">
             <div className="leaderboard-rank">#{e.rank}</div>
             <div className="leaderboard-user">
@@ -93,13 +142,13 @@ function Leaderboard() {
                 <div className="leaderboard-sparkline" aria-hidden="true" />
               </div>
             </div>
-            <div className="leaderboard-score">{e.score} ECA</div>
+            <div className="leaderboard-score">{e.score} Flex Points</div>
           </div>
         ))}
       </div>
 
       <div className="leaderboard-note">
-        Leaderboard: snapshot from DB view (avg ECA per active day over last 30 days). Consider adding a Redis cache if you need sub-second responses at scale.
+        Leaderboard: computed from workout sessions for the current week (Sunday–Saturday), ranked by average flex points per active day.
       </div>
     </div>
   );

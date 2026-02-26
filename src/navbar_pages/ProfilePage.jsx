@@ -18,7 +18,76 @@ function ProfilePage({ onSignOut, initialTab = "overview" }) {
   const [showComplete, setShowComplete] = useState(false);
   const [tab, setTab] = useState(VALID_TABS.has(initialTab) ? initialTab : "overview");
   const [showConfirm, setShowConfirm] = useState(false);
+  const [statsLoading, setStatsLoading] = useState(true);
+  const [overviewStats, setOverviewStats] = useState({
+    totalSessions: 0,
+    totalEca: 0,
+    bestScore: null,
+    sessionsThisWeek: 0,
+  });
   const navigate = useNavigate();
+
+  const computeOverviewStats = (rows = []) => {
+    const totalSessions = rows.length;
+    const totalEca = rows.reduce((sum, r) => sum + (Number(r.eca_points) || 0), 0);
+
+    const bestScore = totalSessions
+      ? Math.max(...rows.map((r) => Number(r.eca_points) || 0))
+      : null;
+
+    const weekStart = new Date();
+    weekStart.setHours(0, 0, 0, 0);
+    weekStart.setDate(weekStart.getDate() - 6);
+    const sessionsThisWeek = rows.filter((r) => {
+      if (!r.created_at) return false;
+      return new Date(r.created_at) >= weekStart;
+    }).length;
+
+    return { totalSessions, totalEca, bestScore, sessionsThisWeek };
+  };
+
+  const fetchOverviewStats = async (userId) => {
+    if (!userId) {
+      setOverviewStats({
+        totalSessions: 0,
+        totalEca: 0,
+        bestScore: null,
+        sessionsThisWeek: 0,
+      });
+      setStatsLoading(false);
+      return;
+    }
+
+    setStatsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from("workout_sessions")
+        .select("accuracy, eca_points, created_at")
+        .eq("user_id", userId);
+
+      if (error) {
+        console.error("overview stats fetch error:", error);
+        setOverviewStats({
+          totalSessions: 0,
+          totalEca: 0,
+          bestScore: null,
+          sessionsThisWeek: 0,
+        });
+      } else {
+        setOverviewStats(computeOverviewStats(data || []));
+      }
+    } catch (err) {
+      console.error("overview stats fetch threw:", err);
+      setOverviewStats({
+        totalSessions: 0,
+        totalEca: 0,
+        bestScore: null,
+        sessionsThisWeek: 0,
+      });
+    } finally {
+      setStatsLoading(false);
+    }
+  };
 
   const fetchProfile = async () => {
     setLoading(true);
@@ -29,9 +98,12 @@ function ProfilePage({ onSignOut, initialTab = "overview" }) {
 
       if (!user) {
         setProfile(null);
+        setStatsLoading(false);
         setLoading(false);
         return;
       }
+
+      await fetchOverviewStats(user.id);
 
       const { data, error } = await supabase
         .from("profiles")
@@ -84,6 +156,7 @@ function ProfilePage({ onSignOut, initialTab = "overview" }) {
 
   const handleSignOut = async () => {
     try {
+      try { sessionStorage.setItem("ff-manual-signout", "1"); } catch (e) {}
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       alert("Signed out");
@@ -110,6 +183,7 @@ function ProfilePage({ onSignOut, initialTab = "overview" }) {
   if (!profile) return <div className="profile-loading">No profile (please sign in)</div>;
 
   const incomplete = !profile.username || profile.profile_completed === false;
+  const hasSessions = overviewStats.totalSessions > 0;
 
   return (
     <div className="profile-dashboard container">
@@ -157,52 +231,52 @@ function ProfilePage({ onSignOut, initialTab = "overview" }) {
 
                 <div className="ff-profile-kpis">
                   <div className="kpi">
-                    <div className="value">0</div>
+                    <div className="value">{statsLoading ? "--" : overviewStats.sessionsThisWeek}</div>
                     <div className="small-muted">Sessions this week</div>
                   </div>
                   <div className="kpi">
-                    <div className="value">--</div>
-                    <div className="small-muted">Best score</div>
+                    <div className="value">
+                      {statsLoading ? "--" : (overviewStats.bestScore !== null ? overviewStats.bestScore : "--")}
+                    </div>
+                    <div className="small-muted">Best Flex Points</div>
                   </div>
                 </div>
               </div>
 
               <div className="ff-profile-actions">
-                {incomplete ? (
+                {/* {incomplete ? (
                   <button className="btn-primary" onClick={() => setShowComplete(true)}>Complete profile</button>
-                ) : null}
-                <Link to="/reports" className="btn-ghost">View Reports</Link>
+                ) : null} */}
+                {/* <Link to="/reports" className="btn-ghost">View Reports</Link> */}
                 <button className="btn-ghost" onClick={() => setShowConfirm(true)}>Sign Out</button>
               </div>
 
-              <div className="ff-profile-stats">
-                <div className="ff-profile-stat">
-                  <div className="stat-label">Total Sessions</div>
-                  <div className="stat-value">0</div>
+                <div className="ff-profile-stats">
+                  <div className="ff-profile-stat">
+                    <div className="stat-label">Total Sessions</div>
+                    <div className="stat-value">{statsLoading ? "--" : overviewStats.totalSessions}</div>
+                  </div>
+                  <div className="ff-profile-stat">
+                    <div className="stat-label">Flex Points</div>
+                    <div className="stat-value">{statsLoading ? "--" : overviewStats.totalEca}</div>
+                  </div>
                 </div>
-                <div className="ff-profile-stat">
-                  <div className="stat-label">Avg Accuracy</div>
-                  <div className="stat-value">--</div>
-                </div>
-                <div className="ff-profile-stat">
-                  <div className="stat-label">ECA Points</div>
-                  <div className="stat-value">0</div>
-                </div>
-              </div>
 
-              <div className="ff-profile-placeholder">
-                You haven't completed any sessions yet. Start a workout to see progress here.
-              </div>
+              {!statsLoading && !hasSessions && (
+                <div className="ff-profile-placeholder">
+                  You haven't completed any sessions yet. Start a workout to see progress here.
+                </div>
+              )}
 
               <div className="ff-profile-details">
-                <div>
+                {/* <div>
                   <div className="detail-label">Member Since</div>
                   <div className="detail-value">{profile.created_at ? new Date(profile.created_at).toLocaleDateString() : "--"}</div>
                 </div>
                 <div>
                   <div className="detail-label">Status</div>
                   <div className="detail-value">{incomplete ? "Incomplete" : "Active"}</div>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>

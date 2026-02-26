@@ -16,6 +16,10 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
 }
+.settings-groups.single {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 520px;
+}
 
 .settings-group {
   display: flex;
@@ -75,6 +79,13 @@
   color: #05141b;
   border: none;
   box-shadow: 0 8px 18px rgba(56,189,248,0.2);
+}
+
+.settings-help-link {
+  margin-top: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ff-accent);
 }
 
 /* Dark theme: neon-cyan borders */

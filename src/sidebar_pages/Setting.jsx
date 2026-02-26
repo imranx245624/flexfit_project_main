@@ -1,23 +1,13 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import "./settings.css";
 
 export default function Settings() {
-  const [voiceFeedback, setVoiceFeedback] = useState(true);
-  const [units, setUnits] = useState("kg");
-  const [difficulty, setDifficulty] = useState("standard");
-  const [debugLogs, setDebugLogs] = useState(false);
-  const [installPrompt, setInstallPrompt] = useState(null);
-  const [canInstall, setCanInstall] = useState(false);
-  const [isInstalled, setIsInstalled] = useState(false);
   const [theme, setTheme] = useState(() => {
     if (typeof window === "undefined") return "light";
     const saved = localStorage.getItem("ff-theme");
     return saved === "dark" ? "dark" : "light";
   });
-
-  const handleSave = () => {
-    // TODO: Hook to existing settings save handlers without changing API calls.
-  };
 
   useEffect(() => {
     const root = document.documentElement;
@@ -29,132 +19,18 @@ export default function Settings() {
     try { localStorage.setItem("ff-theme", theme); } catch (e) {}
   }, [theme]);
 
-  useEffect(() => {
-    const sync = () => {
-      const prompt = window.__ffInstallPrompt || null;
-      const standalone = window.matchMedia("(display-mode: standalone)").matches;
-      const iOSStandalone = window.navigator.standalone === true;
-      setIsInstalled(standalone || iOSStandalone);
-      setInstallPrompt(prompt);
-      setCanInstall(Boolean(prompt) && !(standalone || iOSStandalone));
-    };
-    sync();
-    const handleAvailable = () => sync();
-    const handleInstalled = () => {
-      setIsInstalled(true);
-      setCanInstall(false);
-      setInstallPrompt(null);
-    };
-    const handleUsed = () => {
-      setCanInstall(false);
-      setInstallPrompt(null);
-    };
-    window.addEventListener("flexfit-install-available", handleAvailable);
-    window.addEventListener("appinstalled", handleInstalled);
-    window.addEventListener("flexfit-install-used", handleUsed);
-    return () => {
-      window.removeEventListener("flexfit-install-available", handleAvailable);
-      window.removeEventListener("appinstalled", handleInstalled);
-      window.removeEventListener("flexfit-install-used", handleUsed);
-    };
-  }, []);
-
-  const handleInstall = async () => {
-    if (!installPrompt) return;
-    installPrompt.prompt();
-    try {
-      const choice = await installPrompt.userChoice;
-      if (choice?.outcome === "accepted") {
-        setIsInstalled(true);
-      }
-    } catch (e) {}
-    setCanInstall(false);
-    setInstallPrompt(null);
-    try { window.dispatchEvent(new CustomEvent("flexfit-install-used")); } catch (e) {}
-  };
-
   return (
     <div className="settings-page container">
       <div className="settings-header">
         <div>
           <h1 className="settings-title">Settings</h1>
-          <p className="settings-sub">Personalize your FlexFit experience.</p>
+          <p className="settings-sub">Appearance settings for FlexFit.</p>
         </div>
-        <button className="btn-primary" onClick={handleSave}>Save Changes</button>
       </div>
 
-      <div className="settings-groups">
+      <div className="settings-groups single">
         <div className="settings-group ff-card">
-          <div className="settings-group-title">Account</div>
-          <div className="settings-item">
-            <div className="settings-label">Username</div>
-            <div className="settings-value small-muted">Set in profile</div>
-          </div>
-          <div className="settings-item">
-            <div className="settings-label">Email</div>
-            <div className="settings-value small-muted">Linked to sign-in</div>
-          </div>
-        </div>
-
-        <div className="settings-group ff-card">
-          <div className="settings-group-title">Preferences</div>
-          <div className="settings-item">
-            <div className="settings-label">Voice Feedback</div>
-            <label className="toggle">
-              <input
-                type="checkbox"
-                checked={voiceFeedback}
-                onChange={() => setVoiceFeedback(!voiceFeedback)}
-                aria-label="Toggle voice feedback"
-              />
-              <span />
-            </label>
-          </div>
-
-          <div className="settings-item">
-            <div className="settings-label">Units</div>
-            <div className="settings-options">
-              <button
-                className={`option ${units === "kg" ? "active" : ""}`}
-                onClick={() => setUnits("kg")}
-                aria-label="Use kilograms"
-              >
-                kg
-              </button>
-              <button
-                className={`option ${units === "lbs" ? "active" : ""}`}
-                onClick={() => setUnits("lbs")}
-                aria-label="Use pounds"
-              >
-                lbs
-              </button>
-            </div>
-          </div>
-
-          <div className="settings-item">
-            <div className="settings-label">Difficulty</div>
-            <div className="settings-options">
-              <button
-                className={`option ${difficulty === "easy" ? "active" : ""}`}
-                onClick={() => setDifficulty("easy")}
-              >
-                Easy
-              </button>
-              <button
-                className={`option ${difficulty === "standard" ? "active" : ""}`}
-                onClick={() => setDifficulty("standard")}
-              >
-                Standard
-              </button>
-              <button
-                className={`option ${difficulty === "hard" ? "active" : ""}`}
-                onClick={() => setDifficulty("hard")}
-              >
-                Hard
-              </button>
-            </div>
-          </div>
-
+          <div className="settings-group-title">Appearance</div>
           <div className="settings-item">
             <div className="settings-label">Theme</div>
             <div className="settings-options">
@@ -172,32 +48,8 @@ export default function Settings() {
               </button>
             </div>
           </div>
-
-          {canInstall && !isInstalled && (
-            <div className="settings-item">
-              <div className="settings-label">Install App</div>
-              <button className="btn settings-install-btn" onClick={handleInstall}>
-                Install
-              </button>
-            </div>
-          )}
-        </div>
-
-        <div className="settings-group ff-card">
-          <div className="settings-group-title">Developer</div>
-          <div className="settings-item">
-            <div className="settings-label">Debug Logs</div>
-            <label className="toggle">
-              <input
-                type="checkbox"
-                checked={debugLogs}
-                onChange={() => setDebugLogs(!debugLogs)}
-                aria-label="Toggle debug logs"
-              />
-              <span />
-            </label>
-          </div>
-          <div className="settings-help">Enable verbose console logging for troubleshooting.</div>
+          <div className="settings-help">Theme changes apply instantly across the app.</div>
+          <Link className="settings-help-link" to="/help">Need help? Visit the Help page</Link>
         </div>
       </div>
     </div>

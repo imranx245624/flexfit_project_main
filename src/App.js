@@ -1,5 +1,5 @@
 // src/App.js
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { BrowserRouter as Router, Routes, Route, useNavigate, Link, useLocation } from "react-router-dom";
 
 import "./styles/theme.css"; // new global theme (kept)
@@ -18,6 +18,7 @@ import AIWorkoutLibrary from "./workout_pages/AIWorkoutLibrary.jsx";
 import Profile from "./navbar_pages/ProfilePage.jsx";
 import Progress from "./sidebar_pages/Progress_tracker.jsx";
 import Setting from "./sidebar_pages/Setting.jsx";
+import Help from "./sidebar_pages/Help.jsx";
 
 /* TODO: DO NOT CHANGE API CALLS (supabase) */
 import { supabase } from "./utils/supabaseClient";
@@ -26,6 +27,7 @@ function RouterWrapper() {
   const [hideShell, setHideShell] = useState(false);
   const [routeLoading, setRouteLoading] = useState(false);
   const [, setCurrentUser] = useState(null);
+  const sessionExpiredNotifiedRef = useRef(false);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -36,16 +38,20 @@ function RouterWrapper() {
     } catch (e) {}
   }, [location.pathname]);
 
-  // Show a short loading notice on every route change
+  // Show a short loading notice only if the route feels slow
   useEffect(() => {
     let alive = true;
-    setRouteLoading(true);
-    const timer = setTimeout(() => {
+    setRouteLoading(false);
+    const showTimer = setTimeout(() => {
+      if (alive) setRouteLoading(true);
+    }, 450);
+    const hideTimer = setTimeout(() => {
       if (alive) setRouteLoading(false);
-    }, 4000);
+    }, 2500);
     return () => {
       alive = false;
-      clearTimeout(timer);
+      clearTimeout(showTimer);
+      clearTimeout(hideTimer);
     };
   }, [location.pathname]);
 
@@ -73,7 +79,20 @@ function RouterWrapper() {
   useEffect(() => {
     const { data: { subscription } = {} } = supabase.auth.onAuthStateChange(async (event, session) => {
       try {
+        const notifySessionExpired = () => {
+          if (sessionExpiredNotifiedRef.current) return;
+          sessionExpiredNotifiedRef.current = true;
+          alert("Your session has expired. Please sign in again.");
+          try { window.dispatchEvent(new CustomEvent("flexfit-open-signin")); } catch (e) {}
+        };
+
+        if (event === "TOKEN_REFRESH_FAILED") {
+          notifySessionExpired();
+          return;
+        }
+
         if (event === "SIGNED_IN" && session?.user) {
+          sessionExpiredNotifiedRef.current = false;
           const user = session.user;
           setCurrentUser(user);
           try {
@@ -102,6 +121,12 @@ function RouterWrapper() {
           // keep user in place after login; route guard will allow access
         } else if (event === "SIGNED_OUT") {
           setCurrentUser(null);
+          let manual = false;
+          try {
+            manual = sessionStorage.getItem("ff-manual-signout") === "1";
+            if (manual) sessionStorage.removeItem("ff-manual-signout");
+          } catch (e) {}
+          if (!manual) notifySessionExpired();
         }
       } catch (err) {
         console.error("onAuthStateChange handler error:", err);
@@ -184,7 +209,7 @@ function RouterWrapper() {
       },
       {
         title: "Progress & Reports",
-        desc: "Session summaries, accuracy, ECA points, and performance insights.",
+        desc: "Session summaries, flex points, and performance insights.",
       },
       {
         title: "3D Body Model (Coming Soon)",
@@ -211,8 +236,9 @@ function RouterWrapper() {
 
     return (
       <div className="home-shell">
-        <section className="ff-hero-block with-video">
-          <video
+        <section className="ff-hero-block cover-hero">
+          {/* Old video + overlay (commented as requested) */}
+          {/* <video
             className="ff-hero-video-bg"
             src="/assets/workouts/hero.mp4"
             autoPlay
@@ -220,15 +246,12 @@ function RouterWrapper() {
             loop
             playsInline
           />
-          <div className="ff-hero-video-overlay" />
-          <div className="ff-hero-left">
+          <div className="ff-hero-video-overlay" /> */}
+
+          {/* Old text layout (commented as requested) */}
+          {/* <div className="ff-hero-left">
             <span className="hero-badge">FlexFit</span>
             <h1>AI-Powered Fitness Assistant</h1>
-            {/* <p className="hero-lead">
-              FlexFit AI is a privacy-first fitness assistant that uses your webcam for real-time pose detection
-              and voice feedback. Explore home and gym workouts, track accuracy and reps, and review progress
-              reports. 3D body model visualization is coming soon.
-            </p> */}
             <div className="hero-actions">
               <button className="btn-primary ai-cta" onClick={goAI}>Train with AI</button>
               <button className="btn-ghost" onClick={goLibrary}>Workout Library</button>
@@ -238,6 +261,41 @@ function RouterWrapper() {
               <span>Live Corrections</span>
               <span>Privacy Focused</span>
             </div>
+          </div> */}
+
+          <div className="cover-hero-content">
+            <span className="cover-hero-badge">FlexFit</span>
+            <h1 className="cover-hero-title">AI‑Powered Fitness Assistant</h1>
+            <p className="cover-hero-sub">
+              Train smarter with real‑time pose detection, flex point scoring, and clean progress tracking.
+              Built for everyday users and performance‑focused athletes.
+            </p>
+            <div className="cover-hero-actions">
+              <button className="btn-primary ai-cta" onClick={goAI}>Train with AI</button>
+              <button className="btn-ghost" onClick={goLibrary}>Workout Library</button>
+            </div>
+            <div className="cover-hero-stats">
+              <div className="cover-hero-stat">
+                <div className="stat-value">Live</div>
+                <div className="stat-label">Pose Detection</div>
+              </div>
+              <div className="cover-hero-stat">
+                <div className="stat-value">Flex</div>
+                <div className="stat-label">Point System</div>
+              </div>
+              <div className="cover-hero-stat">
+                <div className="stat-value">Private</div>
+                <div className="stat-label">On‑Device AI</div>
+              </div>
+            </div>
+          </div>
+          <div className="cover-hero-media">
+            <img
+              src="/assets/workouts/hero-cover.jpg"
+              alt="FlexFit training scene"
+              loading="lazy"
+            />
+            <div className="cover-hero-glow" aria-hidden="true" />
           </div>
         </section>
 
@@ -346,8 +404,7 @@ function RouterWrapper() {
             <div className="route-notice" role="status" aria-live="polite">
               <span className="route-notice-dot" aria-hidden="true" />
               <div className="route-notice-text">
-                <strong>Loading page...</strong>
-                <span>If this page takes time or looks stuck, please refresh.</span>
+                <strong>loading...</strong>
               </div>
             </div>
           )}
@@ -365,6 +422,7 @@ function RouterWrapper() {
             <Route path="/profile" element={<Profile onSignOut={handleProfileSignOut} />} />
             <Route path="/progress" element={<Progress />} />
             <Route path="/settings" element={<Setting />} />
+            <Route path="/help" element={<Help />} />
           </Routes>
         </main>
       </div>

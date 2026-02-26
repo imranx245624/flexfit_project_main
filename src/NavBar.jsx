@@ -44,6 +44,7 @@ export default function NavBar() {
     "/profile": "Dashboard",
     "/progress": "MY Progress",
     "/settings": "Settings",
+    "/help": "Help",
   };
   const pageTitle = (() => {
     if (loc.pathname.startsWith("/exercise/")) {
@@ -207,6 +208,7 @@ export default function NavBar() {
 
   const handleSignOut = async () => {
     try {
+      try { sessionStorage.setItem("ff-manual-signout", "1"); } catch (e) {}
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       alert("Signed out");
@@ -242,6 +244,9 @@ export default function NavBar() {
             >
               ☀
             </button>
+            <Link className="nav-help-btn" to="/help" aria-label="Help" title="Help">
+              ?
+            </Link>
             {canInstall && !isInstalled && (
               <button
                 className="nav-btn nav-install"
@@ -292,6 +297,7 @@ export default function NavBar() {
                       <div className="popover-email">{user?.email || "No email"}</div>
                       <div className="popover-actions">
                         <Link to="/profile" className="popover-link" onClick={() => setPopoverOpen(false)}>Go to Dashboard</Link>
+                        <Link to="/help" className="popover-link ghost" onClick={() => setPopoverOpen(false)}>Help & Support</Link>
                         {/* <Link to="/settings" className="popover-link" onClick={() => setPopoverOpen(false)}>Settings</Link> */}
                         <button
                           className="popover-link ghost"

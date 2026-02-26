@@ -107,7 +107,17 @@
   width: 100%;
   transition: box-shadow .12s ease, border-color .12s ease;
 }
-.auth-input::placeholder { color: rgba(31,43,58,0.45); }
+.auth-input::placeholder { color: rgba(31,43,58,0.55); }
+.auth-input::-ms-input-placeholder { color: rgba(31,43,58,0.55); }
+
+:root[data-theme="dark"] .auth-input::placeholder,
+body[data-theme="dark"] .auth-input::placeholder {
+  color: rgba(255,255,255,0.6);
+}
+:root[data-theme="dark"] .auth-input::-ms-input-placeholder,
+body[data-theme="dark"] .auth-input::-ms-input-placeholder {
+  color: rgba(255,255,255,0.6);
+}
 .auth-input:focus { border-color: rgba(124,58,237,0.35); box-shadow: 0 10px 24px rgba(124,58,237,0.12); }
 
 /* continue (primary) button */

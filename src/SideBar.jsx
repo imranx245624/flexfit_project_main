@@ -74,6 +74,7 @@ export default function SideBar({ open = true, setOpen }) {
 
   const handleSignOut = async () => {
     try {
+      try { sessionStorage.setItem("ff-manual-signout", "1"); } catch (e) {}
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       alert("Signed out");
