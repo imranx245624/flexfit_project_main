@@ -6,8 +6,8 @@ import "./TopNav.css";
 const PAGE_TITLES = {
   "/": "Home",
   "/workouts": "Workout Library",
-  "/HWorkout": "Home Workouts",
-  "/GWorkout": "Gym Workouts",
+  "/HWorkout": "Workout Library",
+  "/GWorkout": "Workout Library",
   "/AIWorkoutLibrary": "AI Workout Library",
   "/AIWorkout": "AI Workout",
   "/profile": "Dashboard",
@@ -67,7 +67,7 @@ export default function TopNav({ currentUser }) {
         </div>
 
         <div className="topnav-right">
-          <Link to="/HWorkout" className="btn topnav-cta">Home Workout</Link>
+          <Link to="/workouts?type=home" className="btn topnav-cta">Home Workout</Link>
 
           <button className="nav-icon ghost" aria-label="Notifications">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
@@ -90,7 +90,7 @@ export default function TopNav({ currentUser }) {
         <Link to="/AIWorkoutLibrary" onClick={() => setOpen(false)}>AI Workout</Link>
         <Link to="/profile" onClick={() => setOpen(false)}>Dashboard</Link>
         <Link to="/leaderboard" onClick={() => setOpen(false)}>Flex Rankings</Link>
-        <Link to="/HWorkout" onClick={() => setOpen(false)} className="mobile-cta">Home Workout</Link>
+        <Link to="/workouts?type=home" onClick={() => setOpen(false)} className="mobile-cta">Home Workout</Link>
       </div>
     </header>
   );

@@ -35,8 +35,8 @@ export default function NavBar() {
   const PAGE_TITLES = {
     "/": "Home",
     "/workouts": "Workout Library",
-    "/HWorkout": "Home Workout",
-    "/GWorkout": "Gym Workout",
+    "/HWorkout": "Workout Library",
+    "/GWorkout": "Workout Library",
     "/AIWorkoutLibrary": "AI Workout Library",
     "/AIWorkout": "AI Workout",
     "/leaderboard": "Flex Rankings",

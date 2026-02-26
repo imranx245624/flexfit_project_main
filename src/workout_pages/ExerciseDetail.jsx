@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import PageWrapper from "./pageWrapper.jsx";
 import { getExerciseBySlug } from "../data/exerciseCatalog";
 import { getExerciseDetails } from "../data/exerciseDetails";
+import { fetchPexelsVideoWithFallback } from "../utils/pexelsVideo";
 import "./exerciseDetail.css";
 
 const toTitle = (slug = "") =>
@@ -18,8 +19,13 @@ export default function ExerciseDetail() {
   const displayName = exerciseMeta?.name || toTitle(slug);
 
   const detail = useMemo(() => getExerciseDetails(slug), [slug]);
-  const videoSrc = detail?.video || null;
-  const poster = detail?.poster || null;
+  const [pexelsVideo, setPexelsVideo] = useState(null);
+  const [pexelsLoading, setPexelsLoading] = useState(false);
+  const [pexelsError, setPexelsError] = useState("");
+  const [pexelsDebug, setPexelsDebug] = useState("");
+
+  const videoSrc = detail?.video || pexelsVideo?.videoUrl || null;
+  const poster = detail?.poster || pexelsVideo?.image || null;
   const [previewOpen, setPreviewOpen] = useState(false);
   const previewVideoRef = useRef(null);
 
@@ -30,6 +36,73 @@ export default function ExerciseDetail() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
+
+  useEffect(() => {
+    if (detail?.video) {
+      setPexelsVideo(null);
+      setPexelsLoading(false);
+      setPexelsError("");
+      setPexelsDebug("");
+      return;
+    }
+    if (!process.env.REACT_APP_PEXELS_API_KEY) {
+      setPexelsVideo(null);
+      setPexelsLoading(false);
+      setPexelsError("Pexels API key not configured.");
+      setPexelsDebug("Missing REACT_APP_PEXELS_API_KEY");
+      return;
+    }
+
+    let mounted = true;
+    const controller = new AbortController();
+
+    (async () => {
+      try {
+        setPexelsLoading(true);
+        setPexelsError("");
+        const queries = [
+          `${displayName} exercise`,
+          `${displayName} workout`,
+          "fitness exercise",
+        ];
+        const { result, error } = await fetchPexelsVideoWithFallback(queries, {
+          orientation: "landscape",
+          size: "medium",
+          perPage: 1,
+          minDuration: 0,
+          maxDuration: 120,
+          signal: controller.signal,
+        });
+        if (mounted) {
+          if (result) {
+            setPexelsVideo(result);
+          } else {
+            if (error) {
+              setPexelsError("Could not load video preview.");
+              setPexelsDebug(String(error?.message || error));
+            } else {
+              setPexelsError("No video found for this exercise yet.");
+              setPexelsDebug(`No results for: ${queries.join(" | ")}`);
+            }
+            setPexelsVideo(null);
+          }
+        }
+      } catch (err) {
+        if (mounted && !controller.signal.aborted) {
+          setPexelsError("Could not load video preview.");
+          setPexelsDebug(String(err?.message || err));
+          setPexelsVideo(null);
+        }
+      } finally {
+        if (mounted) setPexelsLoading(false);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+      controller.abort();
+    };
+  }, [displayName, detail?.video, slug]);
 
   const steps = detail?.steps || [];
   const primaryMuscles = detail?.primaryMuscles || [];
@@ -115,7 +188,20 @@ export default function ExerciseDetail() {
               </button>
             ) : (
               <div className="exercise-video-placeholder">
-                Video coming soon.
+              {pexelsLoading ? "Loading video..." : (pexelsError || "Video coming soon.")}
+              {pexelsDebug && <div className="pexels-debug">Debug: {pexelsDebug}</div>}
+            </div>
+          )}
+            {pexelsVideo && (
+              <div className="pexels-attrib">
+                Video by{" "}
+                <a href={pexelsVideo.photographerUrl} target="_blank" rel="noreferrer">
+                  {pexelsVideo.photographer}
+                </a>{" "}
+                on{" "}
+                <a href={pexelsVideo.pexelsUrl} target="_blank" rel="noreferrer">
+                  Pexels
+                </a>
               </div>
             )}
           </div>
@@ -172,6 +258,18 @@ export default function ExerciseDetail() {
               muted
               playsInline
             />
+            {pexelsVideo && (
+              <div className="pexels-attrib modal">
+                Video by{" "}
+                <a href={pexelsVideo.photographerUrl} target="_blank" rel="noreferrer">
+                  {pexelsVideo.photographer}
+                </a>{" "}
+                on{" "}
+                <a href={pexelsVideo.pexelsUrl} target="_blank" rel="noreferrer">
+                  Pexels
+                </a>
+              </div>
+            )}
           </div>
         </div>
       )}

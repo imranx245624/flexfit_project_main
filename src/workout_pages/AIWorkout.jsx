@@ -896,8 +896,8 @@ function AIWorkout() {
     const returnTo =
       location.state?.returnTo ||
       location.state?.from ||
-      (location.state?.origin === "gym" ? "/GWorkout" : "/HWorkout");
-    navigate(returnTo || "/HWorkout");
+      (location.state?.origin === "gym" ? "/workouts?type=gym" : "/workouts?type=home");
+    navigate(returnTo || "/workouts?type=home");
   };
 
 

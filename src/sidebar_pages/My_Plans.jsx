@@ -17,14 +17,14 @@ function Plans() {
             <div className="plans-icon">Home</div>
             <div className="plans-name">Home Workout</div>
             <div className="plans-desc">Train at home with minimal equipment.</div>
-            <Link to="/HWorkout" className="btn">Start Home</Link>
+            <Link to="/workouts?type=home" className="btn">Start Home</Link>
           </div>
 
           <div className="plans-card glow-hover">
             <div className="plans-icon alt">Gym</div>
             <div className="plans-name">Gym Workout</div>
             <div className="plans-desc">Access equipment for higher intensity sessions.</div>
-            <Link to="/GWorkout" className="btn">Start Gym</Link>
+            <Link to="/workouts?type=gym" className="btn">Start Gym</Link>
           </div>
         </div>
       </div>

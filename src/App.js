@@ -8,8 +8,7 @@ import "./HomeContent.css"; // updated file
 import NavBar from "./NavBar.jsx";
 import SideBar from "./SideBar.jsx";
 
-import HWorkout from "./workout_pages/HomeWorkout.jsx";
-import GWorkout from "./workout_pages/GymWorkout.jsx";
+// Home/Gym pages now redirect to the unified library
 import ExerciseDetail from "./workout_pages/ExerciseDetail.jsx";
 import Workouts from "./sidebar_pages/Workout_library.jsx";
 import Plans from "./sidebar_pages/My_Plans.jsx";
@@ -165,8 +164,8 @@ function RouterWrapper() {
   /* --------------------- NEW HomeContent (redesigned) --------------------- */
   function HomeContent() {
     const navigate = useNavigate();
-    const goHomeWorkout = () => navigate("/HWorkout");
-    const goGymWorkout = () => navigate("/GWorkout");
+    const goHomeWorkout = () => navigate("/workouts?type=home");
+    const goGymWorkout = () => navigate("/workouts?type=gym");
     const goAI = () => navigate("/AIWorkoutLibrary");
     const goLibrary = () => navigate("/workouts");
 
@@ -318,6 +317,15 @@ function RouterWrapper() {
   }
   /* ------------------- end HomeContent ------------------- */
 
+  function RedirectToLibrary({ type }) {
+    const navigate = useNavigate();
+    useEffect(() => {
+      const dest = type ? `/workouts?type=${type}` : "/workouts";
+      navigate(dest, { replace: true });
+    }, [navigate, type]);
+    return null;
+  }
+
   const handleProfileSignOut = () => {
     // profile page will call this on sign-out
     setCurrentUser(null);
@@ -345,8 +353,8 @@ function RouterWrapper() {
           )}
           <Routes>
             <Route path="/" element={<HomeContent />} />
-            <Route path="/HWorkout" element={<HWorkout />} />
-            <Route path="/GWorkout" element={<GWorkout />} />
+            <Route path="/HWorkout" element={<RedirectToLibrary type="home" />} />
+            <Route path="/GWorkout" element={<RedirectToLibrary type="gym" />} />
             <Route path="/exercise/:slug" element={<ExerciseDetail />} />
             <Route path="/workouts" element={<Workouts />} />
             <Route path="/plans" element={<Plans />} />
@@ -386,8 +394,8 @@ function RouterWrapper() {
 
             <div className="footer-col">
               <div className="footer-title">Training</div>
-              <Link to="/HWorkout" className="footer-link">Home Workouts</Link>
-              <Link to="/GWorkout" className="footer-link">Gym Workouts</Link>
+              <Link to="/workouts?type=home" className="footer-link">Home Workouts</Link>
+              <Link to="/workouts?type=gym" className="footer-link">Gym Workouts</Link>
               <Link to="/progress" className="footer-link">MY Progress</Link>
               <Link to="/leaderboard" className="footer-link">Leaderboard</Link>
             </div>
