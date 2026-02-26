@@ -9,9 +9,17 @@ export function useAuth() {
     let mounted = true;
     (async () => {
       try {
+        let session = null;
         const { data } = await supabase.auth.getSession();
+        session = data?.session ?? null;
+
+        if (!session) {
+          const { data: refreshed } = await supabase.auth.refreshSession();
+          session = refreshed?.session ?? null;
+        }
+
         if (!mounted) return;
-        setUser(data?.session?.user ?? null);
+        setUser(session?.user ?? null);
       } catch (err) {
         if (mounted) setUser(null);
       } finally {
