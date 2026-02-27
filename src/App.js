@@ -217,7 +217,6 @@ function RouterWrapper() {
     const goHomeWorkout = () => navigate("/workouts?type=home");
     const goGymWorkout = () => navigate("/workouts?type=gym");
     const goAI = () => navigate("/AIWorkoutLibrary");
-    const goLibrary = () => navigate("/workouts");
 
     const features = [
       {
