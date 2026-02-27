@@ -297,7 +297,7 @@ function RouterWrapper() {
             </p>
             <div className="cover-hero-actions">
               <button className="btn-primary ai-cta" onClick={goAI}>Train with AI</button>
-              <button className="btn-ghost" onClick={goLibrary}>Workout Library</button>
+              {/* <button className="btn-ghost" onClick={goLibrary}>Workout Library</button> */}
             </div>
             <div className="cover-hero-stats">
               <div className="cover-hero-stat">
