@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import PageWrapper from "../workout_pages/pageWrapper.jsx";
 import "./workoutLibrary.css";
@@ -15,8 +15,11 @@ export default function Workouts() {
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewError, setPreviewError] = useState("");
   const [previewDebug, setPreviewDebug] = useState("");
+  const previewAbortRef = useRef(null);
 
   const closePreview = () => {
+    try { previewAbortRef.current?.abort(); } catch (e) {}
+    previewAbortRef.current = null;
     setPreviewOpen(false);
     setPreviewLoading(false);
     setPreviewError("");
@@ -29,11 +32,17 @@ export default function Workouts() {
       if (e.key === "Escape") closePreview();
     };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      try { previewAbortRef.current?.abort(); } catch (e) {}
+      previewAbortRef.current = null;
+    };
   }, []);
 
   const openPreview = async (name) => {
+    try { previewAbortRef.current?.abort(); } catch (e) {}
     const controller = new AbortController();
+    previewAbortRef.current = controller;
     setPreviewTitle(name);
     setPreviewOpen(true);
     setPreviewLoading(true);
@@ -55,6 +64,7 @@ export default function Workouts() {
         maxDuration: 120,
         signal: controller.signal,
       });
+      if (controller.signal.aborted) return;
       if (result) {
         setPreviewVideo(result);
       } else {
@@ -67,17 +77,18 @@ export default function Workouts() {
         }
       }
     } catch (err) {
-      if (!controller.signal.aborted) {
-        setPreviewError("Could not load video preview.");
-        const msg = String(err?.message || err || "");
-        setPreviewDebug(
-          msg.includes("Missing Pexels API key")
-            ? "Missing Pexels API key (set REACT_APP_PEXELS_API_KEY or configure /api/pexels)."
-            : msg
-        );
-      }
+      if (controller.signal.aborted) return;
+      setPreviewError("Could not load video preview.");
+      const msg = String(err?.message || err || "");
+      setPreviewDebug(
+        msg.includes("Missing Pexels API key")
+          ? "Missing Pexels API key (set REACT_APP_PEXELS_API_KEY or configure /api/pexels)."
+          : msg
+      );
     } finally {
-      setPreviewLoading(false);
+      if (!controller.signal.aborted) {
+        setPreviewLoading(false);
+      }
     }
   };
 
@@ -146,11 +157,11 @@ export default function Workouts() {
         <div className="library-header">
           <div>
             <h1 className="library-title">Workout Library</h1>
-            <p className="library-sub">
+            {/* <p className="library-sub">
               Video previews provided by{" "}
               <a href="https://www.pexels.com" target="_blank" rel="noreferrer">Pexels</a>{" "}
               with creator attribution.
-            </p>
+            </p> */}
           </div>
           {/* <div className="library-toggle">
             <button

@@ -31,6 +31,31 @@ function RouterWrapper() {
   const location = useLocation();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const handleRejection = (event) => {
+      const err = event?.reason;
+      const msg = err?.message || "";
+      const name = err?.name || "";
+      if (name === "AbortError" || msg.includes("signal is aborted")) {
+        event.preventDefault();
+      }
+    };
+    const handleError = (event) => {
+      const err = event?.error;
+      const msg = err?.message || event?.message || "";
+      const name = err?.name || "";
+      if (name === "AbortError" || msg.includes("signal is aborted")) {
+        event.preventDefault();
+      }
+    };
+    window.addEventListener("unhandledrejection", handleRejection);
+    window.addEventListener("error", handleError);
+    return () => {
+      window.removeEventListener("unhandledrejection", handleRejection);
+      window.removeEventListener("error", handleError);
+    };
+  }, []);
+
   // Always reset to top on route change (no full page reload needed)
   useEffect(() => {
     try {

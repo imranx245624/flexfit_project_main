@@ -2857,7 +2857,7 @@ const runDetector = useCallback(async () => {
         </div>
         <div className="aiw-modal-row" style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid #333" }}>
           <span>Flex Points:</span>
-          <strong>{ecaPoints}</strong>
+          <strong>{ecaPoints} pts</strong>
         </div>
         <div className="aiw-modal-row" style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid #333" }}>
           <span>Time:</span>
@@ -2987,7 +2987,7 @@ const runDetector = useCallback(async () => {
         </p>
 
         <p>
-          Flex Points: <b>{ecaPoints}</b>
+          Flex Points: <b>{ecaPoints} pts</b>
         </p>
 
         <p>
@@ -3209,7 +3209,7 @@ const runDetector = useCallback(async () => {
               </div>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <span>Flex Points:</span>
-                <span style={{ color: "#00ccff" }}>{ecaPoints}</span>
+                <span style={{ color: "#00ccff" }}>{ecaPoints} pts</span>
               </div>
             </div>
 

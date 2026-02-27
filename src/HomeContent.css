@@ -459,6 +459,15 @@ body[data-theme="dark"] .hero-card {
   gap: 12px;
   flex-wrap: wrap;
 }
+.cover-hero-actions .btn-ghost {
+  border-width: 2px;
+}
+
+:root:not([data-theme="dark"]) .cover-hero-content .btn-ghost,
+body:not([data-theme="dark"]) .cover-hero-content .btn-ghost {
+  color: #f3f7ff;
+  border-color: rgba(110,231,255,0.6);
+}
 
 .cover-hero-stats {
   display: grid;

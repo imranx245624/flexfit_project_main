@@ -21,9 +21,9 @@ export default function Help() {
         <div className="help-hero-card">
           <div className="help-hero-card-title">Quick Tips</div>
           <div className="help-hero-item">Use good lighting and keep your full body visible.</div>
-          <div className="help-hero-item">Allow camera permission (HTTPS or localhost).</div>
+          <div className="help-hero-item">Allow camera permission (HTTPS)</div>
           <div className="help-hero-item">Save only after at least 1 rep.</div>
-          <div className="help-hero-item">Flex Rankings reset weekly (Sun-Sat).</div>
+          <div className="help-hero-item">Flex Rankings reset weekly (Sun-Sat)</div>
         </div>
       </div>
 
@@ -63,7 +63,7 @@ export default function Help() {
         <div className="help-card">
           <div className="help-card-title">Troubleshooting</div>
           <div className="help-item">Camera error: use HTTPS or allow permission in the browser.</div>
-          <div className="help-item">No data after reload: sign in again if session expired.</div>
+          <div className="help-item">if data after reload: sign in again because your session expired</div>
           <div className="help-item">Video previews missing: check internet or try again later.</div>
         </div>
 

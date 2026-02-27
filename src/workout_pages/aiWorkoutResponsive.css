@@ -186,6 +186,7 @@ body[data-theme="dark"] .aiw-modal-card {
     position: relative !important;
     align-items: stretch !important;
     justify-content: flex-start !important;
+    flex-wrap: nowrap !important;
     padding: 0 !important;
     gap: 0 !important;
     min-height: 100vh !important;
@@ -194,6 +195,7 @@ body[data-theme="dark"] .aiw-modal-card {
     width: 100% !important;
     max-width: none !important;
     flex: 1 1 auto !important;
+    min-width: 0 !important;
     display: flex !important;
     flex-direction: column !important;
     min-height: 100vh !important;
@@ -207,9 +209,12 @@ body[data-theme="dark"] .aiw-modal-card {
     width: 100% !important;
     max-width: none !important;
     flex: 1 1 auto !important;
-    height: calc(100vh - 220px) !important;
-    min-height: 60vh !important;
+    height: clamp(360px, 60vh, 680px) !important;
+    min-height: 360px !important;
+    max-height: calc(100vh - 220px) !important;
     border-radius: 0 !important;
+    aspect-ratio: auto !important;
+    background: #0b1018 !important;
   }
   .aiw-video-el,
   .aiw-canvas-el {
@@ -313,5 +318,35 @@ body[data-theme="dark"] .aiw-modal-card {
     font-size: 14px !important;
     order: -1 !important;
     margin-top: 0 !important;
+  }
+}
+
+/* Desktop-only: bigger camera, overlay panels */
+@media (min-width: 1024px) {
+  .aiw-left {
+    padding: 0 24px 20px !important;
+  }
+
+  /* Keep 4:3 ratio but scale up to viewport height */
+  .aiw-video-wrap {
+    width: min(100%, calc((100vh - 220px) * 4 / 3)) !important;
+    height: auto !important;
+    max-width: none !important;
+    max-height: calc(100vh - 220px) !important;
+    aspect-ratio: 4 / 3 !important;
+    align-self: center !important;
+  }
+
+  .aiw-right {
+    position: absolute !important;
+    top: 88px !important;
+    right: 28px !important;
+    width: 300px !important;
+    max-width: 320px !important;
+    max-height: calc(100vh - 140px) !important;
+    background: rgba(16, 23, 34, 0.78) !important;
+    border: 1px solid rgba(34, 211, 238, 0.35) !important;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.45) !important;
+    backdrop-filter: blur(12px) !important;
   }
 }

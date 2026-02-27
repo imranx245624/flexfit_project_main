@@ -18,6 +18,46 @@ function dayOfWeek(y,m,d){ return new Date(y,m,d).getDay(); }
 function toHHMM(dt){ const d=new Date(dt); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; }
 function dateOnlyISO(dt){ const d=new Date(dt); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
 
+const PROGRESS_STATE_KEY = "ff-progress-state";
+
+function readProgressState(){
+  try {
+    const raw = sessionStorage.getItem(PROGRESS_STATE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return (parsed && typeof parsed === "object") ? parsed : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function clampYear(val){
+  const n = Number(val);
+  if (!Number.isFinite(n)) return null;
+  return Math.min(YEAR_MAX, Math.max(YEAR_MIN, n));
+}
+
+function clampMonth(val){
+  const n = Number(val);
+  if (!Number.isFinite(n)) return null;
+  return Math.min(11, Math.max(0, n));
+}
+
+function formatMinutes(mins){
+  const v = Number(mins);
+  return `${Number.isFinite(v) ? v : 0} min`;
+}
+
+function formatCalories(kcal){
+  const v = Number(kcal);
+  return `${Number.isFinite(v) ? v : 0} kcal`;
+}
+
+function formatFlex(pts){
+  const v = Number(pts);
+  return `${Number.isFinite(v) ? v : 0} pts`;
+}
+
 const MET_MAP = {
   "PUSH-UPS": 8.0, "PUSHUP": 8.0, "PUSH": 8.0, "SQUAT": 8.0, "SQUATS": 8.0,
   "LUNGE": 8.0, "LUNGES": 8.0, "PLANK": 3.5, "BURPEE": 10.0, "BURPEES": 10.0,
@@ -96,9 +136,21 @@ function getInitials(name){
 /* ---------------- React component ---------------- */
 export default function Progress(){
   const today = new Date();
-  const [viewYear, setViewYear] = useState(today.getFullYear());
-  const [viewMonth, setViewMonth] = useState(today.getMonth());
-  const [selectedDate, setSelectedDate] = useState(isoDate(today.getFullYear(), today.getMonth(), today.getDate()));
+  const storedStateRef = useRef(readProgressState());
+  const storedState = storedStateRef.current;
+  const initialYear = clampYear(storedState?.viewYear) ?? today.getFullYear();
+  const initialMonth = clampMonth(storedState?.viewMonth) ?? today.getMonth();
+  const initialSelectedDate = typeof storedState?.selectedDate === "string"
+    ? storedState.selectedDate
+    : isoDate(today.getFullYear(), today.getMonth(), today.getDate());
+  const initialRangeMode = (storedState?.rangeMode === "week" || storedState?.rangeMode === "year")
+    ? storedState.rangeMode
+    : "month";
+  const initialView = storedState?.view === "chart" ? "chart" : "calendar";
+
+  const [viewYear, setViewYear] = useState(initialYear);
+  const [viewMonth, setViewMonth] = useState(initialMonth);
+  const [selectedDate, setSelectedDate] = useState(initialSelectedDate);
 
   const { user, loading: authLoading } = useAuth();
   const [monthSessionsRaw, setMonthSessionsRaw] = useState([]);
@@ -136,8 +188,8 @@ export default function Progress(){
 
   const summary = useMemo(()=> aggregate(sessionsForDate), [sessionsForDate]);
 
-  const [rangeMode, setRangeMode] = useState("month"); // week|month|year
-  const [view, setView] = useState("calendar"); // calendar | chart
+  const [rangeMode, setRangeMode] = useState(initialRangeMode); // week|month|year
+  const [view, setView] = useState(initialView); // calendar | chart
   const chartData = useMemo(()=> {
     const anchor = new Date(selectedDate);
     const points = [];
@@ -180,6 +232,14 @@ export default function Progress(){
     return points;
   }, [rangeMode, selectedDate, monthSessionsRaw, yearSessionsRaw, viewYear, viewMonth]);
 
+  const chartTotals = useMemo(() => {
+    const totalMinutes = chartData.reduce((s, x) => s + (x.totalMinutes || 0), 0);
+    const totalCalories = Math.round(chartData.reduce((s, x) => s + (x.totalCalories || 0), 0) * 100) / 100;
+    const totalSessions = chartData.reduce((s, x) => s + (x.totalSessions || 0), 0);
+    const totalEca = chartData.reduce((s, x) => s + (x.totalEca || 0), 0);
+    return { totalMinutes, totalCalories, totalSessions, totalEca };
+  }, [chartData]);
+
   function sessionsFromRawForDate(rawRows, isoDateStr){
     if(!rawRows || rawRows.length===0) return [];
     return rawRows.filter(r => dateOnlyISO(r.created_at) === isoDateStr);
@@ -199,6 +259,18 @@ export default function Progress(){
   const forceRefresh = () => setRefreshTick((t) => t + 1);
 
   useEffect(() => {
+    try {
+      sessionStorage.setItem(PROGRESS_STATE_KEY, JSON.stringify({
+        viewYear,
+        viewMonth,
+        selectedDate,
+        rangeMode,
+        view,
+      }));
+    } catch (e) {}
+  }, [viewYear, viewMonth, selectedDate, rangeMode, view]);
+
+  useEffect(() => {
     const onFocus = () => forceRefresh();
     const onVisible = () => { if (document.visibilityState === "visible") forceRefresh(); };
     window.addEventListener("focus", onFocus);
@@ -212,6 +284,10 @@ export default function Progress(){
   /* ---------------- init to latest session date ---------------- */
   useEffect(() => {
     if (authLoading || !user || didInitRef.current) return;
+    if (storedStateRef.current) {
+      didInitRef.current = true;
+      return;
+    }
     let mounted = true;
 
     const fetchLatest = async () => {
@@ -551,18 +627,18 @@ export default function Progress(){
             </div>
             <div className="stat-card">
               <div className="label">Flex Points</div>
-              <div className="val">{summary.totalEca}</div>
+              <div className="val">{formatFlex(summary.totalEca)}</div>
             </div>
           </div>
 
           <div className="summary-row-2">
             <div className="stat-card">
               <div className="label">Calories</div>
-              <div className="val">{summary.totalCalories}</div>
+              <div className="val">{formatCalories(summary.totalCalories)}</div>
             </div>
             <div className="stat-card">
               <div className="label">Time Spent</div>
-              <div className="val">{summary.totalMinutes}m</div>
+              <div className="val">{formatMinutes(summary.totalMinutes)}</div>
             </div>
           </div>
 
@@ -594,13 +670,13 @@ export default function Progress(){
                     <div className="s-title">{s.workoutName}</div>
                     <div className="s-meta">
                       <span>{s.time}</span>
-                      <span>{s.minutes}m</span>
-                      <span>{s.calories} kcal</span>
+                      <span>{formatMinutes(s.minutes)}</span>
+                      <span>{formatCalories(s.calories)}</span>
                     </div>
                   </div>
                   <div className="s-right">
                     <div className="s-row"><span className="k">Reps</span><span className="v">{s.reps}</span></div>
-                    <div className="s-row"><span className="k">Flex Points</span><span className="v">{s.eca}</span></div>
+                    <div className="s-row"><span className="k">Flex Points</span><span className="v">{formatFlex(s.eca)}</span></div>
                   </div>
                 </div>
               ))}
@@ -730,10 +806,10 @@ export default function Progress(){
             </div>
 
             <div className="table-nums">
-              <div className="num-row"><div className="nlabel">Total Time</div><div className="nval">{chartData.reduce((s,x)=>s+(x.totalMinutes||0),0)}m</div></div>
-              <div className="num-row"><div className="nlabel">Calories</div><div className="nval">{Math.round(chartData.reduce((s,x)=>s+(x.totalCalories||0),0) * 100) / 100}</div></div>
-              <div className="num-row"><div className="nlabel">Sessions</div><div className="nval">{chartData.reduce((s,x)=>s+(x.totalSessions||0),0)}</div></div>
-              <div className="num-row"><div className="nlabel">Flex Points</div><div className="nval">{chartData.reduce((s,x)=>s+(x.totalEca||0),0)}</div></div>
+              <div className="num-row"><div className="nlabel">Total Time</div><div className="nval">{formatMinutes(chartTotals.totalMinutes)}</div></div>
+              <div className="num-row"><div className="nlabel">Calories</div><div className="nval">{formatCalories(chartTotals.totalCalories)}</div></div>
+              <div className="num-row"><div className="nlabel">Sessions</div><div className="nval">{chartTotals.totalSessions}</div></div>
+              <div className="num-row"><div className="nlabel">Flex Points</div><div className="nval">{formatFlex(chartTotals.totalEca)}</div></div>
             </div>
           </div>
         </main>

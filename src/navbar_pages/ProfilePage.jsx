@@ -235,7 +235,7 @@ function ProfilePage({ onSignOut, initialTab = "overview" }) {
                   </div>
                   <div className="kpi">
                     <div className="value">
-                      {statsLoading ? "--" : (overviewStats.bestScore !== null ? overviewStats.bestScore : "--")}
+                      {statsLoading ? "--" : (overviewStats.bestScore !== null ? `${overviewStats.bestScore} pts` : "--")}
                     </div>
                     <div className="small-muted">Best Flex Points</div>
                   </div>
@@ -257,7 +257,7 @@ function ProfilePage({ onSignOut, initialTab = "overview" }) {
                   </div>
                   <div className="ff-profile-stat">
                     <div className="stat-label">Flex Points</div>
-                    <div className="stat-value">{statsLoading ? "--" : overviewStats.totalEca}</div>
+                    <div className="stat-value">{statsLoading ? "--" : `${overviewStats.totalEca} pts`}</div>
                   </div>
                 </div>
 
