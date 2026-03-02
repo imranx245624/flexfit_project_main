@@ -107,7 +107,7 @@ export default function ExerciseDetail() {
       mounted = false;
       controller.abort();
     };
-  }, [displayName, detail?.video, slug]);
+  }, [displayName, detail?.video, exerciseMeta?.program, slug]);
 
   const steps = detail?.steps || [];
   const primaryMuscles = detail?.primaryMuscles || [];
