@@ -3,8 +3,9 @@ import { useLocation, useNavigate } from "react-router-dom";
 import PageWrapper from "../workout_pages/pageWrapper.jsx";
 import "./workoutLibrary.css";
 import "../workout_pages/workout.css";
-import { HOME_GROUPS, GYM_GROUPS, toSlug } from "../data/exerciseCatalog";
+import { HOME_GROUPS, GYM_GROUPS, getExerciseBySlug, toSlug } from "../data/exerciseCatalog";
 import { fetchPexelsVideoWithFallback } from "../utils/pexelsVideo";
+import { getPexelsQueries } from "../utils/pexelsQueries";
 
 export default function Workouts() {
   const navigate = useNavigate();
@@ -15,6 +16,7 @@ export default function Workouts() {
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewError, setPreviewError] = useState("");
   const [previewDebug, setPreviewDebug] = useState("");
+  const [query, setQuery] = useState("");
   const previewAbortRef = useRef(null);
 
   const closePreview = () => {
@@ -51,11 +53,13 @@ export default function Workouts() {
     setPreviewVideo(null);
 
     try {
-      const queries = [
-        `${name} exercise`,
-        `${name} workout`,
-        "fitness exercise",
-      ];
+      const slug = toSlug(name);
+      const meta = getExerciseBySlug(slug);
+      const queries = getPexelsQueries({
+        name,
+        slug,
+        program: meta?.program,
+      });
       const { result, error } = await fetchPexelsVideoWithFallback(queries, {
         orientation: "landscape",
         size: "medium",
@@ -81,8 +85,8 @@ export default function Workouts() {
       setPreviewError("Could not load video preview.");
       const msg = String(err?.message || err || "");
       setPreviewDebug(
-        msg.includes("Missing Pexels API key")
-          ? "Missing Pexels API key (set REACT_APP_PEXELS_API_KEY or configure /api/pexels)."
+        msg.includes("Missing PEXELS_API_KEY")
+          ? "Video preview not configured. Set PEXELS_API_KEY for /api/pexels."
           : msg
       );
     } finally {
@@ -151,56 +155,139 @@ export default function Workouts() {
     return preferred ? [preferred, ...rest] : sections;
   }, [filterType, sections]);
 
+  const normalizedQuery = useMemo(() => query.trim().toLowerCase(), [query]);
+
+  const filteredSections = useMemo(() => {
+    if (!normalizedQuery) return orderedSections;
+    const matchItem = (item) => item.toLowerCase().includes(normalizedQuery);
+
+    const filterGroup = (group) => {
+      const filteredSections = group.sections
+        .map((section) => {
+          if (section.subsections) {
+            const subsections = section.subsections
+              .map((sub) => ({
+                ...sub,
+                items: sub.items.filter(matchItem),
+              }))
+              .filter((sub) => sub.items.length > 0);
+            if (!subsections.length) return null;
+            return { ...section, subsections };
+          }
+          const items = section.items.filter(matchItem);
+          if (!items.length) return null;
+          return { ...section, items };
+        })
+        .filter(Boolean);
+
+      if (!filteredSections.length) return null;
+      return { ...group, sections: filteredSections };
+    };
+
+    return orderedSections
+      .map((section) => {
+        const groups = section.groups
+          .map(filterGroup)
+          .filter(Boolean);
+        if (!groups.length) return null;
+        return { ...section, groups };
+      })
+      .filter(Boolean);
+  }, [orderedSections, normalizedQuery]);
+
+  const totalMatches = useMemo(() => {
+    const countItems = (group) => group.sections.reduce((sum, section) => {
+      if (section.subsections) {
+        return sum + section.subsections.reduce((s, sub) => s + sub.items.length, 0);
+      }
+      return sum + section.items.length;
+    }, 0);
+
+    return filteredSections.reduce((sum, section) => {
+      return sum + section.groups.reduce((s, group) => s + countItems(group), 0);
+    }, 0);
+  }, [filteredSections]);
+
   return (
     <PageWrapper>
       <div className="library-page container">
         <div className="library-header">
           <div>
             <h1 className="library-title">Workout Library</h1>
-            {/* <p className="library-sub">
+            <p className="library-sub">
               Video previews provided by{" "}
               <a href="https://www.pexels.com" target="_blank" rel="noreferrer">Pexels</a>{" "}
               with creator attribution.
-            </p> */}
+            </p>
           </div>
-          {/* <div className="library-toggle">
-            <button
-              type="button"
-              className={`chip ${filterType === "home" ? "active" : ""}`}
-              onClick={() => navigate("/workouts?type=home")}
-            >
-              Home
-            </button>
-            <button
-              type="button"
-              className={`chip ${filterType === "gym" ? "active" : ""}`}
-              onClick={() => navigate("/workouts?type=gym")}
-            >
-              Gym
-            </button>
-            <button
-              type="button"
-              className={`chip ${filterType === "" ? "active" : ""}`}
-              onClick={() => navigate("/workouts")}
-            >
-              All
-            </button>
-          </div> */}
+          <div className="library-controls">
+            <div className="library-search">
+              <input
+                type="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search exercises..."
+                aria-label="Search exercises"
+              />
+              {query && (
+                <button
+                  type="button"
+                  className="library-clear"
+                  onClick={() => setQuery("")}
+                  aria-label="Clear search"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+            <div className="library-toggle">
+              <button
+                type="button"
+                className={`chip ${filterType === "home" ? "active" : ""}`}
+                onClick={() => navigate("/workouts?type=home")}
+              >
+                Home
+              </button>
+              <button
+                type="button"
+                className={`chip ${filterType === "gym" ? "active" : ""}`}
+                onClick={() => navigate("/workouts?type=gym")}
+              >
+                Gym
+              </button>
+              <button
+                type="button"
+                className={`chip ${filterType === "" ? "active" : ""}`}
+                onClick={() => navigate("/workouts")}
+              >
+                All
+              </button>
+            </div>
+          </div>
         </div>
 
         <section className="library-section">
           <div className="section-title-row">
             <h2>All Workouts (Home + Gym)</h2>
-            <span>{filterType ? "Focused view - selected first" : "Full exercise list with details"}</span>
+            <span>
+              {normalizedQuery
+                ? `${totalMatches} result(s) for "${query}"`
+                : (filterType ? "Focused view - selected first" : "Full exercise list with details")}
+            </span>
           </div>
 
           <div className="workout-groups">
-            {orderedSections.map((section, idx) => (
+            {!filteredSections.length && (
+              <div className="library-empty">
+                No exercises match your search. Try a different keyword.
+              </div>
+            )}
+            {filteredSections.map((section, idx) => (
               <section key={section.key} className="workout-group-card">
                 <div className="workout-group-header">
                   <h2 className="split-title">
                     <span>{section.title}</span>
-                    <span>{filterType && idx === 0 ? "Selected" : ""}</span>
+                    <span>{filterType && idx === 0 && !normalizedQuery ? "Selected" : ""}</span>
                   </h2>
                 </div>
                 <div className="workout-group-body">
@@ -255,7 +342,7 @@ export default function Workouts() {
                   <div className="preview-debug">Debug: {previewDebug}</div>
                 )}
               </div>
-              <button className="preview-close" type="button" onClick={closePreview}>Close</button>
+              <button className="preview-close" type="button" onClick={closePreview} aria-label="Close preview">Close</button>
             </div>
             {previewVideo && (
               <video

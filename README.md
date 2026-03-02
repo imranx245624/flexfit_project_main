@@ -1,70 +1,53 @@
-# Getting Started with Create React App
+# FlexFit AI
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+FlexFit AI is a privacy-first fitness assistant with real-time pose detection, workout libraries, and progress tracking.
 
-## Available Scripts
+**Highlights**
+- AI pose detection with real-time feedback
+- Workout library for home and gym exercises
+- Progress dashboard with session summaries
+- Leaderboards and profile management
+- PWA install support
 
-In the project directory, you can run:
+**Tech Stack**
+- React (Create React App)
+- Supabase (auth + database)
+- TensorFlow.js + MoveNet
+- Pexels video previews (via server-side proxy)
 
-### `npm start`
+**Getting Started**
+1. Install dependencies:
+```bash
+npm install
+```
+2. Create an environment file:
+```bash
+copy .env.example .env
+```
+3. Fill in the required values in `.env`.
+4. Start the dev server:
+```bash
+npm start
+```
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+**Environment Variables**
+- `REACT_APP_SUPABASE_URL`: Supabase project URL
+- `REACT_APP_SUPABASE_ANON_KEY`: Supabase anon key
+- `PEXELS_API_KEY`: Server-side key for the Pexels proxy
+- `REACT_APP_PEXELS_PROXY`: Set to `1` to force proxy usage (default)
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+**Scripts**
+- `npm start` - Run the app in development
+- `npm test` - Run the test suite
+- `npm run build` - Build for production
 
-### `npm test`
+**Pexels Proxy**
+Video previews use the `/api/pexels` proxy to avoid exposing API keys in the browser.  
+Set `PEXELS_API_KEY` in your environment when running the proxy (Vercel, server, or local dev).
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+**Deployment**
+Deploy to Vercel or any static host that supports serverless functions for `api/pexels.js`.  
+Make sure `PEXELS_API_KEY` is set in your deployment environment.
 
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+**Security Note**
+Never commit real secrets to git. Rotate any keys that were accidentally exposed.

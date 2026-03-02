@@ -4,6 +4,7 @@ import PageWrapper from "./pageWrapper.jsx";
 import { getExerciseBySlug } from "../data/exerciseCatalog";
 import { getExerciseDetails } from "../data/exerciseDetails";
 import { fetchPexelsVideoWithFallback } from "../utils/pexelsVideo";
+import { getPexelsQueries } from "../utils/pexelsQueries";
 import "./exerciseDetail.css";
 
 const toTitle = (slug = "") =>
@@ -45,14 +46,6 @@ export default function ExerciseDetail() {
       setPexelsDebug("");
       return;
     }
-    if (!process.env.REACT_APP_PEXELS_API_KEY) {
-      setPexelsVideo(null);
-      setPexelsLoading(false);
-      setPexelsError("Pexels API key not configured.");
-      setPexelsDebug("Missing REACT_APP_PEXELS_API_KEY");
-      return;
-    }
-
     let mounted = true;
     const controller = new AbortController();
 
@@ -60,11 +53,11 @@ export default function ExerciseDetail() {
       try {
         setPexelsLoading(true);
         setPexelsError("");
-        const queries = [
-          `${displayName} exercise`,
-          `${displayName} workout`,
-          "fitness exercise",
-        ];
+        const queries = getPexelsQueries({
+          name: displayName,
+          slug,
+          program: exerciseMeta?.program,
+        });
         const { result, error } = await fetchPexelsVideoWithFallback(queries, {
           orientation: "landscape",
           size: "medium",
@@ -78,8 +71,14 @@ export default function ExerciseDetail() {
             setPexelsVideo(result);
           } else {
             if (error) {
-              setPexelsError("Could not load video preview.");
-              setPexelsDebug(String(error?.message || error));
+              const msg = String(error?.message || error || "");
+              if (msg.includes("Missing PEXELS_API_KEY")) {
+                setPexelsError("Video preview not configured.");
+                setPexelsDebug("Set PEXELS_API_KEY for /api/pexels.");
+              } else {
+                setPexelsError("Could not load video preview.");
+                setPexelsDebug(msg);
+              }
             } else {
               setPexelsError("No video found for this exercise yet.");
               setPexelsDebug(`No results for: ${queries.join(" | ")}`);
@@ -89,8 +88,14 @@ export default function ExerciseDetail() {
         }
       } catch (err) {
         if (mounted && !controller.signal.aborted) {
-          setPexelsError("Could not load video preview.");
-          setPexelsDebug(String(err?.message || err));
+          const msg = String(err?.message || err || "");
+          if (msg.includes("Missing PEXELS_API_KEY")) {
+            setPexelsError("Video preview not configured.");
+            setPexelsDebug("Set PEXELS_API_KEY for /api/pexels.");
+          } else {
+            setPexelsError("Could not load video preview.");
+            setPexelsDebug(msg);
+          }
           setPexelsVideo(null);
         }
       } finally {
@@ -247,7 +252,7 @@ export default function ExerciseDetail() {
           <div className="exercise-preview-modal" onClick={(e) => e.stopPropagation()}>
             <div className="exercise-preview-header">
               <div className="preview-title">{displayName}</div>
-              <button className="preview-close" onClick={handleClosePreview} type="button">Close</button>
+              <button className="preview-close" onClick={handleClosePreview} type="button" aria-label="Close preview">Close</button>
             </div>
             <video
               ref={previewVideoRef}

@@ -1,6 +1,3 @@
-const PEXELS_API_KEY = process.env.REACT_APP_PEXELS_API_KEY;
-const FORCE_PROXY = process.env.REACT_APP_PEXELS_PROXY !== "0";
-const DIRECT_ENDPOINT = "https://api.pexels.com/videos/search";
 const PROXY_ENDPOINT = "/api/pexels";
 
 const MEMORY_CACHE = new Map();
@@ -41,15 +38,8 @@ function pickBestVideoFile(files = []) {
   return target || sorted[sorted.length - 1];
 }
 
-function shouldUseProxy() {
-  if (typeof window === "undefined") return true;
-  if (FORCE_PROXY) return true;
-  return false;
-}
-
-async function runFetch(url, useProxy, signal) {
-  const headers = useProxy ? {} : { Authorization: PEXELS_API_KEY };
-  return fetch(url, { headers, signal });
+async function runFetch(url, signal) {
+  return fetch(url, { signal });
 }
 
 function clipSnippet(text = "") {
@@ -79,8 +69,8 @@ async function readJsonResponse(res, label) {
   }
 }
 
-async function fetchJson(url, useProxy, signal, label) {
-  const res = await runFetch(url, useProxy, signal);
+async function fetchJson(url, signal, label) {
+  const res = await runFetch(url, signal);
   const data = await readJsonResponse(res, label);
   if (!res.ok) {
     const msg = data?.error || data?.message || `${label} error: ${res.status}`;
@@ -90,10 +80,6 @@ async function fetchJson(url, useProxy, signal, label) {
 }
 
 export async function fetchPexelsVideo(query, options = {}) {
-  const useProxy = shouldUseProxy();
-  if (!useProxy && !PEXELS_API_KEY) {
-    throw new Error("Missing Pexels API key");
-  }
   const {
     orientation = "landscape",
     size = "medium",
@@ -119,20 +105,7 @@ export async function fetchPexelsVideo(query, options = {}) {
     return u.toString();
   };
 
-  let data;
-  if (useProxy) {
-    try {
-      data = await fetchJson(makeUrl(PROXY_ENDPOINT), true, signal, "Pexels proxy");
-    } catch (err) {
-      if (PEXELS_API_KEY) {
-        data = await fetchJson(makeUrl(DIRECT_ENDPOINT), false, signal, "Pexels API");
-      } else {
-        throw err;
-      }
-    }
-  } else {
-    data = await fetchJson(makeUrl(DIRECT_ENDPOINT), false, signal, "Pexels API");
-  }
+  const data = await fetchJson(makeUrl(PROXY_ENDPOINT), signal, "Pexels proxy");
 
   const video = (data?.videos || [])[0];
   if (!video) {

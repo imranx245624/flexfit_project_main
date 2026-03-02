@@ -5,6 +5,7 @@ import * as poseDetection from "@tensorflow-models/pose-detection"; // MoveNet p
 import * as tf from "@tensorflow/tfjs"; // TensorFlow.js runtime/backend
 import { useLocation, useNavigate } from "react-router-dom"; // Router state + navigation
 import { supabase } from "../utils/supabaseClient"; // Supabase client for auth + persistence
+import { toast } from "../utils/toast";
 import "./aiWorkoutResponsive.css"; // Responsive layout styles
 
 function AIWorkout() {
@@ -231,7 +232,28 @@ function AIWorkout() {
   }, []);
 
   const voiceCooldownRef = useRef(0); // throttle speech synthesis
+  const voiceEnabledRef = useRef(true);
+  useEffect(() => {
+    const readSettings = () => {
+      try {
+        const raw = localStorage.getItem("ff-settings");
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+        if (typeof parsed?.voiceFeedback === "boolean") {
+          voiceEnabledRef.current = parsed.voiceFeedback;
+        }
+      } catch (e) {}
+    };
+    readSettings();
+    const handleSettings = (event) => {
+      const next = event?.detail?.voiceFeedback;
+      if (typeof next === "boolean") voiceEnabledRef.current = next;
+    };
+    window.addEventListener("ff-settings-updated", handleSettings);
+    return () => window.removeEventListener("ff-settings-updated", handleSettings);
+  }, []);
   const speak = useCallback((text) => { // voice feedback helper
+    if (!voiceEnabledRef.current) return;
     if (!("speechSynthesis" in window)) return;
     const now = Date.now();
     if (now - voiceCooldownRef.current < 1200) return;
@@ -334,8 +356,8 @@ function AIWorkout() {
       burpeeGoodRepStreakRef.current += 1;
       if (burpeeGoodRepStreakRef.current >= 3) {
         burpeeMilestoneStepRef.current = (burpeeMilestoneStepRef.current % 4) + 1;
-        let message = "That’s three perfect burpees!";
-        if (burpeeMilestoneStepRef.current === 2) message = "That’s how burpees are done!";
+        let message = "That's three perfect burpees!";
+        if (burpeeMilestoneStepRef.current === 2) message = "That's how burpees are done!";
         if (burpeeMilestoneStepRef.current === 3) message = "Explosive! I love it!";
         if (burpeeMilestoneStepRef.current === 4) message = "Solid control and power!";
         setPoseStatus(message);
@@ -909,14 +931,14 @@ function AIWorkout() {
     try {
       const result = await saveToDatabase();
       if (result.ok) {
-        alert("Session saved!");
+        toast("Session saved.", { type: "success" });
         speak("Workout saved");
         setShowSavePopup(false);
         setSessionState("SUMMARY");
       } else {
         const msg = result.message || "Save failed. Please try again.";
         setSaveError(msg);
-        alert(msg);
+        toast(msg, { type: "error" });
       }
     } finally {
       setButtonLocked(false);
@@ -2130,7 +2152,7 @@ return;
                   const jumpedHighEnough = jumpDelta > jumpCueThreshold;
 
                   if (!burpeeFloorReachedRef.current) {
-                    cueStrictBurpee("Don’t rush it — complete the rep.");
+                    cueStrictBurpee("Don't rush it -- complete the rep.");
                   } else if (!jumpedHighEnough) {
                     registerRep(exerciseType, now, currentFormScore, "Burpee!", "Rep counted!");
                     cueStrictBurpee("Jump higher at the top.");
@@ -3128,6 +3150,9 @@ const runDetector = useCallback(async () => {
           <h2 style={{ color: "#76ff03", marginBottom: "10px" }}>
             Pose Detection ({workoutLabel})
           </h2>
+          <div className="aiw-privacy-note">
+            Camera feed stays on your device. No raw video is stored.
+          </div>
 
           <div className="aiw-video-wrap" style={{ position: "relative", width: "100%", maxWidth: "640px", aspectRatio: "4 / 3" }}>
             {/* Live camera feed */}

@@ -1,7 +1,7 @@
 const { createProxyMiddleware } = require("http-proxy-middleware");
 
 module.exports = function (app) {
-  const apiKey = process.env.REACT_APP_PEXELS_API_KEY;
+  const apiKey = (process.env.PEXELS_API_KEY || process.env.REACT_APP_PEXELS_API_KEY || "").trim();
   app.use(
     "/api/pexels",
     createProxyMiddleware({

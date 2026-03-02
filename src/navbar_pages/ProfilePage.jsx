@@ -1,6 +1,6 @@
 // src/navbar_pages/ProfilePage.jsx
 import React, { useCallback, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 /* TODO: DO NOT CHANGE API CALLS (supabase) */
 import { supabase } from "../utils/supabaseClient";
 import CompleteProfile from "./CompleteProfile";
@@ -8,7 +8,8 @@ import Progress from "../sidebar_pages/Progress_tracker.jsx";
 import Setting from "../sidebar_pages/Setting.jsx";
 import "./profilePage.css";
 import ConfirmSignOutModal from "../components/ConfirmSignOutModal.jsx";
-import { clearSupabaseAuthStorage } from "../utils/supabaseAuthStorage";
+import { forceSignOut } from "../utils/forceSignOut";
+import { toast } from "../utils/toast";
 
 const VALID_TABS = new Set(["overview", "progress", "settings"]);
 
@@ -157,18 +158,21 @@ function ProfilePage({ onSignOut, initialTab = "overview" }) {
   const handleSignOut = async () => {
     try {
       try { sessionStorage.setItem("ff-manual-signout", "1"); } catch (e) {}
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      alert("Signed out");
+      const error = await forceSignOut();
+      if (error) {
+        console.error("Sign out error:", error);
+        toast("Signed out locally.", { type: "info" });
+      } else {
+        toast("Signed out", { type: "success" });
+      }
       setProfile(null);
       if (typeof onSignOut === "function") {
         onSignOut();
       }
     } catch (err) {
       console.error("Sign out error:", err);
-      alert("Sign out failed: " + (err.message || err));
+      toast("Sign out failed: " + (err.message || err), { type: "error" });
     } finally {
-      clearSupabaseAuthStorage();
       try { navigate("/", { replace: true }); } catch (e) {}
       try { window.location.replace("/"); } catch (e) {}
     }
@@ -180,7 +184,27 @@ function ProfilePage({ onSignOut, initialTab = "overview" }) {
   };
 
   if (loading) return <div className="profile-loading">Loading...</div>;
-  if (!profile) return <div className="profile-loading">No profile (please sign in)</div>;
+  if (!profile) {
+    return (
+      <div className="profile-loading">
+        <div style={{ display: "grid", gap: 12 }}>
+          <div>No profile found. Please sign in to continue.</div>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <button
+              className="btn"
+              type="button"
+              onClick={() => {
+                try { window.dispatchEvent(new CustomEvent("flexfit-open-signin")); } catch (e) {}
+              }}
+            >
+              Sign in
+            </button>
+            <Link className="btn-ghost" to="/">Go home</Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const hasSessions = overviewStats.totalSessions > 0;
 
@@ -246,7 +270,7 @@ function ProfilePage({ onSignOut, initialTab = "overview" }) {
                 {/* {incomplete ? (
                   <button className="btn-primary" onClick={() => setShowComplete(true)}>Complete profile</button>
                 ) : null} */}
-                {/* <Link to="/reports" className="btn-ghost">View Reports</Link> */}
+                <Link to="/progress" className="btn-ghost">View Progress</Link>
                 <button className="btn-ghost" onClick={() => setShowConfirm(true)}>Sign Out</button>
               </div>
 

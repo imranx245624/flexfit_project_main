@@ -39,5 +39,15 @@ export function useAuth() {
     };
   }, []);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+    const handler = () => {
+      setUser(null);
+      setLoading(false);
+    };
+    window.addEventListener("flexfit-force-signout", handler);
+    return () => window.removeEventListener("flexfit-force-signout", handler);
+  }, []);
+
   return { user, loading };
 }

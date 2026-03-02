@@ -1,0 +1,5 @@
+.legal-page { padding-top: 10px; }
+.legal-card { display: grid; gap: 14px; }
+.legal-section { display: grid; gap: 6px; }
+.legal-title { margin: 0; font-size: 28px; }
+.legal-sub { color: var(--ff-muted); margin: 0; }

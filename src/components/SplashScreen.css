@@ -1,0 +1,137 @@
+.ff-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 20000;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(1200px 520px at 10% -10%, rgba(124, 58, 237, 0.55), transparent 60%),
+    radial-gradient(900px 520px at 92% 0%, rgba(110, 231, 255, 0.45), transparent 60%),
+    radial-gradient(900px 560px at 50% 110%, rgba(255, 107, 157, 0.4), transparent 60%),
+    linear-gradient(135deg, #0a1020 0%, #111a2c 45%, #0b1326 100%);
+  color: #f5f7ff;
+  overflow: hidden;
+  animation: ffSplashFadeIn 0.6s ease both;
+}
+
+.ff-splash.is-exiting {
+  animation: ffSplashFadeOut 0.6s ease forwards;
+}
+
+.ff-splash-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.ff-splash-logo-wrap {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 140px;
+  height: 140px;
+}
+
+.ff-splash-logo {
+  width: 104px;
+  height: 104px;
+  object-fit: contain;
+  filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.35));
+  animation: ffSplashLogo 1.6s ease both;
+}
+
+.ff-splash-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  border: 2px solid rgba(110, 231, 255, 0.45);
+  box-shadow:
+    0 0 35px rgba(110, 231, 255, 0.35),
+    inset 0 0 24px rgba(124, 58, 237, 0.3);
+  animation: ffSplashRing 2.4s ease infinite;
+}
+
+.ff-splash-title {
+  font-size: 36px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.ff-splash-sub {
+  font-size: 14px;
+  letter-spacing: 0.3px;
+  color: rgba(239, 245, 255, 0.78);
+}
+
+.ff-splash-noise {
+  position: absolute;
+  inset: -20%;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 0);
+  background-size: 42px 42px;
+  opacity: 0.12;
+  transform: rotate(8deg);
+  animation: ffSplashNoise 18s linear infinite;
+}
+
+.ff-splash-sheen {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent 0%, rgba(255, 255, 255, 0.1) 40%, transparent 70%);
+  opacity: 0.35;
+  transform: translateX(-30%);
+  animation: ffSplashSheen 3.2s ease-in-out infinite;
+}
+
+@keyframes ffSplashFadeIn {
+  0% { opacity: 0; transform: scale(1.01); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes ffSplashFadeOut {
+  0% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(0.98); }
+}
+
+@keyframes ffSplashLogo {
+  0% { opacity: 0; transform: translateY(14px) scale(0.92); }
+  60% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 1; transform: translateY(-2px) scale(1.02); }
+}
+
+@keyframes ffSplashRing {
+  0% { transform: scale(0.96); opacity: 0.6; }
+  50% { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(0.96); opacity: 0.6; }
+}
+
+@keyframes ffSplashSheen {
+  0% { transform: translateX(-40%); }
+  50% { transform: translateX(15%); }
+  100% { transform: translateX(-40%); }
+}
+
+@keyframes ffSplashNoise {
+  0% { transform: translate3d(0, 0, 0) rotate(8deg); }
+  100% { transform: translate3d(-120px, -80px, 0) rotate(8deg); }
+}
+
+@media (max-width: 640px) {
+  .ff-splash-title { font-size: 30px; }
+  .ff-splash-sub { font-size: 13px; }
+  .ff-splash-logo-wrap { width: 112px; height: 112px; }
+  .ff-splash-logo { width: 82px; height: 82px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ff-splash,
+  .ff-splash * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition: none !important;
+  }
+}

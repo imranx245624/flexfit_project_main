@@ -13,6 +13,11 @@
   font-weight: 800;
   letter-spacing: 0.3px;
 }
+.aiw-privacy-note {
+  font-size: 12px;
+  color: var(--ff-muted);
+  margin-bottom: 10px;
+}
 .aiw-video-wrap {
   width: 100%;
   max-width: 640px;

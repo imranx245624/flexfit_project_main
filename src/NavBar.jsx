@@ -4,10 +4,10 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import "./nav.css";
 import { useAuth } from "./utils/auth";
 import SigninModal from "./components/SigninModal";
-import { supabase } from "./utils/supabaseClient";
 import { getExerciseBySlug } from "./data/exerciseCatalog";
 import ConfirmSignOutModal from "./components/ConfirmSignOutModal.jsx";
-import { clearSupabaseAuthStorage } from "./utils/supabaseAuthStorage";
+import { forceSignOut } from "./utils/forceSignOut";
+import { toast } from "./utils/toast";
 
 export default function NavBar() {
   const { user } = useAuth();
@@ -45,6 +45,8 @@ export default function NavBar() {
     "/progress": "MY Progress",
     "/settings": "Settings",
     "/help": "Help",
+    "/privacy": "Privacy Policy",
+    "/terms": "Terms",
   };
   const pageTitle = (() => {
     if (loc.pathname.startsWith("/exercise/")) {
@@ -209,14 +211,17 @@ export default function NavBar() {
   const handleSignOut = async () => {
     try {
       try { sessionStorage.setItem("ff-manual-signout", "1"); } catch (e) {}
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      alert("Signed out");
+      const error = await forceSignOut();
+      if (error) {
+        console.error("Sign out error:", error);
+        toast("Signed out locally.", { type: "info" });
+      } else {
+        toast("Signed out", { type: "success" });
+      }
     } catch (err) {
       console.error("Sign out error:", err);
-      alert("Sign out failed: " + (err.message || err));
+      toast("Sign out failed: " + (err.message || err), { type: "error" });
     } finally {
-      clearSupabaseAuthStorage();
       setPopoverOpen(false);
       try { navigate("/", { replace: true }); } catch (e) {}
       try { window.location.replace("/"); } catch (e) {}
@@ -242,7 +247,7 @@ export default function NavBar() {
               aria-label="Toggle theme"
               title="Toggle theme"
             >
-              ☀
+              {"\u2600"}
             </button>
             <Link className="nav-help-btn" to="/help" aria-label="Help" title="Help">
               ?
@@ -265,7 +270,7 @@ export default function NavBar() {
                 className="nav-btn nav-cta"
                 type="button"
                 onClick={() => {
-                  alert("Sign in first");
+                  toast("Please sign in to continue.", { type: "info" });
                   setShowSignIn(true);
                 }}
               >

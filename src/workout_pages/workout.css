@@ -83,7 +83,7 @@ body[data-theme="dark"] {
   align-items: start;
 }
 
-/* smaller screens — reduce card height & gaps for better fit */
+/* smaller screens -- reduce card height & gaps for better fit */
 @media (max-width: 1000px) {
   .homeworkout-grid,
   .gymworkout-grid {

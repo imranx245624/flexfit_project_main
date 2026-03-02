@@ -110,7 +110,7 @@ function Leaderboard() {
       <div className="leaderboard-header">
         <div>
           <h1 className="leaderboard-title">Flex Rankings</h1>
-          <p className="leaderboard-sub">Top performers by average Flex Points per active day (Sun–Sat).</p>
+          <p className="leaderboard-sub">Top performers by average Flex Points per active day (Sun-Sat).</p>
         </div>
         <button className="btn-ghost" onClick={handleRefresh} aria-label="Refresh leaderboard">
           {loading ? "Refreshing..." : "Refresh"}
@@ -148,7 +148,7 @@ function Leaderboard() {
       </div>
 
       <div className="leaderboard-note">
-        Leaderboard: computed from workout sessions for the current week (Sunday–Saturday), ranked by average flex points per active day.
+        Leaderboard: computed from workout sessions for the current week (Sunday-Saturday), ranked by average flex points per active day.
       </div>
     </div>
   );

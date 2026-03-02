@@ -118,8 +118,8 @@ export default function CompleteProfile({ profile, onClose, onComplete }) {
   return (
     <div className="cp-overlay">
       <div className="cp-modal">
-        <button className="cp-close" onClick={() => onClose && onClose()}>
-          ✕
+        <button className="cp-close" type="button" onClick={() => onClose && onClose()} aria-label="Close">
+          x
         </button>
 
         <h2 className="cp-title">Complete your profile</h2>

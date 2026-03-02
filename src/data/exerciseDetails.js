@@ -853,8 +853,8 @@ export const EXERCISE_DETAILS = {
   "arnold-press": {
     "name": "Arnold Press",
     "steps": [
-      "Very common shoulder exercise.",
-      "As shown here: https://www.youtube.com/watch?v=vj2w851ZHRM."
+      "Start seated or standing with dumbbells at shoulder height, palms facing you.",
+      "Press overhead while rotating palms forward, then lower with control and rotate back."
     ],
     "primaryMuscles": [
       "Deltoids"
@@ -1191,7 +1191,8 @@ export const EXERCISE_DETAILS = {
   "romanian-deadlift": {
     "name": "Romanian Deadlift",
     "steps": [
-      "DL from top to pos 2: https://www.youtube.com/watch?v=WtWtjViRsKo."
+      "Start standing with a slight knee bend and the bar at hip height.",
+      "Hinge at the hips with a flat back, lower the bar to mid-shin, then drive hips forward to stand."
     ],
     "primaryMuscles": [
       "Hamstrings",
@@ -1389,7 +1390,7 @@ export const EXERCISE_DETAILS = {
     }
   },
   "thrusters": {
-    "name": "Thrusters...........",
+    "name": "Thrusters",
     "steps": [
       "Hold the bar or dumbbells at the shoulders and squat down.",
       "Drive up and press overhead in one fluid motion."

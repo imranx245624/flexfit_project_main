@@ -2,10 +2,10 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import "./sidebar.css";
-import { supabase } from "./utils/supabaseClient";
 import ConfirmSignOutModal from "./components/ConfirmSignOutModal.jsx";
 import { useAuth } from "./utils/auth";
-import { clearSupabaseAuthStorage } from "./utils/supabaseAuthStorage";
+import { forceSignOut } from "./utils/forceSignOut";
+import { toast } from "./utils/toast";
 
 const ICONS = {
   home: (
@@ -75,14 +75,17 @@ export default function SideBar({ open = true, setOpen }) {
   const handleSignOut = async () => {
     try {
       try { sessionStorage.setItem("ff-manual-signout", "1"); } catch (e) {}
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      alert("Signed out");
+      const error = await forceSignOut();
+      if (error) {
+        console.error("Sidebar sign out error:", error);
+        toast("Signed out locally.", { type: "info" });
+      } else {
+        toast("Signed out", { type: "success" });
+      }
     } catch (err) {
       console.error("Sidebar sign out error:", err);
-      alert("Sign out failed: " + (err.message || err));
+      toast("Sign out failed: " + (err.message || err), { type: "error" });
     } finally {
-      clearSupabaseAuthStorage();
       try { navigate("/", { replace: true }); } catch (e) {}
       try { window.location.replace("/"); } catch (e) {}
     }
@@ -97,7 +100,7 @@ export default function SideBar({ open = true, setOpen }) {
     if (user || to === "/") return;
     e.preventDefault();
     e.stopPropagation();
-    alert("Sign in first");
+    toast("Please sign in to continue.", { type: "info" });
     try { window.dispatchEvent(new CustomEvent("flexfit-open-signin")); } catch (err) {}
   };
 

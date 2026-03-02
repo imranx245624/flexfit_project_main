@@ -320,7 +320,7 @@ function SignIn({ setShowSignIn, forceMode = false, onSignedIn }) {
             </div>
 
             {!forceMode && (
-              <button className="close-x" onClick={close} aria-label="Close">✕</button>
+              <button className="close-x" onClick={close} aria-label="Close">x</button>
             )}
           </div>
 

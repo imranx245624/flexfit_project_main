@@ -95,7 +95,7 @@ export const GYM_GROUPS = [
   {
     title: "Compound",
     sections: [
-      { title: "Compound", items: ["Deadlift", "Squat", "Bench Press", "Clean & Press", "Thrusters..........."] },
+      { title: "Compound", items: ["Deadlift", "Squat", "Bench Press", "Clean & Press", "Thrusters"] },
     ],
   },
 ];

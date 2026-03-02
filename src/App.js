@@ -7,6 +7,10 @@ import "./App.css";
 import "./HomeContent.css"; // updated file
 import NavBar from "./NavBar.jsx";
 import SideBar from "./SideBar.jsx";
+import ToastHost from "./components/ToastHost.jsx";
+import RequireAuth from "./components/RequireAuth.jsx";
+import NotFound from "./components/NotFound.jsx";
+import SplashScreen from "./components/SplashScreen.jsx";
 
 // Home/Gym pages now redirect to the unified library
 import ExerciseDetail from "./workout_pages/ExerciseDetail.jsx";
@@ -19,17 +23,42 @@ import Profile from "./navbar_pages/ProfilePage.jsx";
 import Progress from "./sidebar_pages/Progress_tracker.jsx";
 import Setting from "./sidebar_pages/Setting.jsx";
 import Help from "./sidebar_pages/Help.jsx";
+import PrivacyPolicy from "./navbar_pages/PrivacyPolicy.jsx";
+import Terms from "./navbar_pages/Terms.jsx";
 
 /* TODO: DO NOT CHANGE API CALLS (supabase) */
 import { supabase } from "./utils/supabaseClient";
+import { toast } from "./utils/toast";
 
 function RouterWrapper() {
+  const [splashVisible, setSplashVisible] = useState(true);
+  const [splashExiting, setSplashExiting] = useState(false);
   const [hideShell, setHideShell] = useState(false);
   const [routeLoading, setRouteLoading] = useState(false);
   const [, setCurrentUser] = useState(null);
   const sessionExpiredNotifiedRef = useRef(false);
   const location = useLocation();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const showMs = 2200;
+    const fadeMs = 600;
+    const exitTimer = setTimeout(() => setSplashExiting(true), showMs);
+    const removeTimer = setTimeout(() => setSplashVisible(false), showMs + fadeMs);
+    return () => {
+      clearTimeout(exitTimer);
+      clearTimeout(removeTimer);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!splashVisible) return undefined;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [splashVisible]);
 
   useEffect(() => {
     const handleRejection = (event) => {
@@ -107,7 +136,7 @@ function RouterWrapper() {
         const notifySessionExpired = () => {
           if (sessionExpiredNotifiedRef.current) return;
           sessionExpiredNotifiedRef.current = true;
-          alert("Your session has expired. Please sign in again.");
+          toast("Your session has expired. Please sign in again.", { type: "error" });
           try { window.dispatchEvent(new CustomEvent("flexfit-open-signin")); } catch (e) {}
         };
 
@@ -236,8 +265,8 @@ function RouterWrapper() {
         desc: "Session summaries, flex points, and performance insights.",
       },
       {
-        title: "3D Body Model (Coming Soon)",
-        desc: "Planned muscle visualization to explain form and engagement.",
+        title: "Leaderboards & Profiles",
+        desc: "Compete on Flex Rankings and manage your training profile.",
       },
       {
         title: "Privacy First",
@@ -289,10 +318,10 @@ function RouterWrapper() {
 
           <div className="cover-hero-content">
             <span className="cover-hero-badge">FlexFit</span>
-            <h1 className="cover-hero-title">AI‑Powered Fitness Assistant</h1>
+            <h1 className="cover-hero-title">AI-Powered Fitness Assistant</h1>
             <p className="cover-hero-sub">
-              Train smarter with real‑time pose detection, flex point scoring, and clean progress tracking.
-              Built for everyday users and performance‑focused athletes.
+              Train smarter with real-time pose detection, flex point scoring, and clean progress tracking.
+              Built for everyday users and performance-focused athletes.
             </p>
             <div className="cover-hero-actions">
               <button className="btn-primary ai-cta" onClick={goAI}>Train with AI</button>
@@ -309,7 +338,7 @@ function RouterWrapper() {
               </div>
               <div className="cover-hero-stat">
                 <div className="stat-value">Private</div>
-                <div className="stat-label">On‑Device AI</div>
+                <div className="stat-label">On-Device AI</div>
               </div>
             </div>
           </div>
@@ -339,7 +368,7 @@ function RouterWrapper() {
             <div className="hero-card gym" onClick={goGymWorkout} role="button" tabIndex={0} onKeyDown={(e)=>{ if (e.key === "Enter") goGymWorkout(); }}>
               <div>
                 <div className="hero-card-title">Gym Workout Library</div>
-                <div className="hero-card-sub">Machine + free‑weight workouts and progressive plans.</div>
+                <div className="hero-card-sub">Machine + free-weight workouts and progressive plans.</div>
               </div>
               <button className="hero-pill"> View</button>
             </div>
@@ -415,6 +444,7 @@ function RouterWrapper() {
 
   return (
     <>
+      {splashVisible && <SplashScreen exiting={splashExiting} />}
       {!hideShell && <NavBar />}
 
       <div className={`app-shell ${hideShell ? "shell-hidden" : ""}`}>
@@ -428,7 +458,7 @@ function RouterWrapper() {
             <div className="route-notice" role="status" aria-live="polite">
               <span className="route-notice-dot" aria-hidden="true" />
               <div className="route-notice-text">
-                <strong>loading...</strong>
+                <strong>Loading page...</strong>
               </div>
             </div>
           )}
@@ -439,14 +469,52 @@ function RouterWrapper() {
             <Route path="/exercise/:slug" element={<ExerciseDetail />} />
             <Route path="/workouts" element={<Workouts />} />
             <Route path="/plans" element={<Plans />} />
-            <Route path="/leaderboard" element={<Leaderboard />} />
+            <Route
+              path="/leaderboard"
+              element={(
+                <RequireAuth>
+                  <Leaderboard />
+                </RequireAuth>
+              )}
+            />
             <Route path="/AIWorkoutLibrary" element={<AIWorkoutLibrary />} />
-            <Route path="/AIWorkout" element={<AIWorkout />} />
+            <Route
+              path="/AIWorkout"
+              element={(
+                <RequireAuth>
+                  <AIWorkout />
+                </RequireAuth>
+              )}
+            />
             {/* PROFILE AS A STANDALONE PAGE */}
-            <Route path="/profile" element={<Profile onSignOut={handleProfileSignOut} />} />
-            <Route path="/progress" element={<Progress />} />
-            <Route path="/settings" element={<Setting />} />
+            <Route
+              path="/profile"
+              element={(
+                <RequireAuth>
+                  <Profile onSignOut={handleProfileSignOut} />
+                </RequireAuth>
+              )}
+            />
+            <Route
+              path="/progress"
+              element={(
+                <RequireAuth>
+                  <Progress />
+                </RequireAuth>
+              )}
+            />
+            <Route
+              path="/settings"
+              element={(
+                <RequireAuth>
+                  <Setting />
+                </RequireAuth>
+              )}
+            />
             <Route path="/help" element={<Help />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
       </div>
@@ -488,14 +556,21 @@ function RouterWrapper() {
               <Link to="/settings" className="footer-link">Settings</Link>
               <span className="footer-link muted">Secure sign-in with Google</span>
             </div>
+
+            <div className="footer-col">
+              <div className="footer-title">Legal</div>
+              <Link to="/privacy" className="footer-link">Privacy</Link>
+              <Link to="/terms" className="footer-link">Terms</Link>
+            </div>
           </div>
 
           <div className="footer-bottom">
-            <div className="footer-legal">© 2026 FlexFit. Train smarter, safer, anywhere.</div>
+            <div className="footer-legal">(c) 2026 FlexFit. Train smarter, safer, anywhere.</div>
             <div className="footer-credits">Made for everyday athletes.</div>
           </div>
         </footer>
       )}
+      <ToastHost />
     </>
   );
 }

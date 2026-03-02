@@ -153,3 +153,82 @@ body {
   .app-shell { background: transparent; }
   .app-shell::before { display: none; }
 }
+
+/* Toasts */
+.ff-toast-host {
+  position: fixed;
+  top: calc(var(--nav-height) + 12px);
+  right: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 10050;
+  pointer-events: none;
+}
+
+.ff-toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  min-width: 220px;
+  max-width: 360px;
+  border-radius: 12px;
+  background: var(--ff-surface);
+  border: 1px solid var(--ff-card-border);
+  color: var(--ff-text);
+  box-shadow: var(--ff-shadow);
+}
+
+.ff-toast--success { border-color: rgba(34,197,94,0.45); }
+.ff-toast--error { border-color: rgba(244,63,94,0.5); }
+.ff-toast--info { border-color: rgba(14,165,233,0.4); }
+
+.ff-toast-text {
+  font-size: 13px;
+  line-height: 1.4;
+  flex: 1;
+}
+
+.ff-toast-close {
+  border: 1px solid var(--ff-card-border);
+  background: transparent;
+  color: var(--ff-text);
+  border-radius: 8px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+@media (max-width: 720px) {
+  .ff-toast-host {
+    left: 12px;
+    right: 12px;
+  }
+  .ff-toast {
+    width: auto;
+  }
+}
+
+/* Auth gate + Not Found */
+.auth-guard,
+.not-found-page {
+  padding: 80px 0;
+}
+
+.auth-guard .ff-card,
+.not-found-page .ff-card {
+  max-width: 560px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.auth-guard-actions,
+.not-found-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
