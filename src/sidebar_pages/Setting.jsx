@@ -1,27 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "./settings.css";
-import { toast } from "../utils/toast";
-
-const SETTINGS_KEY = "ff-settings";
-
-function readSettings() {
-  try {
-    const raw = localStorage.getItem(SETTINGS_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    return (parsed && typeof parsed === "object") ? parsed : null;
-  } catch (e) {
-    return null;
-  }
-}
 
 export default function Settings() {
-  const [stored] = useState(() => readSettings());
-  const [voiceFeedback, setVoiceFeedback] = useState(stored?.voiceFeedback ?? true);
-  const [units, setUnits] = useState(stored?.units ?? "kg");
-  const [difficulty, setDifficulty] = useState(stored?.difficulty ?? "standard");
-  const [debugLogs, setDebugLogs] = useState(stored?.debugLogs ?? false);
   const [theme, setTheme] = useState(() => {
     if (typeof window === "undefined") return "light";
     const saved = localStorage.getItem("ff-theme");
@@ -37,23 +18,6 @@ export default function Settings() {
     }
     try { localStorage.setItem("ff-theme", theme); } catch (e) {}
   }, [theme]);
-
-  const handleSave = () => {
-    const payload = {
-      voiceFeedback,
-      units,
-      difficulty,
-      debugLogs,
-      theme,
-    };
-    try {
-      localStorage.setItem(SETTINGS_KEY, JSON.stringify(payload));
-    } catch (e) {}
-    try {
-      window.dispatchEvent(new CustomEvent("ff-settings-updated", { detail: payload }));
-    } catch (e) {}
-    toast("Settings saved.", { type: "success" });
-  };
 
   return (
     <div className="settings-page container">
