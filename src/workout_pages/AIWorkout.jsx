@@ -184,9 +184,12 @@ function AIWorkout() {
   const [elapsedMs, setElapsedMs] = useState(0); // live timer for plank/session
   const [, setAvgAccuracy] = useState(0); // avg of per-rep form scores (saved to DB)
   const [ecaPoints, setEcaPoints] = useState(0); // flex points (stored as eca_points in DB)
-  const [weightKg, setWeightKg] = useState(55); // user input for weight
+  const [weightKg, setWeightKg] = useState(""); // user input for weight
   const [finalElapsedMs, setFinalElapsedMs] = useState(0); // frozen time at session end
   const [saveError, setSaveError] = useState(""); // error message in save popup
+
+  const weightValue = Number.parseFloat(weightKg);
+  const isWeightValid = Number.isFinite(weightValue) && weightValue > 0;
   
   // ---------------- HELPER FUNCTIONS ----------------
 
@@ -2734,17 +2737,23 @@ const runDetector = useCallback(async () => {
 
 	    (async () => {
 	      try {
-          // Prefer rear camera for side-view exercises, fallback to user-facing
-          const cameraAttempts = (isPlankWorkout || isCrunchWorkout || isLegRaiseWorkout)
+          // Prefer front camera for plank; keep rear preference for other side-view exercises
+          const cameraAttempts = isPlankWorkout
             ? [
-                { video: { facingMode: { ideal: "environment" } }, audio: false },
+                { video: { facingMode: { exact: "user" } }, audio: false },
                 { video: { facingMode: "user" }, audio: false },
                 { video: true, audio: false },
               ]
-            : [
-                { video: { facingMode: "user" }, audio: false },
-                { video: true, audio: false },
-              ];
+            : (isCrunchWorkout || isLegRaiseWorkout)
+              ? [
+                  { video: { facingMode: { ideal: "environment" } }, audio: false },
+                  { video: { facingMode: "user" }, audio: false },
+                  { video: true, audio: false },
+                ]
+              : [
+                  { video: { facingMode: "user" }, audio: false },
+                  { video: true, audio: false },
+                ];
 
           let lastCameraError = null;
           for (const constraints of cameraAttempts) {
@@ -3103,10 +3112,13 @@ const runDetector = useCallback(async () => {
               <label className="aiw-modal-label" style={{ color: "#ccc", fontSize: "14px" }}>Weight (kg):</label>
               <input
                 type="number"
+                min="1"
                 step="0.5"
                 value={weightKg}
                 onChange={(e) => setWeightKg(e.target.value)}
                 className="aiw-modal-input"
+                placeholder="e.g. 60"
+                aria-invalid={!isWeightValid}
                 style={{
                   width: "90px",
                   padding: "6px 8px",
@@ -3117,19 +3129,32 @@ const runDetector = useCallback(async () => {
                 }}
               />
             </div>
+            {!isWeightValid && (
+              <div style={{ color: "#ff8bb0", fontSize: "12px", marginBottom: "10px" }}>
+                Enter your weight to start.
+              </div>
+            )}
             {/* Start button hides intro and begins init */}
             <button
               className="aiw-modal-btn primary"
-              onClick={() => setShowIntro(false)}
+              disabled={!isWeightValid}
+              onClick={() => {
+                if (!isWeightValid) {
+                  toast("Please enter your weight to start.", { type: "info" });
+                  return;
+                }
+                setShowIntro(false);
+              }}
               style={{
                 padding: "12px 25px",
                 fontSize: "16px",
                 borderRadius: "10px",
                 border: "none",
-                cursor: "pointer",
+                cursor: isWeightValid ? "pointer" : "not-allowed",
                 background: "#76ff03",
                 color: "#000",
                 fontWeight: "bold",
+                opacity: isWeightValid ? 1 : 0.6,
               }}
             >
               Start Workout
