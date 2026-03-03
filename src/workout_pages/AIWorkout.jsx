@@ -1565,7 +1565,7 @@ const pushupLegsBlocked = exerciseType === "pushup" && pushupLegInvalidFramesRef
 
 let ready = false;
 if (exerciseType === "pushup") ready = isPushupReady(kp) && geometryOK;
-else if (exerciseType === "plank") ready = isPlankReady(kp) && geometryOK && plankSideViewOK;
+else if (exerciseType === "plank") ready = isPlankReady(kp) && geometryOK;
 else if (exerciseType === "squat") ready = isSquatReady(kp, isSumoWorkout) && geometryOK;
 else if (exerciseType === "lunge") ready = isLungeReady(kp) && geometryOK;
 else if (exerciseType === "burpee") ready = isBurpeeReady(kp);
@@ -1756,7 +1756,7 @@ return;
   const catastrophicHipDrop = maxHipDropOffset > Math.max(32, torsoLength * 0.36);
   const severeHipRise = minHipRiseOffset < -severeHipRiseThreshold;
   const severeBreak = severeHipDrop || severeHipRise;
-  const plankReadyNow = isPlankReady(kp) && geometryOK && plankSideViewOK && !severeBreak;
+  const plankReadyNow = isPlankReady(kp) && geometryOK && !severeBreak;
   const inStartGrace =
     !!plankStartWallTimeRef.current &&
     now - plankStartWallTimeRef.current < PLANK_START_GRACE_MS;

@@ -5,74 +5,84 @@ import "./help.css";
 export default function Help() {
   return (
     <div className="help-page container">
-      <div className="help-hero">
+      <section className="help-hero">
         <div className="help-hero-text">
           <span className="help-kicker">FlexFit Support</span>
-          <h1 className="help-title">Help & Quick Guide</h1>
+          <h1 className="help-title">Help & Support</h1>
           <p className="help-sub">
-            Everything you need to use FlexFit confidently: workout flow, camera tips,
-            flex points, and common fixes.
+            Official help center for FlexFit. Find setup guidance, workout tips, and account support in one place.
           </p>
+          <div className="help-search">
+            <input
+              type="search"
+              placeholder="Search help topics (coming soon)"
+              aria-label="Search help topics"
+              disabled
+            />
+          </div>
           <div className="help-actions">
             <Link to="/AIWorkoutLibrary" className="btn-primary">Train with AI</Link>
             <Link to="/workouts" className="btn-ghost">Workout Library</Link>
           </div>
         </div>
         <div className="help-hero-card">
-          <div className="help-hero-card-title">Quick Tips</div>
-          <div className="help-hero-item">Use good lighting and keep your full body visible.</div>
-          <div className="help-hero-item">Allow camera permission (HTTPS)</div>
-          <div className="help-hero-item">Save only after at least 1 rep.</div>
-          <div className="help-hero-item">Flex Rankings reset weekly (Sun-Sat).</div>
+          <div className="help-hero-card-title">Contact Support</div>
+          <div className="help-hero-item">Email: <strong>flexfit@gmail.com</strong></div>
+          <div className="help-hero-item">Typical response: 24–48 hours</div>
+          <div className="help-hero-item">Include your device + browser in the message</div>
         </div>
-      </div>
+      </section>
 
-      <div className="help-grid">
-        <div className="help-card">
-          <div className="help-card-title">Project Overview</div>
-          <div className="help-item">FlexFit is an AI workout assistant with pose detection and live feedback.</div>
-          <div className="help-item">Sessions store reps, time, weight, and flex points for progress tracking.</div>
-        </div>
+      <section className="help-section">
+        <div className="help-section-title">Popular Topics</div>
+        <div className="help-grid">
+          <div className="help-card">
+            <div className="help-card-title">Getting Started</div>
+            <div className="help-item">Sign in once to keep your progress and rankings synced.</div>
+            <div className="help-item">Open AI Workout Library and select a workout.</div>
+            <div className="help-item">Allow camera access and begin.</div>
+          </div>
 
-        <div className="help-card">
-          <div className="help-card-title">Getting Started</div>
-          <div className="help-item">Sign in once to keep your progress and dashboard synced.</div>
-          <div className="help-item">Go to AI Workout Library and choose a workout.</div>
-          <div className="help-item">Click Start, allow camera access, and begin reps.</div>
-        </div>
+          <div className="help-card">
+            <div className="help-card-title">AI Workout</div>
+            <div className="help-item">Stand where your full body is visible.</div>
+            <div className="help-item">Follow on-screen cues for posture and tempo.</div>
+            <div className="help-item">Use Stop Workout to save the session.</div>
+          </div>
 
-        <div className="help-card">
-          <div className="help-card-title">AI Workout Flow</div>
-          <div className="help-item">Stand where your full body is visible in frame.</div>
-          <div className="help-item">Follow on-screen cues for posture and timing.</div>
-          <div className="help-item">Use Stop Workout to open the save dialog.</div>
-        </div>
+          <div className="help-card">
+            <div className="help-card-title">Flex Rankings</div>
+            <div className="help-item">Leaderboard refreshes weekly (Sun–Sat).</div>
+            <div className="help-item">Flex Points are based on reps/time, MET, and your weight.</div>
+          </div>
 
-        <div className="help-card">
-          <div className="help-card-title">Flex Points & Rankings</div>
-          <div className="help-item">Flex Points are based on reps/time, MET, and your weight.</div>
-          <div className="help-item">Rankings show average Flex Points per active day (Sun-Sat).</div>
-        </div>
+          <div className="help-card">
+            <div className="help-card-title">Account & Profile</div>
+            <div className="help-item">Update profile details in Dashboard.</div>
+            <div className="help-item">Progress view shows saved sessions and best scores.</div>
+          </div>
 
-        <div className="help-card">
-          <div className="help-card-title">Progress & Dashboard</div>
-          <div className="help-item">Check MY Progress for sessions, calories, and flex points.</div>
-          <div className="help-item">Dashboard shows weekly activity and best flex points.</div>
-        </div>
+          <div className="help-card">
+            <div className="help-card-title">Troubleshooting</div>
+            <div className="help-item">Camera blocked: use HTTPS or allow permission.</div>
+            <div className="help-item">No video preview: check connection and retry.</div>
+            <div className="help-item">Sign-in issues: sign out and sign in again.</div>
+          </div>
 
-        <div className="help-card">
-          <div className="help-card-title">Troubleshooting</div>
-          <div className="help-item">Camera error: use HTTPS or allow permission in the browser.</div>
-          <div className="help-item">If data disappears after reload, sign in again because your session expired.</div>
-          <div className="help-item">Video previews missing: check internet or try again later.</div>
+          <div className="help-card">
+            <div className="help-card-title">Privacy & Safety</div>
+            <div className="help-item">Camera feed stays on device; only stats are saved.</div>
+            <div className="help-item">Stop immediately if you feel pain or discomfort.</div>
+          </div>
         </div>
+      </section>
 
-        <div className="help-card">
-          <div className="help-card-title">Privacy & Safety</div>
-          <div className="help-item">Camera feed stays on device; only workout stats are saved.</div>
-          <div className="help-item">Stop if you feel pain or lose form.</div>
+      <section className="help-section help-contact">
+        <div className="help-section-title">Need More Help?</div>
+        <div className="help-contact-note">
+          Reach out to our support team at <strong>flexfit@gmail.com</strong>.
         </div>
-      </div>
+      </section>
     </div>
   );
 }

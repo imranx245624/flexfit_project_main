@@ -67,17 +67,17 @@ function Leaderboard() {
           .map((userId) => {
             const info = byUser.get(userId);
             const activeDays = info?.days?.size || 0;
-            const avg = activeDays ? info.total / activeDays : 0;
+            const total = Number(info?.total || 0);
             const profile = profileMap[userId];
             const name =
               profile?.full_name ||
               profile?.username ||
               profile?.email ||
               "User";
-            return { userId, name, score: Math.round(avg * 100) / 100, activeDays };
+            return { userId, name, score: Math.round(total * 100) / 100, activeDays };
           })
           .sort((a, b) => b.score - a.score)
-          .slice(0, 20)
+          .slice(0, 10)
           .map((row, idx) => ({
             rank: idx + 1,
             name: row.name || `User ${idx + 1}`,
@@ -96,9 +96,18 @@ function Leaderboard() {
   }, []);
 
   useEffect(() => {
-    // initial load
+    // initial load + keep fresh without manual reload
     fetchLeaderboard();
-    // you may want to poll or refresh on an interval; for now just initial load
+    const onFocus = () => fetchLeaderboard();
+    const onVisible = () => { if (document.visibilityState === "visible") fetchLeaderboard(); };
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisible);
+    const intervalId = setInterval(fetchLeaderboard, 30000);
+    return () => {
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisible);
+      clearInterval(intervalId);
+    };
   }, [fetchLeaderboard]);
 
   const handleRefresh = async () => {
@@ -110,7 +119,7 @@ function Leaderboard() {
       <div className="leaderboard-header">
         <div>
           <h1 className="leaderboard-title">Flex Rankings</h1>
-          <p className="leaderboard-sub">Top performers by average Flex Points per active day (Sun-Sat).</p>
+          <p className="leaderboard-sub">Top 10 performers by total Flex Points (Sun-Sat).</p>
         </div>
         <button className="btn-ghost" onClick={handleRefresh} aria-label="Refresh leaderboard">
           {loading ? "Refreshing..." : "Refresh"}
@@ -148,7 +157,7 @@ function Leaderboard() {
       </div>
 
       <div className="leaderboard-note">
-        Leaderboard: computed from workout sessions for the current week (Sunday-Saturday), ranked by average flex points per active day.
+        Leaderboard: current week (Sunday-Saturday), ranked by total Flex Points. Auto-refreshes every 30 seconds.
       </div>
     </div>
   );
