@@ -44,7 +44,7 @@ function Leaderboard() {
       const queryRange = async (range) => {
         const { data, error } = await supabase
           .from("daily_aggregates")
-          .select("user_id, day, avg_eca")
+          .select("user_id, day, total_eca")
           .gte("day", toIsoDate(range.start))
           .lte("day", toIsoDate(range.end));
         if (error) throw error;
@@ -77,7 +77,7 @@ function Leaderboard() {
       rows.forEach((row) => {
         if (!row?.user_id) return;
         const entry = byUser.get(row.user_id) || { total: 0, days: new Set() };
-        entry.total += Number(row.avg_eca) || 0;
+        entry.total += Number(row.total_eca) || 0;
         if (row.day) entry.days.add(toDateKey(row.day));
         byUser.set(row.user_id, entry);
       });
@@ -105,11 +105,10 @@ function Leaderboard() {
           const activeDays = info?.days?.size || 0;
           const total = Number(info?.total || 0);
           const profile = profileMap[userId];
-          const name =
-            profile?.full_name ||
-            profile?.username ||
-            profile?.email ||
-            "User";
+            const name =
+              profile?.full_name ||
+              profile?.username ||
+              "User";
           return { userId, name, score: Math.round(total * 100) / 100, activeDays };
         })
         .sort((a, b) => b.score - a.score)
@@ -131,18 +130,8 @@ function Leaderboard() {
   }, []);
 
   useEffect(() => {
-    // initial load + keep fresh without manual reload
+    // initial load only; further updates are manual via Refresh button
     fetchLeaderboard();
-    const onFocus = () => fetchLeaderboard();
-    const onVisible = () => { if (document.visibilityState === "visible") fetchLeaderboard(); };
-    window.addEventListener("focus", onFocus);
-    document.addEventListener("visibilitychange", onVisible);
-    const intervalId = setInterval(fetchLeaderboard, 30000);
-    return () => {
-      window.removeEventListener("focus", onFocus);
-      document.removeEventListener("visibilitychange", onVisible);
-      clearInterval(intervalId);
-    };
   }, [fetchLeaderboard]);
 
   const handleRefresh = async () => {
@@ -156,7 +145,7 @@ function Leaderboard() {
       <div className="leaderboard-header">
         <div>
           <h1 className="leaderboard-title">Flex Rankings</h1>
-          <p className="leaderboard-sub">Top 10 performers by summed Avg ECA (Sun-Sat).</p>
+          <p className="leaderboard-sub">Top 10 performers by total Flex Points (Sun-Sat).</p>
           {rangeText && (
             <p className="leaderboard-range">Showing: {rangeInfo.label} ({rangeText}).</p>
           )}
@@ -177,7 +166,7 @@ function Leaderboard() {
         {!loading && (!entries || entries.length === 0) && (
           <div className="ff-card cached-card">
             <div className="cached-title">No weekly data yet</div>
-            <div className="cached-sub">No Avg ECA entries found for the current or last week.</div>
+            <div className="cached-sub">No Flex Points entries found for the current or last week.</div>
           </div>
         )}
 
@@ -197,7 +186,7 @@ function Leaderboard() {
       </div>
 
       <div className="leaderboard-note">
-        Leaderboard: weekly score = sum of daily Avg ECA (Sunday-Saturday). {rangeText ? `Showing: ${rangeInfo.label} (${rangeText}). ` : ""}Auto-refreshes every 30 seconds.
+        Leaderboard: weekly score = sum of daily Flex Points (Sunday-Saturday). {rangeText ? `Showing: ${rangeInfo.label} (${rangeText}). ` : ""}Use Refresh to fetch latest data.
       </div>
     </div>
   );

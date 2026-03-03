@@ -259,7 +259,6 @@ export default function ExerciseDetail() {
               ref={previewVideoRef}
               className="exercise-preview-video"
               src={videoSrc}
-              controls
               autoPlay
               muted
               playsInline

@@ -423,11 +423,23 @@ body[data-theme="dark"] .workout-card:hover{
   flex-direction:column;
   gap: 12px;
 }
-.preview-header { display:flex; justify-content:space-between; align-items:center; gap:12px; }
+.preview-header { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap: wrap; }
+.preview-header > div { min-width: 0; }
 .preview-title { font-size:18px; font-weight:800; color: var(--ff-text); }
 .preview-meta { color: var(--library-muted); font-size:13px; }
 .preview-debug { color: #f97316; font-size: 12px; margin-top: 4px; }
-.preview-close { background:transparent; border:1px solid var(--library-border); color:var(--library-muted); padding:8px 10px; border-radius:8px; cursor:pointer; }
+.preview-modal .preview-close {
+  background: transparent;
+  border: 1px solid var(--library-border);
+  color: var(--library-muted);
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  width: auto;
+  height: auto;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
 
 /* preview video: show full content using object-fit: contain */
 .preview-video {

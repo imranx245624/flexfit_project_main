@@ -4,6 +4,7 @@ import PageWrapper from "../workout_pages/pageWrapper.jsx";
 import "./workoutLibrary.css";
 import "../workout_pages/workout.css";
 import { HOME_GROUPS, GYM_GROUPS, getExerciseBySlug, toSlug } from "../data/exerciseCatalog";
+import { getExerciseDetails } from "../data/exerciseDetails";
 import { fetchPexelsVideoWithFallback } from "../utils/pexelsVideo";
 import { getPexelsQueries } from "../utils/pexelsQueries";
 
@@ -55,6 +56,12 @@ export default function Workouts() {
     try {
       const slug = toSlug(name);
       const meta = getExerciseBySlug(slug);
+      const detail = getExerciseDetails(slug);
+      if (detail?.video) {
+        setPreviewVideo({ videoUrl: detail.video, image: detail.poster || "" });
+        setPreviewLoading(false);
+        return;
+      }
       const queries = getPexelsQueries({
         name,
         slug,
@@ -350,13 +357,12 @@ export default function Workouts() {
                 className="preview-video"
                 src={previewVideo.videoUrl}
                 poster={previewVideo.image || ""}
-                controls
                 autoPlay
                 muted
                 playsInline
               />
             )}
-            {previewVideo && (
+            {previewVideo?.pexelsUrl && (
               <div className="pexels-attrib">
                 Video by{" "}
                 <a href={previewVideo.photographerUrl} target="_blank" rel="noreferrer">
