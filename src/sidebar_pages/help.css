@@ -85,6 +85,17 @@
 }
 .help-hero-item:last-child { border-bottom: none; padding-bottom: 0; }
 
+.help-link {
+  color: var(--ff-accent);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.help-link:hover,
+.help-link:focus-visible {
+  text-decoration: underline;
+}
+
 .help-section {
   margin-bottom: 22px;
 }

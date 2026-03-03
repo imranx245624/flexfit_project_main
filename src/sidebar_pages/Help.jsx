@@ -27,8 +27,13 @@ export default function Help() {
         </div>
         <div className="help-hero-card">
           <div className="help-hero-card-title">Contact Support</div>
-          <div className="help-hero-item">Email: <strong>flexfit@gmail.com</strong></div>
-          <div className="help-hero-item">Typical response: 24–48 hours</div>
+          <div className="help-hero-item">
+            Email:{" "}
+            <a className="help-link" href="mailto:flexfit@gmail.com" aria-label="Email FlexFit support">
+              flexfit@gmail.com
+            </a>
+          </div>
+          <div className="help-hero-item">Typical response: 24-48 hours</div>
           <div className="help-hero-item">Include your device + browser in the message</div>
         </div>
       </section>
@@ -52,7 +57,7 @@ export default function Help() {
 
           <div className="help-card">
             <div className="help-card-title">Flex Rankings</div>
-            <div className="help-item">Leaderboard refreshes weekly (Sun–Sat).</div>
+            <div className="help-item">Leaderboard refreshes weekly (Sun-Sat).</div>
             <div className="help-item">Flex Points are based on reps/time, MET, and your weight.</div>
           </div>
 
@@ -80,7 +85,11 @@ export default function Help() {
       <section className="help-section help-contact">
         <div className="help-section-title">Need More Help?</div>
         <div className="help-contact-note">
-          Reach out to our support team at <strong>flexfit@gmail.com</strong>.
+          Reach out to our support team at{" "}
+          <a className="help-link" href="mailto:flexfit@gmail.com" aria-label="Email FlexFit support">
+            flexfit@gmail.com
+          </a>
+          .
         </div>
       </section>
     </div>

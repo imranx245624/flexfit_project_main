@@ -816,8 +816,12 @@ function AIWorkout() {
 
     try {
       const repsCountGuard = repsRef.current || 0;
-      if (repsCountGuard <= 0) {
+      const elapsedForSaveGuard = finalElapsedMs || getFinalElapsedMs();
+      if (!isPlankWorkout && repsCountGuard <= 0) {
         return { ok: false, message: "Please complete at least 1 rep before saving." };
+      }
+      if (isPlankWorkout && elapsedForSaveGuard <= 0) {
+        return { ok: false, message: "Please hold the plank for a few seconds before saving." };
       }
       let user = null;
       // Prefer cached session first (faster), then fall back to getUser
@@ -855,7 +859,7 @@ function AIWorkout() {
       const normalizedWorkoutName = String(workoutLabel || "").trim().toUpperCase();
       const repsCount = repsRef.current || 0;
       const avg = getAvgAccuracy();
-      const elapsedForSave = finalElapsedMs || getFinalElapsedMs();
+      const elapsedForSave = elapsedForSaveGuard;
       const flexPoints = calcFlexPoints(repsCount, elapsedForSave);
 
       setAvgAccuracy(avg);
