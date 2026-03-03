@@ -76,7 +76,7 @@ const fetchProfilesFromServer = async (ids) => {
 };
 
 function Leaderboard() {
-  const cached = readCache();
+  const [cached] = useState(() => readCache());
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [entries, setEntries] = useState([]);
@@ -249,7 +249,7 @@ function Leaderboard() {
       return;
     }
     fetchLeaderboard();
-  }, [fetchLeaderboard]);
+  }, [fetchLeaderboard, cached]);
 
   const handleRefresh = async () => {
     await fetchLeaderboard({ silent: true });
