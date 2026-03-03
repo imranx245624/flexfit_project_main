@@ -462,7 +462,7 @@ function RouterWrapper() {
               </div>
             </div>
           )}
-          <Routes>
+          <Routes key={`${location.pathname}${location.search}`}>
             <Route path="/" element={<HomeContent />} />
             <Route path="/HWorkout" element={<RedirectToLibrary type="home" />} />
             <Route path="/GWorkout" element={<RedirectToLibrary type="gym" />} />

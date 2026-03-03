@@ -34,19 +34,19 @@ export const HOME_GROUPS = [
       { title: "Quads", items: ["Squats", "Wall sit"] },
       { title: "Hamstrings", items: ["Glute bridge", "Single leg bridge"] },
       { title: "Glutes", items: ["Lunges", "Glute kickbacks"] },
-      { title: "Calves", items: ["Calf raises", "Single leg calf raises"] },
+      { title: "Calves", items: ["Calf raises"] },
     ],
   },
-  {
-    title: "Full Body",
-    sections: [
-      { title: "Full Body", items: ["Burpees", "Mountain climbers", "Jump squats", "Plank to push-up"] },
-    ],
-  },
+  // {
+  //   title: "Full Body",
+  //   sections: [
+  //     { title: "Full Body", items: ["Burpees",  "Plank to push-up"] },
+  //   ],
+  // },
   {
     title: "Cardio",
     sections: [
-      { title: "Cardio", items: ["Jumping jacks", "High knees", "Skipping (without rope)"] },
+      { title: "Cardio", items: ["Jumping jacks", "High knees", "Skipping "] },
     ],
   },
 ];
@@ -55,13 +55,13 @@ export const GYM_GROUPS = [
   {
     title: "Chest",
     sections: [
-      { title: "Chest", items: ["Bench Press", "Incline Bench Press", "Decline Bench Press", "Chest Fly (Machine / Dumbbell)", "Cable Crossover", "Pec Deck Machine"] },
+      { title: "Chest", items: ["Bench Press", "Incline Bench Press",  "Chest Fly (Machine / Dumbbell)",  "Pec Deck Machine"] },
     ],
   },
   {
     title: "Back",
     sections: [
-      { title: "Back", items: ["Lat Pulldown", "Pull-ups", "Seated Cable Row", "Barbell Row", "T-Bar Row", "Deadlift"] },
+      { title: "Back", items: ["Lat Pulldown", "Pull-ups", "Seated Cable Row", "T-Bar Row", "Deadlift"] },
     ],
   },
   {
@@ -73,8 +73,8 @@ export const GYM_GROUPS = [
   {
     title: "Arms",
     sections: [
-      { title: "Biceps", items: ["Barbell Curl", "Dumbbell Curl", "Hammer Curl", "Preacher Curl", "Cable Curl"] },
-      { title: "Triceps", items: ["Tricep Pushdown", "Skull Crushers", "Overhead Tricep Extension", "Dips", "Close Grip Bench Press"] },
+      { title: "Biceps", items: ["Barbell Curl", "Dumbbell Curl", "Cable Curl"] },
+      { title: "Triceps", items: ["Tricep Pushdown", "Skull Crushers", "Overhead Tricep Extension", "Dips"] },
     ],
   },
   {
@@ -86,16 +86,16 @@ export const GYM_GROUPS = [
       { title: "Calves", items: ["Standing Calf Raise", "Seated Calf Raise"] },
     ],
   },
-  {
-    title: "Core",
-    sections: [
-      { title: "Core", items: ["Cable Crunch", "Hanging Leg Raise", "Decline Sit-ups", "Ab Roller", "Russian Twists"] },
-    ],
-  },
+  // {
+  //   title: "Core",
+  //   sections: [
+  //     { title: "Core", items: ["Cable Crunch", "Hanging Leg Raise", "Russian Twists"] },
+  //   ],
+  // },
   {
     title: "Compound",
     sections: [
-      { title: "Compound", items: ["Deadlift", "Squat", "Bench Press", "Clean & Press", "Thrusters"] },
+      { title: "Compound", items: ["Deadlift", "Squat", "Bench Press"] },
     ],
   },
 ];
