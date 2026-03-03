@@ -2,6 +2,9 @@ import React, { useCallback, useEffect, useState } from "react";
 import { supabase } from "../utils/supabaseClient";
 import "./leaderboard.css";
 
+const CACHE_KEY = "ff-leaderboard-cache";
+const CACHE_TTL_MS = 1000 * 60 * 5; // 5 minutes
+
 const getWeekRange = (baseDate = new Date()) => {
   const start = new Date(baseDate);
   start.setHours(0, 0, 0, 0);
@@ -26,6 +29,25 @@ const toIsoDate = (dt) => {
 };
 
 const normalizeText = (value) => (typeof value === "string" ? value.trim() : "");
+
+const readCache = () => {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed?.ts || !parsed?.entries) return null;
+    if (Date.now() - parsed.ts > CACHE_TTL_MS) return null;
+    return parsed;
+  } catch (e) {
+    return null;
+  }
+};
+
+const writeCache = (payload) => {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ ...payload, ts: Date.now() }));
+  } catch (e) {}
+};
 
 const fetchProfilesFromServer = async (ids) => {
   if (!ids?.length) return {};
@@ -54,7 +76,9 @@ const fetchProfilesFromServer = async (ids) => {
 };
 
 function Leaderboard() {
+  const cached = readCache();
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [entries, setEntries] = useState([]);
   const [rangeInfo, setRangeInfo] = useState({ label: "This week", start: null, end: null });
 
@@ -66,30 +90,56 @@ function Leaderboard() {
     return `${startText} to ${endText}`;
   };
 
-  const fetchLeaderboard = useCallback(async () => {
+  const fetchLeaderboard = useCallback(async ({ silent = false } = {}) => {
     try {
-      setLoading(true);
+      if (silent) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
+
       const queryRange = async (range) => {
+        const { data: fastData, error: fastErr } = await supabase
+          .from("daily_aggregates")
+          .select("user_id, avg_eca.sum(), day.count()")
+          .gte("day", toIsoDate(range.start))
+          .lte("day", toIsoDate(range.end));
+
+        if (!fastErr && Array.isArray(fastData)) {
+          const rows = (fastData || []).map((row) => ({
+            user_id: row.user_id,
+            total: Number(row.avg_eca_sum || 0),
+            daysCount: Number(row.day_count || 0),
+            _aggregated: true,
+          }));
+          return { rows, aggregated: true };
+        }
+
+        if (fastErr) {
+          console.warn("Leaderboard aggregate query failed, falling back:", fastErr);
+        }
+
         const { data, error } = await supabase
           .from("daily_aggregates")
           .select("user_id, day, avg_eca")
           .gte("day", toIsoDate(range.start))
           .lte("day", toIsoDate(range.end));
         if (error) throw error;
-        return data || [];
+        return { rows: data || [], aggregated: false };
       };
 
       const currentRange = getWeekRange();
       let rangeUsed = { ...currentRange, label: "This week" };
-      let rows = await queryRange(currentRange);
+      let { rows, aggregated } = await queryRange(currentRange);
 
       if (!rows.length) {
         const prevBase = new Date(currentRange.start);
         prevBase.setDate(prevBase.getDate() - 7);
         const prevRange = getWeekRange(prevBase);
-        const prevRows = await queryRange(prevRange);
-        if (prevRows.length) {
-          rows = prevRows;
+        const prevResult = await queryRange(prevRange);
+        if (prevResult.rows.length) {
+          rows = prevResult.rows;
+          aggregated = prevResult.aggregated;
           rangeUsed = { ...prevRange, label: "Last week" };
         }
       }
@@ -102,30 +152,50 @@ function Leaderboard() {
       }
 
       const byUser = new Map();
-      rows.forEach((row) => {
-        if (!row?.user_id) return;
-        const entry = byUser.get(row.user_id) || { total: 0, days: new Set() };
-        entry.total += Number(row.avg_eca) || 0;
-        if (row.day) entry.days.add(toDateKey(row.day));
-        byUser.set(row.user_id, entry);
-      });
+      if (aggregated) {
+        rows.forEach((row) => {
+          if (!row?.user_id) return;
+          byUser.set(row.user_id, {
+            total: Number(row.total) || 0,
+            daysCount: Number(row.daysCount) || 0,
+          });
+        });
+      } else {
+        rows.forEach((row) => {
+          if (!row?.user_id) return;
+          const entry = byUser.get(row.user_id) || { total: 0, days: new Set() };
+          entry.total += Number(row.avg_eca) || 0;
+          if (row.day) entry.days.add(toDateKey(row.day));
+          byUser.set(row.user_id, entry);
+        });
+      }
 
       const userIds = Array.from(byUser.keys());
       const profileMap = {};
+      const usernameMap = {};
       if (userIds.length > 0) {
-        const { data: profiles, error: profileErr } = await supabase
-          .from("profiles")
-          .select("id, full_name, username, email")
-          .in("id", userIds);
+        const [profilesRes, usernamesRes] = await Promise.all([
+          supabase.from("profiles").select("id, full_name, username, email").in("id", userIds),
+          supabase.from("usernames").select("user_id, username").in("user_id", userIds),
+        ]);
 
-        if (profileErr) {
-          console.warn("Leaderboard profile fetch error:", profileErr);
+        if (profilesRes.error) {
+          console.warn("Leaderboard profile fetch error:", profilesRes.error);
         } else {
-          (profiles || []).forEach((p) => {
+          (profilesRes.data || []).forEach((p) => {
             profileMap[p.id] = p;
           });
         }
+
+        if (usernamesRes.error) {
+          console.warn("Leaderboard username fetch error:", usernamesRes.error);
+        } else {
+          (usernamesRes.data || []).forEach((u) => {
+            usernameMap[u.user_id] = u;
+          });
+        }
       }
+
       const missingProfileIds = userIds.filter((id) => !profileMap[id]);
       if (missingProfileIds.length > 0) {
         const serverProfiles = await fetchProfilesFromServer(missingProfileIds);
@@ -136,26 +206,11 @@ function Leaderboard() {
           );
         }
       }
-      const usernameMap = {};
-      if (userIds.length > 0) {
-        const { data: usernames, error: usernameErr } = await supabase
-          .from("usernames")
-          .select("user_id, username")
-          .in("user_id", userIds);
-
-        if (usernameErr) {
-          console.warn("Leaderboard username fetch error:", usernameErr);
-        } else {
-          (usernames || []).forEach((u) => {
-            usernameMap[u.user_id] = u;
-          });
-        }
-      }
 
       const ranked = userIds
         .map((userId) => {
           const info = byUser.get(userId);
-          const activeDays = info?.days?.size || 0;
+          const activeDays = aggregated ? (info?.daysCount || 0) : (info?.days?.size || 0);
           const total = Number(info?.total || 0);
           const profile = profileMap[userId];
           const usernameFallback = usernameMap[userId]?.username;
@@ -175,24 +230,34 @@ function Leaderboard() {
         }));
 
       setEntries(ranked);
+      writeCache({ entries: ranked, rangeInfo: rangeUsed });
     } catch (err) {
       console.error("Leaderboard fetch threw:", err);
-      setEntries([]);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }, []);
 
   useEffect(() => {
     // initial load only; further updates are manual via Refresh button
+    if (cached?.entries?.length) {
+      setEntries(cached.entries);
+      if (cached.rangeInfo) setRangeInfo(cached.rangeInfo);
+      setLoading(false);
+      fetchLeaderboard({ silent: true });
+      return;
+    }
     fetchLeaderboard();
   }, [fetchLeaderboard]);
 
   const handleRefresh = async () => {
-    await fetchLeaderboard();
+    await fetchLeaderboard({ silent: true });
   };
 
   const rangeText = formatRange(rangeInfo.start, rangeInfo.end);
+  const isBusy = loading || refreshing;
+  const buttonLabel = loading ? "Loading..." : (refreshing ? "Refreshing..." : "Refresh");
 
   return (
     <div className="leaderboard-page container">
@@ -204,13 +269,18 @@ function Leaderboard() {
             <p className="leaderboard-range">Showing: {rangeInfo.label} ({rangeText}).</p>
           )}
         </div>
-        <button className="btn-ghost" onClick={handleRefresh} aria-label="Refresh leaderboard">
-          {loading ? "Refreshing..." : "Refresh"}
+        <button
+          className="btn-ghost"
+          onClick={handleRefresh}
+          aria-label="Refresh leaderboard"
+          disabled={isBusy}
+        >
+          {buttonLabel}
         </button>
       </div>
 
       <div className="leaderboard-list">
-        {loading && (
+        {loading && !entries?.length && (
           <div className="ff-card cached-card">
             <div className="cached-title">Loading leaderboard...</div>
             <div className="cached-sub">Fetching latest rankings.</div>
