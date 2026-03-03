@@ -20,10 +20,10 @@ export default function Help() {
               disabled
             />
           </div>
-          <div className="help-actions">
+          {/* <div className="help-actions">
             <Link to="/AIWorkoutLibrary" className="btn-primary">Train with AI</Link>
             <Link to="/workouts" className="btn-ghost">Workout Library</Link>
-          </div>
+          </div> */}
         </div>
         <div className="help-hero-card">
           <div className="help-hero-card-title">Contact Support</div>

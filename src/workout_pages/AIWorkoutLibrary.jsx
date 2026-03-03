@@ -4,25 +4,29 @@ import { useNavigate } from "react-router-dom";
 import PageWrapper from "./pageWrapper.jsx";
 import "./aiWorkout.css";
 
-import video1 from "../assets/videos/video1.mp4";
+// import video1 from "../assets/videos/video1.mp4";
 import video2 from "../assets/videos/video2.mp4";
 import video3 from "../assets/videos/video3.mp4";
-import video4 from "../assets/videos/video4.mp4";
+import burpees from "../assets/videos/burpees.mp4";
 import jumpingJacks from "../assets/videos/jumping jacks.mp4";
 import legRaises from "../assets/videos/leg raises.mp4";
 import sumoSquat from "../assets/videos/Sumo Squat.mp4";
 import lungesVideo from "../assets/videos/lunges.mp4";
 import pullUpsVideo from "../assets/videos/pull_ups.mp4";
+import crunches from "../assets/videos/crunches.mp4";
+import plank from "../assets/videos/plank.mp4";
+
+
 const AI_WORKOUTS = [
   { title: "Push Ups", level: "Intermediate", duration: "10-20 min", video: video2, tracking: "full" },
   { title: "Squats", level: "Beginner", duration: "12-20 min", video: video3, tracking: "full" },
-  { title: "Planks", level: "Beginner", duration: "3-8 min", video: video1, tracking: "full" },
+  { title: "Planks", level: "Beginner", duration: "3-8 min", video: plank, tracking: "full" },
   { title: "Lunges", level: "Beginner", duration: "10-18 min", video: lungesVideo, tracking: "full" },
-  { title: "Burpees", level: "Advanced", duration: "8-15 min", video: video4, tracking: "full" },
+  { title: "Burpees", level: "Advanced", duration: "8-15 min", video: burpees, tracking: "full" },
   { title: "Jumping Jacks", level: "Beginner", duration: "6-12 min", video: jumpingJacks, tracking: "full" },
   { title: "Sumo Squat", level: "Beginner", duration: "10-18 min", video: sumoSquat, tracking: "full" },
   { title: "Pull Ups", level: "Advanced", duration: "6-15 min", video: pullUpsVideo, tracking: "partial" },
-  { title: "Crunches", level: "Beginner", duration: "6-12 min", video: video1, tracking: "partial" },
+  { title: "Crunches", level: "Beginner", duration: "6-12 min", video: crunches, tracking: "partial" },
   { title: "Leg Raises", level: "Beginner", duration: "6-12 min", video: legRaises, tracking: "partial" },
 ];
 

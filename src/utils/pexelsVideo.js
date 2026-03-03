@@ -1,7 +1,5 @@
-import { PEXELS_VIDEO_OVERRIDES } from "../data/pexelsOverrides";
-
+import{PEXELS_VIDEO_OVERRIDES} from "../data/pexelsOverrides";
 const PROXY_ENDPOINT = "/api/pexels";
-
 const MEMORY_CACHE = new Map();
 const CACHE_PREFIX = "ff-pexels-video:";
 const CACHE_TTL_MS = 1000 * 60 * 60 * 12; // 12 hours

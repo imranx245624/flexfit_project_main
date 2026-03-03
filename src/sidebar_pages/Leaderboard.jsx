@@ -25,6 +25,34 @@ const toIsoDate = (dt) => {
   return `${d.getFullYear()}-${mm}-${dd}`;
 };
 
+const normalizeText = (value) => (typeof value === "string" ? value.trim() : "");
+
+const fetchProfilesFromServer = async (ids) => {
+  if (!ids?.length) return {};
+  try {
+    const res = await fetch("/api/public-profiles", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ids }),
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      console.warn("public-profiles fetch failed:", res.status, text.slice(0, 160));
+      return {};
+    }
+    const payload = await res.json();
+    const list = payload?.data || payload?.profiles || [];
+    const map = {};
+    (list || []).forEach((p) => {
+      if (p?.id) map[p.id] = p;
+    });
+    return map;
+  } catch (err) {
+    console.warn("public-profiles fetch error:", err);
+    return {};
+  }
+};
+
 function Leaderboard() {
   const [loading, setLoading] = useState(true);
   const [entries, setEntries] = useState([]);
@@ -98,6 +126,16 @@ function Leaderboard() {
           });
         }
       }
+      const missingProfileIds = userIds.filter((id) => !profileMap[id]);
+      if (missingProfileIds.length > 0) {
+        const serverProfiles = await fetchProfilesFromServer(missingProfileIds);
+        Object.assign(profileMap, serverProfiles);
+        if (Object.keys(serverProfiles).length === 0) {
+          console.warn(
+            "Leaderboard: profiles missing. Check profiles RLS or configure /api/public-profiles."
+          );
+        }
+      }
       const usernameMap = {};
       if (userIds.length > 0) {
         const { data: usernames, error: usernameErr } = await supabase
@@ -120,14 +158,13 @@ function Leaderboard() {
           const activeDays = info?.days?.size || 0;
           const total = Number(info?.total || 0);
           const profile = profileMap[userId];
-            const usernameFallback = usernameMap[userId]?.username;
-            const name =
-              profile?.full_name ||
-              profile?.username ||
-              usernameFallback ||
-              "User";
-            return { userId, name, score: Math.round(total * 100) / 100, activeDays };
-          })
+          const usernameFallback = usernameMap[userId]?.username;
+          const fullName = normalizeText(profile?.full_name);
+          const userName = normalizeText(profile?.username);
+          const fallbackName = normalizeText(usernameFallback);
+          const name = fullName || userName || fallbackName || "User";
+          return { userId, name, score: Math.round(total * 100) / 100, activeDays };
+        })
         .sort((a, b) => b.score - a.score)
         .slice(0, 10)
         .map((row, idx) => ({
@@ -202,9 +239,9 @@ function Leaderboard() {
         ))}
       </div>
 
-      <div className="leaderboard-note">
+      {/* <div className="leaderboard-note">
         Leaderboard: weekly score = sum of daily Avg ECA (Sunday-Saturday). {rangeText ? `Showing: ${rangeInfo.label} (${rangeText}). ` : ""}Use Refresh to fetch latest data.
-      </div>
+      </div> */}
     </div>
   );
 }

@@ -17,8 +17,9 @@
   gap: 12px;
 }
 .settings-groups.single {
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: minmax(0, 520px);
   max-width: 520px;
+  margin: 0 auto;
 }
 
 .settings-group {

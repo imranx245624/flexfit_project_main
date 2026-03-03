@@ -1,5 +1,8 @@
 // Auto-generated exercise details (offline, no API calls)
 import { HOME_WORKOUT_VIDEOS } from "./homeWorkoutVideos";
+import { GYM_WORKOUT_VIDEOS } from "./gymWorkoutVideos";
+
+const LOCAL_WORKOUT_VIDEOS = { ...HOME_WORKOUT_VIDEOS, ...GYM_WORKOUT_VIDEOS };
 export const EXERCISE_DETAILS = {
   "push-ups": {
     "name": "Push-ups",
@@ -1412,7 +1415,7 @@ export const EXERCISE_DETAILS = {
 
 export const getExerciseDetails = (slug) => {
   const base = EXERCISE_DETAILS[slug] || null;
-  const video = HOME_WORKOUT_VIDEOS[slug];
+  const video = LOCAL_WORKOUT_VIDEOS[slug];
   if (!base) return video ? { name: slug, video } : null;
   return video ? { ...base, video } : base;
 };

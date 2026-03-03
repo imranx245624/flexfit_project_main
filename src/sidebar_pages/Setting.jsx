@@ -62,13 +62,13 @@ export default function Settings() {
           <h1 className="settings-title">Settings</h1>
           <p className="settings-sub">Personalize your FlexFit experience.</p>
         </div>
-        <button className="btn-primary" type="button" onClick={handleSave}>
+        {/* <button className="btn-primary" type="button" onClick={handleSave}>
           Save Changes
-        </button>
+        </button> */}
       </div>
 
-      <div className="settings-groups">
-        <div className="settings-group ff-card">
+       <div className="settings-groups single">
+       {/*  <div className="settings-group ff-card">
           <div className="settings-group-title">Preferences</div>
           <div className="settings-item">
             <div className="settings-label">Voice Feedback</div>
@@ -131,7 +131,7 @@ export default function Settings() {
               </button>
             </div>
           </div>
-        </div>
+        </div> */}
 
         <div className="settings-group ff-card">
           <div className="settings-group-title">Appearance</div>
@@ -158,7 +158,7 @@ export default function Settings() {
           <Link className="settings-help-link" to="/help">Need help? Visit the Help page</Link>
         </div>
 
-        <div className="settings-group ff-card">
+        {/* <div className="settings-group ff-card">
           <div className="settings-group-title">Developer</div>
           <div className="settings-item">
             <div className="settings-label">Debug Logs</div>
@@ -173,7 +173,7 @@ export default function Settings() {
             </label>
           </div>
           <div className="settings-help">Enable verbose console logging for troubleshooting.</div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

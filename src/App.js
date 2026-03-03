@@ -31,7 +31,14 @@ import { supabase } from "./utils/supabaseClient";
 import { toast } from "./utils/toast";
 
 function RouterWrapper() {
-  const [splashVisible, setSplashVisible] = useState(true);
+  const [splashVisible, setSplashVisible] = useState(() => {
+    try {
+      if (typeof window !== "undefined" && window.localStorage) {
+        return !window.localStorage.getItem("ff-splash-seen");
+      }
+    } catch (e) {}
+    return true;
+  });
   const [splashExiting, setSplashExiting] = useState(false);
   const [hideShell, setHideShell] = useState(false);
   const [routeLoading, setRouteLoading] = useState(false);
@@ -41,6 +48,10 @@ function RouterWrapper() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (!splashVisible) return undefined;
+    try {
+      window.localStorage.setItem("ff-splash-seen", "1");
+    } catch (e) {}
     const showMs = 2200;
     const fadeMs = 600;
     const exitTimer = setTimeout(() => setSplashExiting(true), showMs);
@@ -49,7 +60,7 @@ function RouterWrapper() {
       clearTimeout(exitTimer);
       clearTimeout(removeTimer);
     };
-  }, []);
+  }, [splashVisible]);
 
   useEffect(() => {
     if (!splashVisible) return undefined;
