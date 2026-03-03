@@ -63,9 +63,10 @@ export default function Workouts() {
       const { result, error } = await fetchPexelsVideoWithFallback(queries, {
         orientation: "landscape",
         size: "medium",
-        perPage: 1,
+        perPage: 8,
         minDuration: 0,
         maxDuration: 120,
+        meta: { name, slug },
         signal: controller.signal,
       });
       if (controller.signal.aborted) return;

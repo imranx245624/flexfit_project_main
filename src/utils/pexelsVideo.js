@@ -1,3 +1,5 @@
+import { PEXELS_VIDEO_OVERRIDES } from "../data/pexelsOverrides";
+
 const PROXY_ENDPOINT = "/api/pexels";
 
 const MEMORY_CACHE = new Map();
@@ -36,6 +38,90 @@ function pickBestVideoFile(files = []) {
   const sorted = mp4.slice().sort((a, b) => (a.width || 0) - (b.width || 0));
   const target = sorted.find((f) => (f.width || 0) >= 720 && (f.width || 0) <= 1280);
   return target || sorted[sorted.length - 1];
+}
+
+const STOP_TOKENS = new Set(["and", "with", "without", "the", "a", "an", "of", "to"]);
+const VARIANT_TOKENS = [
+  "knee",
+  "knees",
+  "assisted",
+  "modified",
+  "beginner",
+  "easy",
+  "incline",
+  "decline",
+  "diamond",
+  "close",
+  "closegrip",
+  "wide",
+  "bench",
+  "wall",
+  "chair",
+  "band",
+  "machine",
+  "dumbbell",
+  "barbell",
+  "kettlebell",
+  "smith",
+  "cable",
+  "bodyweight",
+];
+
+function normalizeToken(value = "") {
+  return String(value).toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+function tokenize(value = "") {
+  return String(value)
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim()
+    .split(/\s+/)
+    .map((t) => normalizeToken(t))
+    .filter((t) => t && !STOP_TOKENS.has(t));
+}
+
+function urlTokens(videoUrl = "") {
+  const parts = String(videoUrl).split("/");
+  const slug = parts[parts.length - 1] || "";
+  return tokenize(slug.replace(/\d+/g, ""));
+}
+
+function scoreVideo(video, { slug, name, query } = {}) {
+  const baseTokens = tokenize(slug || name || "");
+  const queryTokens = tokenize(query || "");
+  const videoTokens = new Set(urlTokens(video?.url || ""));
+
+  const allowed = new Set(baseTokens);
+  const disallowed = VARIANT_TOKENS.filter((t) => !allowed.has(t));
+
+  let score = 0;
+  baseTokens.forEach((t) => {
+    if (videoTokens.has(t)) score += 2;
+  });
+  queryTokens.forEach((t) => {
+    if (videoTokens.has(t)) score += 1;
+  });
+  disallowed.forEach((t) => {
+    if (videoTokens.has(t)) score -= 3;
+  });
+
+  return score;
+}
+
+function pickBestVideo(videos = [], meta) {
+  if (!videos.length) return null;
+  let best = videos[0];
+  let bestScore = scoreVideo(best, meta);
+  for (let i = 1; i < videos.length; i += 1) {
+    const score = scoreVideo(videos[i], meta);
+    if (score > bestScore) {
+      best = videos[i];
+      bestScore = score;
+    }
+  }
+  return best;
 }
 
 async function runFetch(url, signal) {
@@ -83,31 +169,45 @@ export async function fetchPexelsVideo(query, options = {}) {
   const {
     orientation = "landscape",
     size = "medium",
-    perPage = 1,
+    perPage = 8,
     minDuration = 5,
     maxDuration = 60,
     signal,
+    meta,
   } = options;
 
-  const cacheKey = `${query}|${orientation}|${size}|${perPage}|${minDuration}|${maxDuration}`;
+  const cacheKey = `${query}|${orientation}|${size}|${perPage}|${minDuration}|${maxDuration}|${meta?.slug || ""}`;
   const cached = getCache(cacheKey);
   if (cached !== null) return cached;
 
   const base = window?.location?.origin || "http://localhost";
-  const makeUrl = (endpoint) => {
+  const makeUrl = (endpoint, params = {}) => {
     const u = new URL(endpoint, base);
-    u.searchParams.set("query", query);
-    u.searchParams.set("per_page", String(perPage));
-    u.searchParams.set("orientation", orientation);
-    if (size) u.searchParams.set("size", size);
-    if (minDuration != null) u.searchParams.set("min_duration", String(minDuration));
-    if (maxDuration != null) u.searchParams.set("max_duration", String(maxDuration));
+    Object.entries(params).forEach(([key, value]) => {
+      if (value == null) return;
+      u.searchParams.set(key, String(value));
+    });
     return u.toString();
   };
 
-  const data = await fetchJson(makeUrl(PROXY_ENDPOINT), signal, "Pexels proxy");
+  const data = await fetchJson(
+    makeUrl(PROXY_ENDPOINT, {
+      query,
+      per_page: perPage,
+      orientation,
+      size,
+      min_duration: minDuration,
+      max_duration: maxDuration,
+    }),
+    signal,
+    "Pexels proxy"
+  );
 
-  const video = (data?.videos || [])[0];
+  const video = pickBestVideo(data?.videos || [], {
+    slug: meta?.slug,
+    name: meta?.name,
+    query,
+  });
   if (!video) {
     setCache(cacheKey, null);
     return null;
@@ -138,6 +238,16 @@ export async function fetchPexelsVideo(query, options = {}) {
 export async function fetchPexelsVideoWithFallback(queries = [], options = {}) {
   let lastError = null;
   let lastQuery = null;
+  const slug = options?.meta?.slug;
+  const overrideId = slug ? PEXELS_VIDEO_OVERRIDES[slug] : null;
+  if (overrideId) {
+    try {
+      const result = await fetchPexelsVideoById(overrideId, options);
+      if (result) return { result, query: `id:${overrideId}`, error: null };
+    } catch (e) {
+      lastError = e;
+    }
+  }
   for (const q of queries) {
     if (!q) continue;
     try {
@@ -150,4 +260,27 @@ export async function fetchPexelsVideoWithFallback(queries = [], options = {}) {
     }
   }
   return { result: null, query: lastQuery, error: lastError };
+}
+
+export async function fetchPexelsVideoById(id, options = {}) {
+  const { signal } = options;
+  const base = window?.location?.origin || "http://localhost";
+  const u = new URL(PROXY_ENDPOINT, base);
+  u.searchParams.set("id", String(id));
+  const data = await fetchJson(u.toString(), signal, "Pexels proxy");
+  const video = data || null;
+  if (!video?.video_files) return null;
+  const file = pickBestVideoFile(video.video_files || []);
+  if (!file) return null;
+  return {
+    id: video.id,
+    videoUrl: file.link,
+    image: video.image || "",
+    duration: video.duration,
+    width: file.width,
+    height: file.height,
+    photographer: video.user?.name || "Pexels Creator",
+    photographerUrl: video.user?.url || "https://www.pexels.com",
+    pexelsUrl: video.url || "https://www.pexels.com/videos/",
+  };
 }

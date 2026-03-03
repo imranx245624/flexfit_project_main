@@ -5,6 +5,7 @@ module.exports = async function handler(req, res) {
   }
 
   const {
+    id,
     query = "",
     orientation,
     size,
@@ -14,18 +15,23 @@ module.exports = async function handler(req, res) {
     max_duration,
   } = req.query || {};
 
-  if (!query) {
+  if (!id && !query) {
     return res.status(400).json({ error: "Query is required" });
   }
 
-  const url = new URL("https://api.pexels.com/videos/search");
-  url.searchParams.set("query", query);
-  if (orientation) url.searchParams.set("orientation", orientation);
-  if (size) url.searchParams.set("size", size);
-  if (per_page) url.searchParams.set("per_page", String(per_page));
-  if (page) url.searchParams.set("page", String(page));
-  if (min_duration) url.searchParams.set("min_duration", String(min_duration));
-  if (max_duration) url.searchParams.set("max_duration", String(max_duration));
+  const url = id
+    ? new URL(`https://api.pexels.com/videos/videos/${encodeURIComponent(String(id))}`)
+    : new URL("https://api.pexels.com/videos/search");
+
+  if (!id) {
+    url.searchParams.set("query", query);
+    if (orientation) url.searchParams.set("orientation", orientation);
+    if (size) url.searchParams.set("size", size);
+    if (per_page) url.searchParams.set("per_page", String(per_page));
+    if (page) url.searchParams.set("page", String(page));
+    if (min_duration) url.searchParams.set("min_duration", String(min_duration));
+    if (max_duration) url.searchParams.set("max_duration", String(max_duration));
+  }
 
   try {
     const upstream = await fetch(url.toString(), {

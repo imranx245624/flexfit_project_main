@@ -7,7 +7,14 @@ module.exports = function (app) {
     createProxyMiddleware({
       target: "https://api.pexels.com",
       changeOrigin: true,
-      pathRewrite: { "^/api/pexels": "/videos/search" },
+      pathRewrite: (path, req) => {
+        try {
+          const url = new URL(req.url, "http://localhost");
+          const id = url.searchParams.get("id");
+          if (id) return `/videos/videos/${encodeURIComponent(id)}`;
+        } catch (e) {}
+        return "/videos/search";
+      },
       onProxyReq: (proxyReq) => {
         if (apiKey) proxyReq.setHeader("Authorization", apiKey);
       },

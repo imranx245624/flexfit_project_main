@@ -473,7 +473,7 @@ function AIWorkout() {
   // Exercise-specific cue helpers (each one throttles repeat messages)
   const cueStrictPushup = useCallback((statusText, voiceText = statusText) => {
     const now = Date.now();
-    if (now - pushupCueCooldownRef.current < 2200) return false;
+    if (now - pushupCueCooldownRef.current < 2000) return false;
     pushupCueCooldownRef.current = now;
     setPoseStatus(statusText);
     speak(voiceText);
@@ -1725,7 +1725,8 @@ return;
               }
 
               // Counting Logic (per exercise)
-	      if (exerciseType === "plank") {
+              
+ if (exerciseType === "plank") {
   // Plank: time-based tracking with form break detection
   // Strategy: keep timer running only while plank posture is valid; pause/stop on breaks.
   const hipOffset = getTrackedHipOffset(kp);
@@ -1744,11 +1745,12 @@ return;
       : centerHipOffset;
   const maxHipDropOffset = Math.max(hipOffset, centerHipOffset, leftHipOffset, rightHipOffset);
   const minHipRiseOffset = Math.min(hipOffset, centerHipOffset, leftHipOffset, rightHipOffset);
-  const hipWarnThreshold = Math.max(10, torsoLength * 0.13);
-  const hipThreshold = Math.max(14, torsoLength * 0.18);
-  const severeHipDropThreshold = Math.max(16, torsoLength * 0.18);
+  const hipWarnThreshold = Math.max(12, torsoLength * 0.15);
+  const hipThreshold = Math.max(20, torsoLength * 0.24);
+  const severeHipDropThreshold = Math.max(24, torsoLength * 0.29);
   const severeHipRiseThreshold = Math.max(24, torsoLength * 0.26);
   const severeHipDrop = maxHipDropOffset > severeHipDropThreshold;
+  const catastrophicHipDrop = maxHipDropOffset > Math.max(32, torsoLength * 0.36);
   const severeHipRise = minHipRiseOffset < -severeHipRiseThreshold;
   const severeBreak = severeHipDrop || severeHipRise;
   const plankReadyNow = isPlankReady(kp) && geometryOK && plankSideViewOK && !severeBreak;
@@ -1757,7 +1759,7 @@ return;
     now - plankStartWallTimeRef.current < PLANK_START_GRACE_MS;
 
   // If plank breaks badly while active, stop immediately and finalize.
-  if (plankActiveRef.current && severeHipDrop) {
+  if (plankActiveRef.current && catastrophicHipDrop) {
     if (startTimeRef.current) {
       const finalElapsed = now - startTimeRef.current;
       plankElapsedCarryRef.current = Math.max(plankElapsedCarryRef.current, finalElapsed);
@@ -1913,8 +1915,8 @@ return;
       finalizeAndShowSave("Plank broken");
     }
   }
-  return;
-}              else if (exerciseType === "pushup") {
+  return;}
+	              else if (exerciseType === "pushup") {
                 // Pushup: down/up elbow angle thresholds
                 const pushupLegsStraightNow = !pushupLegsBlocked;
                 // Track rep start + minimum elbow angle for depth validation
@@ -2677,6 +2679,9 @@ return;
       }
     }
   } catch (err) {
+    const name = err?.name || "";
+    const msg = err?.message || "";
+    if (name === "AbortError" || msg.includes("signal is aborted")) return;
     console.error("detectPose error:", err);
   } finally {
     busyRef.current = false;
@@ -2813,6 +2818,9 @@ const runDetector = useCallback(async () => {
         };
         rafRef.current = requestAnimationFrame(loop);
       } catch (err) {
+        const name = err?.name || "";
+        const msg = err?.message || "";
+        if (name === "AbortError" || msg.includes("signal is aborted")) return;
         console.error("Camera / detector init failed:", err);
         setPoseStatus(getCameraErrorMessage(err));
       }
