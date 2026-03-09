@@ -328,7 +328,10 @@ function RouterWrapper() {
           </div> */}
 
           <div className="cover-hero-content">
-            <span className="cover-hero-badge">FlexFit</span>
+            <div className="cover-hero-brand">
+              <img className="cover-hero-logo" src="/flexfit.png" alt="FlexFit logo" />
+              <span className="cover-hero-badge">FlexFit</span>
+            </div>
             <h1 className="cover-hero-title">AI-Powered Fitness Assistant</h1>
             <p className="cover-hero-sub">
               Train smarter with real-time pose detection, flex point scoring, and clean progress tracking.
@@ -355,8 +358,9 @@ function RouterWrapper() {
           </div>
           <div className="cover-hero-media">
             <img
-              src="/assets/workouts/hero-cover.jpg"
-              alt="FlexFit training scene"
+              className="cover-hero-image"
+              src="/flexfit.png"
+              alt="FlexFit logo"
               loading="lazy"
             />
             <div className="cover-hero-glow" aria-hidden="true" />
@@ -482,11 +486,7 @@ function RouterWrapper() {
             <Route path="/plans" element={<Plans />} />
             <Route
               path="/leaderboard"
-              element={(
-                <RequireAuth>
-                  <Leaderboard />
-                </RequireAuth>
-              )}
+              element={<Leaderboard />}
             />
             <Route path="/AIWorkoutLibrary" element={<AIWorkoutLibrary />} />
             <Route
@@ -500,27 +500,15 @@ function RouterWrapper() {
             {/* PROFILE AS A STANDALONE PAGE */}
             <Route
               path="/profile"
-              element={(
-                <RequireAuth>
-                  <Profile onSignOut={handleProfileSignOut} />
-                </RequireAuth>
-              )}
+              element={<Profile onSignOut={handleProfileSignOut} />}
             />
             <Route
               path="/progress"
-              element={(
-                <RequireAuth>
-                  <Progress />
-                </RequireAuth>
-              )}
+              element={<Progress />}
             />
             <Route
               path="/settings"
-              element={(
-                <RequireAuth>
-                  <Setting />
-                </RequireAuth>
-              )}
+              element={<Setting />}
             />
             <Route path="/help" element={<Help />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />

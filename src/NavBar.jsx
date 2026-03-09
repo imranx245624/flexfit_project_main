@@ -10,8 +10,20 @@ import { forceSignOut } from "./utils/forceSignOut";
 import { toast } from "./utils/toast";
 
 export default function NavBar() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const [showSignIn, setShowSignIn] = useState(false);
+  const [signInLocked, setSignInLocked] = useState(false);
+  const GUEST_LOCK_KEY = "ff-guest-lock";
+  const [guestLocked, setGuestLocked] = useState(() => {
+    if (typeof window === "undefined") return false;
+    try {
+      return localStorage.getItem(GUEST_LOCK_KEY) === "1";
+    } catch (e) {
+      return false;
+    }
+  });
+  const [guestGraceActive, setGuestGraceActive] = useState(false);
+  const [guestGraceModal, setGuestGraceModal] = useState(false);
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [installPrompt, setInstallPrompt] = useState(null);
@@ -29,6 +41,8 @@ export default function NavBar() {
   const popoverRef = useRef(null);
   const installDelayRef = useRef(null);
   const isInstalledRef = useRef(false);
+  const guestTimerRef = useRef(null);
+  const guestGracePathRef = useRef("");
   const loc = useLocation();
   const navigate = useNavigate();
 
@@ -73,7 +87,19 @@ export default function NavBar() {
   }, []);
 
   useEffect(() => {
-    const handler = () => setShowSignIn(true);
+    const handler = (e) => {
+      const force = Boolean(e?.detail?.force);
+      const guestGrace = Boolean(e?.detail?.guestGrace);
+      if (guestGrace) {
+        setGuestGraceModal(true);
+        setSignInLocked(false);
+      }
+      if (force) {
+        setSignInLocked(true);
+        setGuestGraceModal(false);
+      }
+      setShowSignIn(true);
+    };
     window.addEventListener("flexfit-open-signin", handler);
     return () => window.removeEventListener("flexfit-open-signin", handler);
   }, []);
@@ -169,6 +195,61 @@ export default function NavBar() {
       if (installDelayRef.current) clearTimeout(installDelayRef.current);
     };
   }, [pendingInstallHint, canInstall, isInstalled]);
+
+  useEffect(() => {
+    if (!user) return;
+    if (guestTimerRef.current) {
+      clearTimeout(guestTimerRef.current);
+      guestTimerRef.current = null;
+    }
+    if (signInLocked) setSignInLocked(false);
+    if (showSignIn) setShowSignIn(false);
+    if (guestGraceModal) setGuestGraceModal(false);
+    if (guestGraceActive) setGuestGraceActive(false);
+  }, [user, signInLocked, showSignIn, guestGraceModal, guestGraceActive]);
+
+  useEffect(() => {
+    if (user || loading || guestLocked || loc.pathname === "/") {
+      if (guestTimerRef.current) {
+        clearTimeout(guestTimerRef.current);
+        guestTimerRef.current = null;
+      }
+      if (loc.pathname === "/") guestGracePathRef.current = "";
+    }
+  }, [user, loading, guestLocked, loc.pathname]);
+
+  useEffect(() => {
+    if (user || loading || guestLocked) return;
+    if (loc.pathname === "/") return;
+    if (guestGraceActive) return;
+    if (guestTimerRef.current) return;
+
+    guestTimerRef.current = setTimeout(() => {
+      guestTimerRef.current = null;
+      setGuestLocked(true);
+      try { localStorage.setItem(GUEST_LOCK_KEY, "1"); } catch (e) {}
+      const pathNow = window.location.pathname + window.location.search;
+      guestGracePathRef.current = pathNow;
+      setGuestGraceActive(true);
+      setGuestGraceModal(true);
+      try {
+        window.dispatchEvent(new CustomEvent("flexfit-open-signin", { detail: { guestGrace: true } }));
+      } catch (e) {}
+    }, 30000);
+  }, [user, loading, guestLocked, loc.pathname, guestGraceActive, GUEST_LOCK_KEY]);
+
+  useEffect(() => {
+    if (user || loading) return;
+    if (!guestLocked) return;
+    if (loc.pathname === "/") return;
+    const currentPath = loc.pathname + loc.search;
+    if (guestGraceActive && guestGracePathRef.current === currentPath) return;
+    try { sessionStorage.setItem("ff-auth-redirect", currentPath); } catch (e) {}
+    try {
+      window.dispatchEvent(new CustomEvent("flexfit-open-signin", { detail: { guestGrace: true } }));
+    } catch (e) {}
+    try { navigate("/", { replace: true }); } catch (e) {}
+  }, [user, loading, guestLocked, guestGraceActive, loc.pathname, loc.search, navigate]);
 
   const toggleTheme = () => {
     const next = theme === "dark" ? "light" : "dark";
@@ -337,7 +418,24 @@ export default function NavBar() {
         </div>
       )}
 
-      <SigninModal open={showSignIn} onClose={() => setShowSignIn(false)} nonDismissible={false} />
+      <SigninModal
+        open={showSignIn || signInLocked}
+        onClose={signInLocked ? undefined : () => {
+          setShowSignIn(false);
+          if (guestGraceModal) {
+            setGuestGraceModal(false);
+            setGuestGraceActive(false);
+            try { navigate("/", { replace: true }); } catch (e) {}
+          }
+        }}
+        nonDismissible={signInLocked}
+        onSignedIn={() => {
+          setSignInLocked(false);
+          setShowSignIn(false);
+          if (guestGraceModal) setGuestGraceModal(false);
+          if (guestGraceActive) setGuestGraceActive(false);
+        }}
+      />
       <ConfirmSignOutModal
         open={showConfirm}
         onCancel={() => setShowConfirm(false)}

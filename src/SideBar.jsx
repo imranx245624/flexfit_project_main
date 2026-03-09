@@ -97,7 +97,8 @@ export default function SideBar({ open = true, setOpen }) {
   };
 
   const handleProtectedClick = (e, to) => {
-    if (user || to === "/") return;
+    if (to !== "/AIWorkout") return;
+    if (user) return;
     e.preventDefault();
     e.stopPropagation();
     toast("Please sign in to continue.", { type: "info" });

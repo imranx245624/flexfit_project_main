@@ -188,18 +188,27 @@ export async function fetchPexelsVideo(query, options = {}) {
     return u.toString();
   };
 
-  const data = await fetchJson(
-    makeUrl(PROXY_ENDPOINT, {
-      query,
-      per_page: perPage,
-      orientation,
-      size,
-      min_duration: minDuration,
-      max_duration: maxDuration,
-    }),
-    signal,
-    "Pexels proxy"
-  );
+  let data;
+  try {
+    data = await fetchJson(
+      makeUrl(PROXY_ENDPOINT, {
+        query,
+        per_page: perPage,
+        orientation,
+        size,
+        min_duration: minDuration,
+        max_duration: maxDuration,
+      }),
+      signal,
+      "Pexels proxy"
+    );
+  } catch (err) {
+    const msg = String(err?.message || err || "");
+    if (signal?.aborted || err?.name === "AbortError" || msg.includes("signal is aborted")) {
+      return null;
+    }
+    throw err;
+  }
 
   const video = pickBestVideo(data?.videos || [], {
     slug: meta?.slug,
@@ -254,7 +263,9 @@ export async function fetchPexelsVideoWithFallback(queries = [], options = {}) {
       if (result) return { result, query: q, error: null };
     } catch (e) {
       lastError = e;
-      if (options?.signal?.aborted) throw e;
+      if (options?.signal?.aborted) {
+        return { result: null, query: lastQuery, error: null };
+      }
     }
   }
   return { result: null, query: lastQuery, error: lastError };
@@ -265,7 +276,16 @@ export async function fetchPexelsVideoById(id, options = {}) {
   const base = window?.location?.origin || "http://localhost";
   const u = new URL(PROXY_ENDPOINT, base);
   u.searchParams.set("id", String(id));
-  const data = await fetchJson(u.toString(), signal, "Pexels proxy");
+  let data;
+  try {
+    data = await fetchJson(u.toString(), signal, "Pexels proxy");
+  } catch (err) {
+    const msg = String(err?.message || err || "");
+    if (signal?.aborted || err?.name === "AbortError" || msg.includes("signal is aborted")) {
+      return null;
+    }
+    throw err;
+  }
   const video = data || null;
   if (!video?.video_files) return null;
   const file = pickBestVideoFile(video.video_files || []);
