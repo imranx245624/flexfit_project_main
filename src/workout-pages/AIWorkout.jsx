@@ -1,4 +1,4 @@
-// src/workout_pages/AIWorkout.jsx
+// src/workout-pages/AIWorkout.jsx
 // Main AI workout screen: handles camera, pose detection, rep counting, form feedback, and session saving.
 import React, { useRef, useEffect, useState, useCallback } from "react"; // React + hooks for state/refs
 import * as poseDetection from "@tensorflow-models/pose-detection"; // MoveNet pose detector + utilities
@@ -6,7 +6,7 @@ import * as tf from "@tensorflow/tfjs"; // TensorFlow.js runtime/backend
 import { useLocation, useNavigate } from "react-router-dom"; // Router state + navigation
 import { supabase } from "../utils/supabaseClient"; // Supabase client for auth + persistence
 import { toast } from "../utils/toast";
-import "./aiWorkoutResponsive.css"; // Responsive layout styles
+import "./AIWorkoutResponsive.css"; // Responsive layout styles
 
 function AIWorkout() {
   const location = useLocation(); // access route state (workout name, return path, etc.)

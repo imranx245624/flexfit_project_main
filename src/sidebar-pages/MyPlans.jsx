@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import PageWrapper from "../workout_pages/pageWrapper.jsx";
-import "./plans.css";
+import PageWrapper from "../workout-pages/PageWrapper.jsx";
+import "./MyPlans.css";
 
 const PLANS = [
   {
@@ -40,7 +40,7 @@ const PLANS = [
   },
 ];
 
-function Plans() {
+function MyPlans() {
   return (
     <PageWrapper>
       <div className="plans-page container">
@@ -65,4 +65,4 @@ function Plans() {
   );
 }
 
-export default Plans;
+export default MyPlans;

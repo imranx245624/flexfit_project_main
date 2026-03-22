@@ -1,14 +1,14 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import PageWrapper from "../workout_pages/pageWrapper.jsx";
-import "./workoutLibrary.css";
-import "../workout_pages/workout.css";
+import PageWrapper from "../workout-pages/PageWrapper.jsx";
+import "./WorkoutLibrary.css";
+import "../workout-pages/workout.css";
 import { HOME_GROUPS, GYM_GROUPS, getExerciseBySlug, toSlug } from "../data/exerciseCatalog";
 import { getExerciseDetails } from "../data/exerciseDetails";
 import { fetchPexelsVideoWithFallback } from "../utils/pexelsVideo";
 import { getPexelsQueries } from "../utils/pexelsQueries";
 
-export default function Workouts() {
+export default function WorkoutLibrary() {
   const navigate = useNavigate();
   const location = useLocation();
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -104,30 +104,50 @@ export default function Workouts() {
     }
   };
 
-  const ExerciseCard = ({ name }) => (
-    <div className="workout-exercise-card library-exercise-card">
-      <div className="workout-exercise-info">
-        <span className="workout-exercise-name">{name}</span>
-        <span className="workout-exercise-cta">Preview or view details</span>
+  const ExerciseCard = ({ name }) => {
+    const slug = toSlug(name);
+    const detail = getExerciseDetails(slug);
+    const thumbVideo = detail?.video || null;
+    return (
+      <div className="workout-exercise-card library-exercise-card">
+        {thumbVideo && (
+          <video
+            className="exercise-card-bg"
+            src={thumbVideo}
+            poster={detail?.poster || ""}
+            muted
+            autoPlay
+            loop
+            playsInline
+            preload="auto"
+            aria-hidden="true"
+            tabIndex={-1}
+          />
+        )}
+        {thumbVideo && <div className="exercise-card-scrim" aria-hidden="true" />}
+        <div className="workout-exercise-info">
+          <span className="workout-exercise-name">{name}</span>
+          <span className="workout-exercise-cta">Preview or view details</span>
+        </div>
+        <div className="workout-exercise-actions">
+          <button
+            type="button"
+            className="exercise-action ghost"
+            onClick={() => openPreview(name)}
+          >
+            Preview
+          </button>
+          <button
+            type="button"
+            className="exercise-action primary"
+            onClick={() => navigate(`/exercise/${toSlug(name)}`)}
+          >
+            Details
+          </button>
+        </div>
       </div>
-      <div className="workout-exercise-actions">
-        <button
-          type="button"
-          className="exercise-action ghost"
-          onClick={() => openPreview(name)}
-        >
-          Preview
-        </button>
-        <button
-          type="button"
-          className="exercise-action primary"
-          onClick={() => navigate(`/exercise/${toSlug(name)}`)}
-        >
-          Details
-        </button>
-      </div>
-    </div>
-  );
+    );
+  };
 
   const ExerciseGrid = ({ items }) => (
     <div className="workout-exercise-grid">

@@ -1,18 +1,18 @@
-// src/workout_pages/AIWorkoutLibrary.jsx
+// src/workout-pages/AIWorkoutLibrary.jsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import PageWrapper from "./pageWrapper.jsx";
-import "./aiWorkout.css";
+import PageWrapper from "./PageWrapper.jsx";
+import "./AIWorkout.css";
 
 // import video1 from "../assets/videos/video1.mp4";
 import video2 from "../assets/videos/video2.mp4";
 import video3 from "../assets/videos/video3.mp4";
 import burpees from "../assets/videos/burpees.mp4";
-import jumpingJacks from "../assets/videos/jumping jacks.mp4";
-import legRaises from "../assets/videos/leg raises.mp4";
-import sumoSquat from "../assets/videos/Sumo Squat.mp4";
+import jumpingJacks from "../assets/videos/jumping-jacks.mp4";
+import legRaises from "../assets/videos/leg-raises.mp4";
+import sumoSquat from "../assets/videos/sumo-squat.mp4";
 import lungesVideo from "../assets/videos/lunges.mp4";
-import pullUpsVideo from "../assets/videos/pull_ups.mp4";
+import pullUpsVideo from "../assets/videos/pull-ups.mp4";
 import crunches from "../assets/videos/crunches.mp4";
 import plank from "../assets/videos/plank.mp4";
 

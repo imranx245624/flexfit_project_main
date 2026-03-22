@@ -5,26 +5,27 @@ import { BrowserRouter as Router, Routes, Route, useNavigate, Link, useLocation 
 import "./styles/theme.css"; // new global theme (kept)
 import "./App.css";
 import "./HomeContent.css"; // updated file
+import flexfitLightHero from "./assets/flexfit2.png";
 import NavBar from "./NavBar.jsx";
-import SideBar from "./SideBar.jsx";
+import Sidebar from "./Sidebar.jsx";
 import ToastHost from "./components/ToastHost.jsx";
 import RequireAuth from "./components/RequireAuth.jsx";
 import NotFound from "./components/NotFound.jsx";
 import SplashScreen from "./components/SplashScreen.jsx";
 
 // Home/Gym pages now redirect to the unified library
-import ExerciseDetail from "./workout_pages/ExerciseDetail.jsx";
-import Workouts from "./sidebar_pages/Workout_library.jsx";
-import Plans from "./sidebar_pages/My_Plans.jsx";
-import Leaderboard from "./sidebar_pages/Leaderboard.jsx";
-import AIWorkout from "./workout_pages/AIWorkout.jsx";
-import AIWorkoutLibrary from "./workout_pages/AIWorkoutLibrary.jsx";
-import Profile from "./navbar_pages/ProfilePage.jsx";
-import Progress from "./sidebar_pages/Progress_tracker.jsx";
-import Setting from "./sidebar_pages/Setting.jsx";
-import Help from "./sidebar_pages/Help.jsx";
-import PrivacyPolicy from "./navbar_pages/PrivacyPolicy.jsx";
-import Terms from "./navbar_pages/Terms.jsx";
+import ExerciseDetail from "./workout-pages/ExerciseDetail.jsx";
+import WorkoutLibrary from "./sidebar-pages/WorkoutLibrary.jsx";
+import MyPlans from "./sidebar-pages/MyPlans.jsx";
+import Leaderboard from "./sidebar-pages/Leaderboard.jsx";
+import AIWorkout from "./workout-pages/AIWorkout.jsx";
+import AIWorkoutLibrary from "./workout-pages/AIWorkoutLibrary.jsx";
+import Profile from "./navbar-pages/ProfilePage.jsx";
+import ProgressTracker from "./sidebar-pages/ProgressTracker.jsx";
+import Settings from "./sidebar-pages/Settings.jsx";
+import Help from "./sidebar-pages/Help.jsx";
+import PrivacyPolicy from "./navbar-pages/PrivacyPolicy.jsx";
+import Terms from "./navbar-pages/Terms.jsx";
 
 /* TODO: DO NOT CHANGE API CALLS (supabase) */
 import { supabase } from "./utils/supabaseClient";
@@ -42,6 +43,10 @@ function RouterWrapper() {
   const [splashExiting, setSplashExiting] = useState(false);
   const [hideShell, setHideShell] = useState(false);
   const [routeLoading, setRouteLoading] = useState(false);
+  const [isDarkTheme, setIsDarkTheme] = useState(() => {
+    if (typeof document === "undefined") return false;
+    return document.documentElement.getAttribute("data-theme") === "dark";
+  });
   const [, setCurrentUser] = useState(null);
   const sessionExpiredNotifiedRef = useRef(false);
   const location = useLocation();
@@ -70,6 +75,18 @@ function RouterWrapper() {
       document.body.style.overflow = prev;
     };
   }, [splashVisible]);
+
+  useEffect(() => {
+    if (typeof document === "undefined") return undefined;
+    const root = document.documentElement;
+    const syncTheme = () => {
+      setIsDarkTheme(root.getAttribute("data-theme") === "dark");
+    };
+    syncTheme();
+    const observer = new MutationObserver(syncTheme);
+    observer.observe(root, { attributes: true, attributeFilter: ["data-theme"] });
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const handleRejection = (event) => {
@@ -359,8 +376,8 @@ function RouterWrapper() {
           <div className="cover-hero-media">
             <img
               className="cover-hero-image"
-              src="/flexfit.png"
-              alt="FlexFit logo"
+              src={isDarkTheme ? "/flexfit.png" : flexfitLightHero}
+              alt="FlexFit hero illustration"
               loading="lazy"
             />
             <div className="cover-hero-glow" aria-hidden="true" />
@@ -463,7 +480,7 @@ function RouterWrapper() {
       {!hideShell && <NavBar />}
 
       <div className={`app-shell ${hideShell ? "shell-hidden" : ""}`}>
-        {!hideShell && <SideBar />}
+        {!hideShell && <Sidebar />}
 
         <main
           className={`mainPart ${hideShell ? "" : "app-main-content"}`}
@@ -482,8 +499,8 @@ function RouterWrapper() {
             <Route path="/HWorkout" element={<RedirectToLibrary type="home" />} />
             <Route path="/GWorkout" element={<RedirectToLibrary type="gym" />} />
             <Route path="/exercise/:slug" element={<ExerciseDetail />} />
-            <Route path="/workouts" element={<Workouts />} />
-            <Route path="/plans" element={<Plans />} />
+            <Route path="/workouts" element={<WorkoutLibrary />} />
+            <Route path="/plans" element={<MyPlans />} />
             <Route
               path="/leaderboard"
               element={<Leaderboard />}
@@ -504,11 +521,11 @@ function RouterWrapper() {
             />
             <Route
               path="/progress"
-              element={<Progress />}
+              element={<ProgressTracker />}
             />
             <Route
               path="/settings"
-              element={<Setting />}
+              element={<Settings />}
             />
             <Route path="/help" element={<Help />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />

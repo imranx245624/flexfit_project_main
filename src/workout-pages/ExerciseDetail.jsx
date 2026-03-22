@@ -1,11 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import PageWrapper from "./pageWrapper.jsx";
+import PageWrapper from "./PageWrapper.jsx";
 import { getExerciseBySlug } from "../data/exerciseCatalog";
 import { getExerciseDetails } from "../data/exerciseDetails";
 import { fetchPexelsVideoWithFallback } from "../utils/pexelsVideo";
 import { getPexelsQueries } from "../utils/pexelsQueries";
-import "./exerciseDetail.css";
+import "./ExerciseDetail.css";
 
 const toTitle = (slug = "") =>
   String(slug)
@@ -27,16 +27,8 @@ export default function ExerciseDetail() {
 
   const videoSrc = detail?.video || pexelsVideo?.videoUrl || null;
   const poster = detail?.poster || pexelsVideo?.image || null;
-  const [previewOpen, setPreviewOpen] = useState(false);
-  const previewVideoRef = useRef(null);
-
-  useEffect(() => {
-    const onKey = (e) => {
-      if (e.key === "Escape") setPreviewOpen(false);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  const inlineVideoRef = useRef(null);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
     if (detail?.video) {
@@ -119,31 +111,26 @@ export default function ExerciseDetail() {
     calories: "~40-70 kcal / 10 min",
   };
 
-  const handleOpenPreview = () => {
+  const handleTogglePlay = async () => {
     if (!videoSrc) return;
-    setPreviewOpen(true);
-    setTimeout(() => {
-      const el = previewVideoRef.current;
-      if (!el) return;
-      try {
-        if (el.requestFullscreen) el.requestFullscreen();
-        else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-      } catch (e) {}
-      el.play().catch(() => {});
-    }, 120);
-  };
-
-  const handleClosePreview = async () => {
+    const el = inlineVideoRef.current;
+    if (!el) return;
     try {
-      if (previewVideoRef.current) {
-        previewVideoRef.current.pause();
-        previewVideoRef.current.currentTime = 0;
+      if (el.paused) {
+        await el.play();
+      } else {
+        el.pause();
       }
     } catch (e) {}
+  };
+
+  const handleFullscreen = () => {
+    const el = inlineVideoRef.current;
+    if (!el) return;
     try {
-      if (document.fullscreenElement) await document.exitFullscreen();
+      if (el.requestFullscreen) el.requestFullscreen();
+      else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
     } catch (e) {}
-    setPreviewOpen(false);
   };
 
   return (
@@ -188,10 +175,36 @@ export default function ExerciseDetail() {
         <div className="exercise-content">
           <div className="exercise-video-card">
             {videoSrc ? (
-              <button className="video-click" type="button" onClick={handleOpenPreview}>
-                <video className="exercise-video" src={videoSrc} poster={poster || ""} muted loop playsInline />
-                <span className="video-overlay">Play Video</span>
-              </button>
+              <div className="video-player">
+                <video
+                  ref={inlineVideoRef}
+                  className="exercise-video"
+                  src={videoSrc}
+                  poster={poster || ""}
+                  controls
+                  playsInline
+                  onPlay={() => setIsPlaying(true)}
+                  onPause={() => setIsPlaying(false)}
+                  onEnded={() => setIsPlaying(false)}
+                />
+                {!isPlaying && (
+                  <button className="video-overlay" type="button" onClick={handleTogglePlay} aria-label="Play video">
+                    Play Video
+                  </button>
+                )}
+                <button className="video-fullscreen" type="button" onClick={handleFullscreen} aria-label="Full screen">
+                  <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                    <path
+                      d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      fill="none"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </button>
+              </div>
             ) : (
               <div className="exercise-video-placeholder">
               {pexelsLoading ? "Loading video..." : (pexelsError || "Video coming soon.")}
@@ -248,36 +261,6 @@ export default function ExerciseDetail() {
         </div>
       </div>
 
-      {previewOpen && videoSrc && (
-        <div className="exercise-preview-backdrop" role="dialog" aria-modal="true" onClick={handleClosePreview}>
-          <div className="exercise-preview-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="exercise-preview-header">
-              <div className="preview-title">{displayName}</div>
-              <button className="preview-close" onClick={handleClosePreview} type="button" aria-label="Close preview">Close</button>
-            </div>
-            <video
-              ref={previewVideoRef}
-              className="exercise-preview-video"
-              src={videoSrc}
-              autoPlay
-              muted
-              playsInline
-            />
-            {pexelsVideo && (
-              <div className="pexels-attrib modal">
-                Video by{" "}
-                <a href={pexelsVideo.photographerUrl} target="_blank" rel="noreferrer">
-                  {pexelsVideo.photographer}
-                </a>{" "}
-                on{" "}
-                <a href={pexelsVideo.pexelsUrl} target="_blank" rel="noreferrer">
-                  Pexels
-                </a>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </PageWrapper>
   );
 }

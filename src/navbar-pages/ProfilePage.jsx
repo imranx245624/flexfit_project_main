@@ -1,12 +1,12 @@
-// src/navbar_pages/ProfilePage.jsx
+// src/navbar-pages/ProfilePage.jsx
 import React, { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 /* TODO: DO NOT CHANGE API CALLS (supabase) */
 import { supabase } from "../utils/supabaseClient";
 import CompleteProfile from "./CompleteProfile";
-import Progress from "../sidebar_pages/Progress_tracker.jsx";
-import Setting from "../sidebar_pages/Setting.jsx";
-import "./profilePage.css";
+import ProgressTracker from "../sidebar-pages/ProgressTracker.jsx";
+import Settings from "../sidebar-pages/Settings.jsx";
+import "./ProfilePage.css";
 import ConfirmSignOutModal from "../components/ConfirmSignOutModal.jsx";
 import { forceSignOut } from "../utils/forceSignOut";
 import { toast } from "../utils/toast";
@@ -307,13 +307,13 @@ function ProfilePage({ onSignOut, initialTab = "overview" }) {
 
         {tab === "progress" && (
           <div>
-            <Progress />
+          <ProgressTracker />
           </div>
         )}
 
         {tab === "settings" && (
           <div>
-            <Setting />
+          <Settings />
           </div>
         )}
       </div>

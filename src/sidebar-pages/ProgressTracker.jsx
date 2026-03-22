@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "../utils/supabaseClient";
 import { useAuth } from "../utils/auth";
-import "./progressTracker.css";
+import "./ProgressTracker.css";
 
 /* helpers and constants left unchanged (pad, isoDate, MET_MAP, mapDbRowToSession, aggregate, downloadCSV) */
 const YEAR_MIN = 2024;
@@ -134,7 +134,7 @@ function getInitials(name){
 }
 
 /* ---------------- React component ---------------- */
-export default function Progress(){
+export default function ProgressTracker(){
   const today = new Date();
   const storedStateRef = useRef(readProgressState());
   const storedState = storedStateRef.current;
@@ -239,6 +239,37 @@ export default function Progress(){
     const totalEca = chartData.reduce((s, x) => s + (x.totalEca || 0), 0);
     return { totalMinutes, totalCalories, totalSessions, totalEca };
   }, [chartData]);
+  const chartMetrics = [
+    {
+      key: "time",
+      title: "Time Overview",
+      legend: "time",
+      totalLabel: "Total Time",
+      totalValue: chartTotals.totalMinutes,
+      format: formatMinutes,
+    },
+    {
+      key: "calories",
+      title: "Calories Burned Overview",
+      legend: "calories",
+      totalLabel: "Calories Burned",
+      totalValue: chartTotals.totalCalories,
+      format: formatCalories,
+    },
+    {
+      key: "flex",
+      title: "Flex Points Overview",
+      legend: "flex points",
+      totalLabel: "Flex Points",
+      totalValue: chartTotals.totalEca,
+      format: formatFlex,
+    },
+  ];
+  const metricValue = (point, key) => {
+    if (key === "time") return point.totalMinutes || 0;
+    if (key === "calories") return point.totalCalories || 0;
+    return point.totalEca || 0;
+  };
 
   function sessionsFromRawForDate(rawRows, isoDateStr){
     if(!rawRows || rawRows.length===0) return [];
@@ -690,128 +721,117 @@ export default function Progress(){
       {view === "chart" && (
       <div className="content-grid chart-only">
         <main className="right-col">
-          <div className="chart-card card">
-            <div className="chart-head">
-              <div>
-                <div className="chart-title">Activity Overview</div>
-                <div className="muted">Mode: {rangeMode}</div>
+          {chartMetrics.map((metric) => (
+            <div className="chart-card card" key={metric.key}>
+              <div className="chart-head">
+                <div>
+                  <div className="chart-title">{metric.title}</div>
+                  <div className="muted">Mode: {rangeMode}</div>
+                </div>
+                <div className="chart-controls">
+                  <div className={`legend ${metric.key}`}><span className="dot small" /> {metric.legend}</div>
+                </div>
               </div>
-              <div className="chart-controls">
-                <div className="legend time"><span className="dot small" /> time</div>
-                <div className="legend calories"><span className="dot small" /> calories</div>
-                <div className="legend flex"><span className="dot small" /> flex points</div>
+
+              <div className="chart-area">
+                <svg viewBox="0 0 100 40" preserveAspectRatio="none" className="bar-svg">
+                  {(() => {
+                    const plot = { x: 12, y: 3, w: 86, h: 30 };
+                    const maxVal = Math.max(
+                      ...chartData.map((p) => metricValue(p, metric.key)),
+                      1
+                    );
+                    const tickCount = 4;
+                    const ticks = Array.from({ length: tickCount + 1 }, (_, i) =>
+                      Math.round((maxVal * i) / tickCount)
+                    );
+                    const groupW = plot.w / Math.max(1, chartData.length);
+                    const innerGap = Math.min(0.4, groupW * 0.12);
+                    const barW = Math.max(0.6, groupW - innerGap * 2);
+
+                    return (
+                      <>
+                        <line
+                          className="axis-line"
+                          x1={plot.x}
+                          y1={plot.y}
+                          x2={plot.x}
+                          y2={plot.y + plot.h}
+                        />
+                        <line
+                          className="axis-line"
+                          x1={plot.x}
+                          y1={plot.y + plot.h}
+                          x2={plot.x + plot.w}
+                          y2={plot.y + plot.h}
+                        />
+                        {ticks.map((val, idx) => {
+                          const ratio = maxVal ? val / maxVal : 0;
+                          const y = plot.y + plot.h - plot.h * ratio;
+                          return (
+                            <g key={`tick-${metric.key}-${idx}`}>
+                              <line
+                                className="axis-grid"
+                                x1={plot.x}
+                                y1={y}
+                                x2={plot.x + plot.w}
+                                y2={y}
+                              />
+                              <text className="axis-text" x={plot.x - 1.2} y={y + 1}>
+                                {val}
+                              </text>
+                            </g>
+                          );
+                        })}
+
+                        {chartData.map((p, i) => {
+                          const baseX = plot.x + i * groupW;
+                          const val = metricValue(p, metric.key);
+                          const h = maxVal ? (val / maxVal) * plot.h : 0;
+                          const x = baseX + (groupW - barW) / 2;
+                          const y = plot.y + plot.h - h;
+                          return (
+                            <g key={`group-${metric.key}-${i}`}>
+                              <rect
+                                x={x}
+                                y={y}
+                                width={barW}
+                                height={h}
+                                rx="0.6"
+                                className={`bar bar-${metric.key}`}
+                              />
+                              <text
+                                x={baseX + groupW / 2}
+                                y={plot.y + plot.h + 4}
+                                className="bar-label"
+                              >
+                                {p.label}
+                              </text>
+                            </g>
+                          );
+                        })}
+                      </>
+                    );
+                  })()}
+                </svg>
               </div>
-            </div>
 
-            <div className="chart-area">
-              <svg viewBox="0 0 100 40" preserveAspectRatio="none" className="bar-svg">
-                {(() => {
-                  const plot = { x: 12, y: 3, w: 86, h: 30 };
-                  const maxVal = Math.max(
-                    ...chartData.map((p) =>
-                      Math.max(p.totalMinutes || 0, p.totalCalories || 0, p.totalEca || 0)
-                    ),
-                    1
-                  );
-                  const tickCount = 4;
-                  const ticks = Array.from({ length: tickCount + 1 }, (_, i) =>
-                    Math.round((maxVal * i) / tickCount)
-                  );
-                  const groupW = plot.w / Math.max(1, chartData.length);
-                  const innerGap = Math.min(0.4, groupW * 0.12);
-                  const barW = Math.max(0.35, (groupW - innerGap * 2) / 3);
+              <div className="chart-range">
+                <div className="range-toggle">
+                  <button className={rangeMode==="week"?"chip active":"chip"} onClick={()=>setRangeMode("week")}>WEEK</button>
+                  <button className={rangeMode==="month"?"chip active":"chip"} onClick={()=>setRangeMode("month")}>MONTH</button>
+                  <button className={rangeMode==="year"?"chip active":"chip"} onClick={()=>setRangeMode("year")}>YEAR</button>
+                </div>
+              </div>
 
-                  return (
-                    <>
-                      <line
-                        className="axis-line"
-                        x1={plot.x}
-                        y1={plot.y}
-                        x2={plot.x}
-                        y2={plot.y + plot.h}
-                      />
-                      <line
-                        className="axis-line"
-                        x1={plot.x}
-                        y1={plot.y + plot.h}
-                        x2={plot.x + plot.w}
-                        y2={plot.y + plot.h}
-                      />
-                      {ticks.map((val, idx) => {
-                        const ratio = maxVal ? val / maxVal : 0;
-                        const y = plot.y + plot.h - plot.h * ratio;
-                        return (
-                          <g key={`tick-${idx}`}>
-                            <line
-                              className="axis-grid"
-                              x1={plot.x}
-                              y1={y}
-                              x2={plot.x + plot.w}
-                              y2={y}
-                            />
-                            <text className="axis-text" x={plot.x - 1.2} y={y + 1}>
-                              {val}
-                            </text>
-                          </g>
-                        );
-                      })}
-
-                      {chartData.map((p, i) => {
-                        const baseX = plot.x + i * groupW;
-                        const values = [
-                          { key: "time", val: p.totalMinutes || 0 },
-                          { key: "calories", val: p.totalCalories || 0 },
-                          { key: "flex", val: p.totalEca || 0 },
-                        ];
-                        return (
-                          <g key={`group-${i}`}>
-                            {values.map((v, j) => {
-                              const h = maxVal ? (v.val / maxVal) * plot.h : 0;
-                              const x = baseX + j * (barW + innerGap);
-                              const y = plot.y + plot.h - h;
-                              return (
-                                <rect
-                                  key={`${i}-${v.key}`}
-                                  x={x}
-                                  y={y}
-                                  width={barW}
-                                  height={h}
-                                  rx="0.6"
-                                  className={`bar bar-${v.key}`}
-                                />
-                              );
-                            })}
-                            <text
-                              x={baseX + groupW / 2}
-                              y={plot.y + plot.h + 4}
-                              className="bar-label"
-                            >
-                              {p.label}
-                            </text>
-                          </g>
-                        );
-                      })}
-                    </>
-                  );
-                })()}
-              </svg>
-            </div>
-
-            <div className="chart-range">
-              <div className="range-toggle">
-                <button className={rangeMode==="week"?"chip active":"chip"} onClick={()=>setRangeMode("week")}>WEEK</button>
-                <button className={rangeMode==="month"?"chip active":"chip"} onClick={()=>setRangeMode("month")}>MONTH</button>
-                <button className={rangeMode==="year"?"chip active":"chip"} onClick={()=>setRangeMode("year")}>YEAR</button>
+              <div className="table-nums">
+                <div className="num-row">
+                  <div className="nlabel">{metric.totalLabel}</div>
+                  <div className="nval">{metric.format(metric.totalValue)}</div>
+                </div>
               </div>
             </div>
-
-            <div className="table-nums">
-              <div className="num-row"><div className="nlabel">Total Time</div><div className="nval">{formatMinutes(chartTotals.totalMinutes)}</div></div>
-              <div className="num-row"><div className="nlabel">Calories</div><div className="nval">{formatCalories(chartTotals.totalCalories)}</div></div>
-              <div className="num-row"><div className="nlabel">Sessions</div><div className="nval">{chartTotals.totalSessions}</div></div>
-              <div className="num-row"><div className="nlabel">Flex Points</div><div className="nval">{formatFlex(chartTotals.totalEca)}</div></div>
-            </div>
-          </div>
+          ))}
         </main>
       </div>
       )}

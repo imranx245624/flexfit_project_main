@@ -263,12 +263,30 @@
 
 .axis-line { stroke: rgba(255,255,255,0.35); stroke-width: 0.2; }
 .axis-grid { stroke: rgba(255,255,255,0.12); stroke-width: 0.2; }
-.axis-text { fill: var(--ff-muted); font-size: 2.2px; text-anchor: end; }
+.axis-text {
+  fill: var(--ff-muted);
+  font-size: 2.4px;
+  text-anchor: end;
+  font-family: var(--ff-font-stack);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+  letter-spacing: -0.08px;
+}
 .bar { opacity: 0.9; }
 .bar-time { fill: #22d3ee; }
 .bar-calories { fill: #f59e0b; }
 .bar-flex { fill: #8b5cf6; }
-.bar-label { font-size:2px; fill:var(--ff-muted); text-anchor:middle; }
+.bar-label {
+  font-size: 2.1px;
+  fill: var(--ff-muted);
+  text-anchor: middle;
+  font-family: var(--ff-font-stack);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+  letter-spacing: -0.12px;
+}
 
 .chart-range {
   display: flex;
@@ -277,8 +295,20 @@
 }
 .chart-range .range-toggle { display: inline-flex; gap: 8px; flex-wrap: wrap; }
 
-.table-nums { margin-top:8px; display:flex; flex-direction:column; gap:8px; }
-.num-row { display:flex; justify-content:space-between; align-items:center; padding:8px; border-radius:8px; background: var(--ff-surface-2); border:1px solid var(--ff-card-border); }
+.table-nums { margin-top:8px; display:flex; align-items:flex-start; }
+.num-row {
+  width: clamp(120px, 22vw, 170px);
+  aspect-ratio: 1 / 1;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:flex-start;
+  gap:6px;
+  padding:12px;
+  border-radius:6px;
+  background: var(--ff-surface-2);
+  border:1px solid var(--ff-card-border);
+}
 .nlabel { color:var(--ff-muted); font-size:13px; }
 .nval { font-weight:800; color:var(--ff-text); }
 
@@ -392,7 +422,7 @@
 }
 
 @media (min-width:1200px){
-  .table-nums { display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:10px; }
+  .table-nums { display:flex; align-items:flex-start; }
 }
 
 /* Desktop override (placed last to win) */

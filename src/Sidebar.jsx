@@ -1,7 +1,7 @@
-// src/SideBar.jsx
+// src/Sidebar.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import "./sidebar.css";
+import "./Sidebar.css";
 import ConfirmSignOutModal from "./components/ConfirmSignOutModal.jsx";
 import { useAuth } from "./utils/auth";
 import { forceSignOut } from "./utils/forceSignOut";
@@ -46,7 +46,7 @@ const ICONS = {
   ),
 };
 
-export default function SideBar({ open = true, setOpen }) {
+export default function Sidebar({ open = true, setOpen }) {
   const { user } = useAuth();
   const [expanded, setExpanded] = useState(true);
   const [showConfirm, setShowConfirm] = useState(false);

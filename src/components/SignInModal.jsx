@@ -1,8 +1,8 @@
 import React from "react";
-import SignIn from "../workout_pages/SignIn.jsx";
-import "./signinModal.css";
+import SignIn from "../workout-pages/SignIn.jsx";
+import "./SignInModal.css";
 
-export default function SigninModal({ open = true, nonDismissible = false, onClose, onSignedIn }) {
+export default function SignInModal({ open = true, nonDismissible = false, onClose, onSignedIn }) {
   if (!open) return null;
 
   const handleBackdropClick = (e) => {

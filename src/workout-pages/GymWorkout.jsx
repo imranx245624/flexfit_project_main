@@ -1,4 +1,4 @@
-import PageWrapper from "./pageWrapper.jsx";
+import PageWrapper from "./PageWrapper.jsx";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import "./workout.css";

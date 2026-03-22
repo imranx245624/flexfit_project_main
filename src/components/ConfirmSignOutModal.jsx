@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import "./confirmSignOutModal.css";
+import "./ConfirmSignOutModal.css";
 
 export default function ConfirmSignOutModal({ open = false, onConfirm, onCancel }) {
   useEffect(() => {

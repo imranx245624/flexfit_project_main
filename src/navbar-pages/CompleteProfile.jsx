@@ -1,8 +1,8 @@
-// src/navbar_pages/CompleteProfile.jsx
+// src/navbar-pages/CompleteProfile.jsx
 import React, { useState } from "react";
 /* TODO: DO NOT CHANGE API CALLS (supabase) */
 import { supabase } from "../utils/supabaseClient"; // adjust path if needed
-import "./completeProfile.css";
+import "./CompleteProfile.css";
 
 export default function CompleteProfile({ profile, onClose, onComplete }) {
   // profile: { id, email, full_name, username, profile_completed }

@@ -1,7 +1,7 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
-import Sidebar from "./SideBar.jsx";
+import Sidebar from "./Sidebar.jsx";
 
 jest.mock("./utils/auth", () => ({
   useAuth: () => ({ user: null, loading: false }),

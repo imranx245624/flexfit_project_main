@@ -1,4 +1,4 @@
-// src/workout_pages/SignIn.jsx
+// src/workout-pages/SignIn.jsx
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Authentication.css";

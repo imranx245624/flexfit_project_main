@@ -1,4 +1,4 @@
-// src/workout_pages/SignUp.jsx
+// src/workout-pages/SignUp.jsx
 import React, { useState } from "react";
 import "./Authentication.css";
 /* TODO: DO NOT CHANGE API CALLS (supabase) */

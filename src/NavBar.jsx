@@ -1,9 +1,9 @@
 // src/NavBar.jsx
 import React, { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import "./nav.css";
+import "./NavBar.css";
 import { useAuth } from "./utils/auth";
-import SigninModal from "./components/SigninModal";
+import SignInModal from "./components/SignInModal";
 import { getExerciseBySlug } from "./data/exerciseCatalog";
 import ConfirmSignOutModal from "./components/ConfirmSignOutModal.jsx";
 import { forceSignOut } from "./utils/forceSignOut";
@@ -418,7 +418,7 @@ export default function NavBar() {
         </div>
       )}
 
-      <SigninModal
+      <SignInModal
         open={showSignIn || signInLocked}
         onClose={signInLocked ? undefined : () => {
           setShowSignIn(false);

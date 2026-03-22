@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import PageWrapper from "./pageWrapper.jsx";
+import PageWrapper from "./PageWrapper.jsx";
 import "./workout.css";
 import { HOME_GROUPS, toSlug } from "../data/exerciseCatalog";
 
