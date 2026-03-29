@@ -11,6 +11,11 @@ try {
   const savedTheme = localStorage.getItem("ff-theme");
   if (savedTheme === "dark") {
     document.documentElement.setAttribute("data-theme", "dark");
+  } else if (savedTheme === "light") {
+    document.documentElement.removeAttribute("data-theme");
+  } else {
+    document.documentElement.setAttribute("data-theme", "dark");
+    localStorage.setItem("ff-theme", "dark");
   }
 } catch (e) {}
 

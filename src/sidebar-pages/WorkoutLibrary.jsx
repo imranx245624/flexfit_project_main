@@ -105,26 +105,8 @@ export default function WorkoutLibrary() {
   };
 
   const ExerciseCard = ({ name }) => {
-    const slug = toSlug(name);
-    const detail = getExerciseDetails(slug);
-    const thumbVideo = detail?.video || null;
     return (
       <div className="workout-exercise-card library-exercise-card">
-        {thumbVideo && (
-          <video
-            className="exercise-card-bg"
-            src={thumbVideo}
-            poster={detail?.poster || ""}
-            muted
-            autoPlay
-            loop
-            playsInline
-            preload="auto"
-            aria-hidden="true"
-            tabIndex={-1}
-          />
-        )}
-        {thumbVideo && <div className="exercise-card-scrim" aria-hidden="true" />}
         <div className="workout-exercise-info">
           <span className="workout-exercise-name">{name}</span>
           <span className="workout-exercise-cta">Preview or view details</span>

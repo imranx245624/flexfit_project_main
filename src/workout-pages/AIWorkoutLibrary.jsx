@@ -16,7 +16,6 @@ import pullUpsVideo from "../assets/videos/pull-ups.mp4";
 import crunches from "../assets/videos/crunches.mp4";
 import plank from "../assets/videos/plank.mp4";
 
-
 const AI_WORKOUTS = [
   { title: "Push Ups", level: "Intermediate", duration: "10-20 min", video: video2, tracking: "full" },
   { title: "Squats", level: "Beginner", duration: "12-20 min", video: video3, tracking: "full" },
